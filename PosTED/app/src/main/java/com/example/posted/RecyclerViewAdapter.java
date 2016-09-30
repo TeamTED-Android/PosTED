@@ -42,11 +42,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             LaptopSqlite current = this.mLaptops.get(position);
 
             holder.mModel.setText(current.getModel());
-            holder.mRam.setText(current.getCapacity_ram());
-            holder.mHdd.setText(current.getCapacity_hdd());
-            holder.mProcessor.setText(current.getProcessor_type());
-            holder.mVideoCard.setText(current.getVideo_card_type());
-            holder.mDisplay.setText(current.getDisplay_size());
+//            holder.mRam.setText(current.getCapacity_ram());
+//            holder.mHdd.setText(current.getCapacity_hdd());
+//            holder.mProcessor.setText(current.getProcessor_type());
+//            holder.mVideoCard.setText(current.getVideo_card_type());
+//            holder.mDisplay.setText(current.getDisplay_size());
             holder.mPrice.setText(current.getPrice());
             holder.mCurrency.setText(current.getCurrency());
 
@@ -62,29 +62,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView mModel;
-        private TextView mRam;
-        private TextView mHdd;
-        private TextView mProcessor;
-        private TextView mVideoCard;
-        private TextView mDisplay;
+//        private TextView mRam;
+//        private TextView mHdd;
+//        private TextView mProcessor;
+//        private TextView mVideoCard;
+//        private TextView mDisplay;
         private TextView mPrice;
         private TextView mCurrency;
         private ImageView mImage;
 
-//        private int position;
-//
-//        public void setPosition(int position) {
-//            this.position = position;
-//        }
 
         public ViewHolder(View itemView) {
             super(itemView);
             this.mModel = (TextView) itemView.findViewById(R.id.model);
-            this.mRam = (TextView) itemView.findViewById(R.id.ram);
-            this.mHdd = (TextView) itemView.findViewById(R.id.hdd);
-            this.mProcessor = (TextView) itemView.findViewById(R.id.processor);
-            this.mVideoCard = (TextView) itemView.findViewById(R.id.video_card);
-            this.mDisplay = (TextView) itemView.findViewById(R.id.display);
+//            this.mRam = (TextView) itemView.findViewById(R.id.ram);
+//            this.mHdd = (TextView) itemView.findViewById(R.id.hdd);
+//            this.mProcessor = (TextView) itemView.findViewById(R.id.processor);
+//            this.mVideoCard = (TextView) itemView.findViewById(R.id.video_card);
+//            this.mDisplay = (TextView) itemView.findViewById(R.id.display);
             this.mPrice = (TextView) itemView.findViewById(R.id.price);
             this.mCurrency = (TextView) itemView.findViewById(R.id.currency);
             this.mImage = (ImageView) itemView.findViewById(R.id.image_lpt);

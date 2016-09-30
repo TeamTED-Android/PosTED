@@ -363,6 +363,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                         Toast myToast = Toast.makeText(mContext, "dateting report", Toast.LENGTH_SHORT);
                                         myToast.show();
                                         succsesLogin();
+                                        finish();
                                     } finally {
                                         if (databaseManager != null)
                                             databaseManager.close();

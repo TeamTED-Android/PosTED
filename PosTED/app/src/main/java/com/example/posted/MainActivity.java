@@ -22,6 +22,7 @@ import android.view.View;
 import com.example.posted.fragments.LaptopFragment;
 import com.example.posted.fragments.MainFragment;
 import com.example.posted.fragments.OverviewFragment;
+import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
 import com.example.posted.login.LoginActivity;
 import com.example.posted.login.LoginManager;
 import com.example.posted.models.LaptopSqlite;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         MainFragment.ButtonsExchangeData,
-        OverviewFragment.OnLaptopSelectedDataExchange {
+        OnLaptopSelectedDataExchange {
 
     private Context ctx;
     private LoadDataService mLoadDataService;
@@ -69,27 +70,13 @@ public class MainActivity extends AppCompatActivity
         this.mServiceIntent = new Intent(this, LoadDataService.class);
         this.startService(this.mServiceIntent);
 
-        bindService(this.mServiceIntent,connection,Context.BIND_AUTO_CREATE);
+        bindService(this.mServiceIntent, connection, Context.BIND_AUTO_CREATE);
         this.mMainFragment = new MainFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.container,this.mMainFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.container, this.mMainFragment).commit();
 
         this.loginManager = new LoginManager(this);
     }
 
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            if (getSupportFragmentManager().getBackStackEntryCount() == 0){
-                super.onBackPressed();
-            }else {
-                getSupportFragmentManager().popBackStack();
-            }
-
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -153,31 +140,46 @@ public class MainActivity extends AppCompatActivity
 //        bundleOverview.putParcelableArrayList("result",result);
         OverviewFragment overviewFragment = new OverviewFragment();
 //        overviewFragment.setArguments(bundleOverview);
-        getSupportFragmentManager().beginTransaction().replace(R.id.container,overviewFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment).commit();
 
     }
 
     @Override
     public void onLaptopSelected(LaptopSqlite laptop) {
         Bundle bundleLaptop = new Bundle();
-        bundleLaptop.putParcelable("current_laptop",laptop);
+        bundleLaptop.putParcelable("current_laptop", laptop);
         LaptopFragment laptopFragment = new LaptopFragment();
         laptopFragment.setArguments(bundleLaptop);
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.container,laptopFragment)
-                .addToBackStack(null)
+                .replace(R.id.container, laptopFragment)
                 .commit();
+    }
+
+    @Override
+    public void onBackToOverviewButtonSelected() {
+        OverviewFragment overviewFragment = new OverviewFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment).commit();
     }
 
 
     @Override
     protected void onDestroy() {
-        if (mIsBinded){
+        if (mIsBinded) {
             unbindService(connection);
         }
         stopService(this.mServiceIntent);
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     ServiceConnection connection = new ServiceConnection() {

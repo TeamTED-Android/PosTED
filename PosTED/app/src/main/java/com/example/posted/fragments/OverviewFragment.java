@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import com.example.posted.LoadDataService;
 import com.example.posted.R;
 import com.example.posted.RecyclerViewAdapter;
+import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
 import com.example.posted.models.LaptopSqlite;
 
 import java.util.ArrayList;
@@ -29,11 +30,11 @@ import java.util.ArrayList;
  */
 public class OverviewFragment extends Fragment implements RecyclerViewAdapter.RecyclerViewSelectedElement {
 
-    public interface OnLaptopSelectedDataExchange{
-        void onLaptopSelected(LaptopSqlite laptop);
-    }
+//    public interface OnLaptopSelectedDataExchange{
+//        void onLaptopSelected(LaptopSqlite laptop);
+//    }
 
-    private OverviewFragment.OnLaptopSelectedDataExchange mLaptopSelectedDataExchange;
+    private OnLaptopSelectedDataExchange mLaptopSelectedDataExchange;
     private Context ctx;
     private LoadDataService mLoadDataService;
     private Intent mServiceIntent;

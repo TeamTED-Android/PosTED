@@ -35,7 +35,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 ConstantsHelper.DISPLAY_COLUMN + " TEXT, " +
                 ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
                 ConstantsHelper.PRICE_COLUMN + " TEXT, " +
-                ConstantsHelper.IMAGE_COLUMN + " TEXT )";
+                ConstantsHelper.IMAGE_COLUMN + " MEDIUMTEXT )";
         db.execSQL(query);
 
 
