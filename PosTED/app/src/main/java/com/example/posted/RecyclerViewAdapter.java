@@ -1,17 +1,18 @@
 package com.example.posted;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-
 import com.example.posted.models.LaptopSqlite;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
@@ -22,11 +23,19 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private Context mContext;
     private ArrayList<LaptopSqlite> mLaptops;
     private RecyclerViewAdapter.RecyclerViewSelectedElement mOnItemSelectedListener;
+    private Map<String, Bitmap> mPreLoadedBitmaps;
 
     public RecyclerViewAdapter(Context context, ArrayList<LaptopSqlite> laptops, RecyclerViewAdapter.RecyclerViewSelectedElement onItemSelectedListener) {
         this.mContext = context;
         this.mLaptops = laptops;
         this.mOnItemSelectedListener = onItemSelectedListener;
+    }
+
+    private Map<String, Bitmap> getPreLoadedBitmaps() {
+        if (this.mPreLoadedBitmaps == null) {
+            this.mPreLoadedBitmaps = new WeakHashMap<>();
+        }
+        return this.mPreLoadedBitmaps;
     }
 
     @Override
@@ -49,7 +58,19 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //            holder.mDisplay.setText(current.getDisplay_size());
             holder.mPrice.setText(current.getPrice());
             holder.mCurrency.setText(current.getCurrency());
-
+            String id = current.getId();
+            String base64Img = current.getImage();
+            if (base64Img.contains(",")) {
+                base64Img = base64Img.substring(current.getImage().indexOf(','));
+            }
+            Map<String, Bitmap> bitmapCache = this.getPreLoadedBitmaps();
+            if (!bitmapCache.containsKey(id)) {
+                AsyncImageLoader imageLoader = new AsyncImageLoader(holder);
+                imageLoader.execute(base64Img);
+            } else {
+                Bitmap bitmap = bitmapCache.get(id);
+                holder.setImageViewBitmap(bitmap);
+            }
         }
     }
 
@@ -59,7 +80,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return this.mLaptops.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AsyncImageLoader.Listener {
 
         private TextView mModel;
 //        private TextView mRam;
@@ -69,8 +90,26 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //        private TextView mDisplay;
         private TextView mPrice;
         private TextView mCurrency;
-        private ImageView mImage;
+//        private ImageView mImage;
 
+        private ImageView getImageView() {
+            if (this.itemView == null) {
+                return null;
+            }
+            View imageView = this.itemView.findViewById(R.id.image_lpt);
+            if (imageView instanceof ImageView) {
+                return (ImageView) imageView;
+            }
+            return null;
+        }
+
+        private void setImageViewBitmap(Bitmap bitmap) {
+            ImageView imageView = this.getImageView();
+            if (imageView == null) {
+                return;
+            }
+            imageView.setImageBitmap(bitmap);
+        }
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -82,15 +121,32 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //            this.mDisplay = (TextView) itemView.findViewById(R.id.display);
             this.mPrice = (TextView) itemView.findViewById(R.id.price);
             this.mCurrency = (TextView) itemView.findViewById(R.id.currency);
-            this.mImage = (ImageView) itemView.findViewById(R.id.image_lpt);
+//            this.mImage = (ImageView) itemView.findViewById(R.id.image_lpt);
             itemView.setOnClickListener(this);
         }
 
 
         @Override
         public void onClick(View view) {
-            LaptopSqlite clickedLaptop = mLaptops.get(getLayoutPosition());
-            mOnItemSelectedListener.onItemSelected(clickedLaptop);
+            LaptopSqlite clickedLaptop = RecyclerViewAdapter.this.mLaptops.get(this.getAdapterPosition());
+            RecyclerViewAdapter.this.mOnItemSelectedListener.onItemSelected(clickedLaptop);
+        }
+
+        @Override
+        public void onImageLoaded(Bitmap bitmap) {
+            if (bitmap == null) {
+//                this.setImageViewBitmap(null);
+                return;
+            }
+            this.setImageViewBitmap(bitmap);
+            int currPosition = this.getAdapterPosition();
+            if (currPosition < 0 || currPosition >= RecyclerViewAdapter.this.getItemCount()) {
+                return;
+            }
+            LaptopSqlite item = RecyclerViewAdapter.this.mLaptops.get(currPosition);
+            String id = item.getId();
+            Map<String, Bitmap> bitmapCache = RecyclerViewAdapter.this.getPreLoadedBitmaps();
+            bitmapCache.put(id, bitmap);
         }
     }
 }

@@ -15,9 +15,7 @@
         android:layout_marginRight="@dimen/cardView_text_margin"
         card_view:cardCornerRadius="4dp"
         card_view:cardElevation="14.5sp"
-        card_view:cardUseCompatPadding="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
+        card_view:cardUseCompatPadding="true">
 
         <LinearLayout
             android:orientation="vertical"

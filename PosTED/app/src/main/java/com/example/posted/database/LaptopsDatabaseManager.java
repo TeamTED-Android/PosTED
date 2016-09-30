@@ -1,12 +1,8 @@
 package com.example.posted.database;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.widget.Toast;
-
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.models.LaptopSqlite;
 
@@ -48,6 +44,7 @@ public class LaptopsDatabaseManager {
         if (cursor.moveToFirst()) {
             do {
                 LaptopSqlite current = new LaptopSqlite();
+                current.setId(cursor.getString(0));
                 current.setModel(cursor.getString(1));
                 current.setCapacity_ram(cursor.getString(2));
                 current.setCapacity_hdd(cursor.getString(3));

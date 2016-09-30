@@ -9,11 +9,10 @@
     android:layout_marginLeft="@dimen/cardView_text_margin"
     android:layout_marginRight="@dimen/cardView_text_margin"
     card_view:cardCornerRadius="4dp"
-    card_view:cardElevation="14.5sp"
+    card_view:cardElevation="5sp"
     card_view:cardUseCompatPadding="true"
     android:layout_alignParentRight="true"
     android:layout_alignParentEnd="true">
-
 
     <LinearLayout
         android:orientation="horizontal"
@@ -61,81 +60,6 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/cardView_text_margin"/>
                 </LinearLayout>
-                <!--<LinearLayout-->
-                    <!--android:orientation="horizontal"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="match_parent">-->
-                    <!--<TextView-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:text="RAM:"-->
-                        <!--android:layout_margin="@dimen/cardView_text_margin"/>-->
-                    <!--<TextView-->
-                        <!--android:id="@+id/ram"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_margin="@dimen/cardView_text_margin"/>-->
-                <!--</LinearLayout>-->
-                <!--<LinearLayout-->
-                    <!--android:orientation="horizontal"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="match_parent">-->
-                    <!--<TextView-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:text="HDD:"-->
-                        <!--android:layout_margin="@dimen/cardView_text_margin"/>-->
-                    <!--<TextView-->
-                        <!--android:id="@+id/hdd"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_margin="@dimen/cardView_text_margin"/>-->
-                <!--</LinearLayout>-->
-                <!--<LinearLayout-->
-                    <!--android:orientation="horizontal"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="match_parent">-->
-                    <!--<TextView-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:text="Processor:"-->
-                        <!--android:layout_margin="@dimen/cardView_text_margin"/>-->
-                    <!--<TextView-->
-                        <!--android:id="@+id/processor"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_margin="@dimen/cardView_text_margin"/>-->
-                <!--</LinearLayout>-->
-                <!--<LinearLayout-->
-                    <!--android:orientation="horizontal"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="match_parent">-->
-                    <!--<TextView-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:text="Video Card:"-->
-                        <!--android:layout_margin="@dimen/cardView_text_margin"/>-->
-                    <!--<TextView-->
-                        <!--android:id="@+id/video_card"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_margin="@dimen/cardView_text_margin"/>-->
-                <!--</LinearLayout>-->
-                <!--<LinearLayout-->
-                    <!--android:orientation="horizontal"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="match_parent">-->
-                    <!--<TextView-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:text="Display:"-->
-                        <!--android:layout_margin="@dimen/cardView_text_margin"/>-->
-                    <!--<TextView-->
-                        <!--android:id="@+id/display"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_margin="@dimen/cardView_text_margin"/>-->
-                <!--</LinearLayout>-->
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
