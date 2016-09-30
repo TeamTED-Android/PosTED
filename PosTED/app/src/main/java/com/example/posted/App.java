@@ -28,6 +28,7 @@ public class App extends Application {
             pendingIntent.send();
         } catch (PendingIntent.CanceledException e) {
 
+
             e.printStackTrace();
         }
     }

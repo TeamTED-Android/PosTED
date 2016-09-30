@@ -34,6 +34,8 @@ import android.widget.Toast;
 
 import com.example.posted.MainActivity;
 import com.example.posted.R;
+import com.example.posted.database.DatabaseManager;
+import com.example.posted.database.UsersDatabaseManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +47,7 @@ import static android.Manifest.permission.READ_CONTACTS;
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-     private User mUser;
+    private User mUser;
     private LoginManager mLoginManager;
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -303,22 +305,24 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         private final String mEmail;
         private final String mPassword;
         private final Context mContext;
+        private DatabaseManager databaseManager;
 
         UserLoginTask(String email, String password, Context context) {
             mEmail = email;
             mPassword = password;
-            mContext= context;
+            mContext = context;
+            this.databaseManager = new DatabaseManager(getApplicationContext());
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-            DBTools dbTools=null;
-            try{
-                dbTools = new DBTools(mContext);
-                mUser = dbTools.getUser(mEmail);
+            UsersDatabaseManager usersDatabaseManager = null;
+            try {
+                usersDatabaseManager = new UsersDatabaseManager(databaseManager);
+                mUser = usersDatabaseManager.getUser(mEmail);
 
-                if (mUser.getId()>0) {
+                if (mUser.getId() > 0) {
                     // Account exists, check password.
                     if (mUser.getPassword().equals(mPassword))
                         return true;
@@ -328,9 +332,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     mUser.setPassword(mPassword);
                     return true;
                 }
-            } finally{
-                if (dbTools!=null)
-                    dbTools.close();
+            } finally {
+                if (this.databaseManager != null){
+                    this.databaseManager.close();
+                }
+
             }
         }
 
@@ -340,26 +346,26 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                if (mUser.getId()>0){
+                if (mUser.getId() > 0) {
                     finish();
                     succsesLogin();
                 } else {
                     DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            switch (which){
+                            switch (which) {
                                 case DialogInterface.BUTTON_POSITIVE:
-                                    DBTools dbTools=null;
-                                    try{
+                                    UsersDatabaseManager usersDatabaseManager = null;
+                                    try {
                                         finish();
-                                        dbTools = new DBTools(mContext);
-                                        mUser=dbTools.insertUser(mUser);
-                                        Toast myToast = Toast.makeText(mContext,"pdateting report", Toast.LENGTH_SHORT);
+                                        usersDatabaseManager = new UsersDatabaseManager(databaseManager);
+                                        mUser = usersDatabaseManager.insertUser(mUser);
+                                        Toast myToast = Toast.makeText(mContext, "dateting report", Toast.LENGTH_SHORT);
                                         myToast.show();
                                         succsesLogin();
-                                    } finally{
-                                        if (dbTools!=null)
-                                            dbTools.close();
+                                    } finally {
+                                        if (databaseManager != null)
+                                            databaseManager.close();
                                     }
                                     break;
 
@@ -387,10 +393,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
         }
 
-        public void succsesLogin(){
-            Intent myIntent = new Intent(LoginActivity.this,MainActivity.class);
+        public void succsesLogin() {
+            Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
             LoginActivity.this.startActivity(myIntent);
             mLoginManager.loginUser(mUser);
+           // finish();
         }
     }
 }

@@ -9,7 +9,9 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 
-import com.example.posted.database.SqliteController;
+import com.example.posted.constants.ConstantsHelper;
+import com.example.posted.database.DatabaseManager;
+import com.example.posted.database.LaptopsDatabaseManager;
 import com.example.posted.models.LaptopKinvey;
 import com.example.posted.models.LaptopSqlite;
 import com.kinvey.android.AsyncAppData;
@@ -34,8 +36,9 @@ public class LoadDataService extends IntentService {
    // public static final String BROADCAST_ACTION_SHOW_RESULT = "com.example.etasheva.kinveytest.showresult";
     private Client mKinveyClient;
     private IBinder binder;
-    private SqliteController mController;
+    private DatabaseManager mController;
     private SQLiteDatabase mDatabase;
+    private LaptopsDatabaseManager mLaptopsDatabaseManager;
 
     public class LoadDataServiceBinder extends Binder {
         public LoadDataService getService() {
@@ -67,11 +70,12 @@ public class LoadDataService extends IntentService {
     public void onCreate() {
         this.binder = new LoadDataServiceBinder();
         this.mKinveyClient = new Client.Builder(APP_KEY, APP_SECRET, this.getApplicationContext()).build();
-//        if (!doesDatabaseExist(getApplicationContext(),SqliteController.DB_NAME)) {
-//            this.mController = new SqliteController(getApplicationContext());
+//        if (!doesDatabaseExist(getApplicationContext(),LaptopsDatabaseManager.DB_NAME)) {
+//            this.mController = new LaptopsDatabaseManager(getApplicationContext());
 //        }
 
-        this.mController = new SqliteController(getApplicationContext());
+        this.mController = new DatabaseManager(getApplicationContext());
+        this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(this.mController);
         super.onCreate();
     }
 
@@ -123,17 +127,17 @@ public class LoadDataService extends IntentService {
                 for (LaptopKinvey laptop : laptops) {
                     count++;
                     HashMap<String,String> laptopData = new LinkedHashMap<String, String>();
-                    laptopData.put(SqliteController.ID_COLUMN,String.valueOf(count));
-                    laptopData.put(SqliteController.MODEL_COLUMN,laptop.getModel());
-                    laptopData.put(SqliteController.RAM_COLUMN,laptop.getCapacity_ram());
-                    laptopData.put(SqliteController.HDD_COLUMN,laptop.getCapacity_hdd());
-                    laptopData.put(SqliteController.PROCESSOR_COLUMN,laptop.getProcessor_type());
-                    laptopData.put(SqliteController.VIDEO_CARD_COLUMN,laptop.getVideo_card_type());
-                    laptopData.put(SqliteController.DISPLAY_COLUMN,laptop.getDisplay_size());
-                    laptopData.put(SqliteController.CURRENCY_COLUMN,laptop.getCurrency());
-                    laptopData.put(SqliteController.PRICE_COLUMN,laptop.getPrice());
-                    laptopData.put(SqliteController.IMAGE_COLUMN,laptop.getImage());
-                    mController.insertRecord(laptopData);
+                    laptopData.put(ConstantsHelper.ID_COLUMN,String.valueOf(count));
+                    laptopData.put(ConstantsHelper.MODEL_COLUMN,laptop.getModel());
+                    laptopData.put(ConstantsHelper.RAM_COLUMN,laptop.getCapacity_ram());
+                    laptopData.put(ConstantsHelper.HDD_COLUMN,laptop.getCapacity_hdd());
+                    laptopData.put(ConstantsHelper.PROCESSOR_COLUMN,laptop.getProcessor_type());
+                    laptopData.put(ConstantsHelper.VIDEO_CARD_COLUMN,laptop.getVideo_card_type());
+                    laptopData.put(ConstantsHelper.DISPLAY_COLUMN,laptop.getDisplay_size());
+                    laptopData.put(ConstantsHelper.CURRENCY_COLUMN,laptop.getCurrency());
+                    laptopData.put(ConstantsHelper.PRICE_COLUMN,laptop.getPrice());
+                    laptopData.put(ConstantsHelper.IMAGE_COLUMN,laptop.getImage());
+                    mLaptopsDatabaseManager.insertRecord(laptopData);
                     Toast.makeText(LoadDataService.this, "LaptopKinvey model " + laptop.getModel() + " added", Toast.LENGTH_SHORT).show();
                 }
 
@@ -150,7 +154,7 @@ public class LoadDataService extends IntentService {
     }
 
     public ArrayList<LaptopSqlite> showResult(){
-        ArrayList<LaptopSqlite> result = this.mController.getAllStudents();
+        ArrayList<LaptopSqlite> result = this.mLaptopsDatabaseManager.getAllLaptops();
 //        Intent intentShowResult = new Intent(BROADCAST_ACTION_SHOW_RESULT);
 //        intentShowResult.putExtra("result_data", result);
 //        sendBroadcast(intentShowResult);
