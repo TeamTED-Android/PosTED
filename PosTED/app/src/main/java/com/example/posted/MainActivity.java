@@ -69,7 +69,6 @@ public class MainActivity extends AppCompatActivity
         this.mServiceIntent = new Intent(this, LoadDataService.class);
         this.startService(this.mServiceIntent);
 
-
         bindService(this.mServiceIntent,connection,Context.BIND_AUTO_CREATE);
         this.mMainFragment = new MainFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.container,this.mMainFragment).commit();
@@ -149,11 +148,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void showResultButtonClicked() {
-        ArrayList<LaptopSqlite> result = this.mLoadDataService.showResult();
-        Bundle bundleOverview = new Bundle();
-        bundleOverview.putParcelableArrayList("result",result);
+//        ArrayList<LaptopSqlite> result = this.mLoadDataService.showResult();
+//        Bundle bundleOverview = new Bundle();
+//        bundleOverview.putParcelableArrayList("result",result);
         OverviewFragment overviewFragment = new OverviewFragment();
-        overviewFragment.setArguments(bundleOverview);
+//        overviewFragment.setArguments(bundleOverview);
         getSupportFragmentManager().beginTransaction().replace(R.id.container,overviewFragment).commit();
 
     }
