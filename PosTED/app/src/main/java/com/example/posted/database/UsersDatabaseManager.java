@@ -41,10 +41,7 @@ public class UsersDatabaseManager {
     }
 
     public User getUser(String username) {
-        String query = "SELECT "
-                + ConstantsHelper.USERNAME_COLUMN
-                + " , " + ConstantsHelper.PASSWORD_COLUMN
-                + " FROM "
+        String query = "SELECT * FROM "
                 + ConstantsHelper.USERS_TABLE_NAME
                 + " WHERE " + ConstantsHelper.USERNAME_COLUMN + " ='"
                 + username + "'";
@@ -54,7 +51,7 @@ public class UsersDatabaseManager {
         if (cursor.moveToFirst()) {
             do {
                 myUser.setId(cursor.getLong(0));
-                myUser.setPassword(cursor.getString(1));
+                myUser.setPassword(cursor.getString(2));
             } while (cursor.moveToNext());
         }
         return myUser;
