@@ -65,7 +65,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
             Map<String, Bitmap> bitmapCache = this.getPreLoadedBitmaps();
             if (!bitmapCache.containsKey(id)) {
-                AsyncImageLoader imageLoader = new AsyncImageLoader(holder);
+                AsyncImageLoader imageLoader = new AsyncImageLoader(holder, position);
                 imageLoader.execute(base64Img);
             } else {
                 Bitmap bitmap = bitmapCache.get(id);
@@ -90,6 +90,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //        private TextView mDisplay;
         private TextView mPrice;
         private TextView mCurrency;
+        private long mCurrExecTime;
 //        private ImageView mImage;
 
         private ImageView getImageView() {
@@ -109,6 +110,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 return;
             }
             imageView.setImageBitmap(bitmap);
+        }
+
+        private void setImageViewResId(int resId) {
+            ImageView imageView = this.getImageView();
+            if (imageView == null) {
+                return;
+            }
+            imageView.setImageResource(resId);
         }
 
         public ViewHolder(View itemView) {
@@ -133,17 +142,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
 
         @Override
-        public void onImageLoaded(Bitmap bitmap) {
+        public void onImageLoaded(Bitmap bitmap, long execTime, int position) {
+            if (execTime < this.mCurrExecTime) {
+                return;
+            }
+            this.mCurrExecTime = execTime;
             if (bitmap == null) {
-//                this.setImageViewBitmap(null);
+                this.setImageViewResId(R.mipmap.no_image_black);
                 return;
             }
             this.setImageViewBitmap(bitmap);
-            int currPosition = this.getAdapterPosition();
-            if (currPosition < 0 || currPosition >= RecyclerViewAdapter.this.getItemCount()) {
+            if (position < 0 || position >= RecyclerViewAdapter.this.getItemCount()) {
                 return;
             }
-            LaptopSqlite item = RecyclerViewAdapter.this.mLaptops.get(currPosition);
+            LaptopSqlite item = RecyclerViewAdapter.this.mLaptops.get(position);
             String id = item.getId();
             Map<String, Bitmap> bitmapCache = RecyclerViewAdapter.this.getPreLoadedBitmaps();
             bitmapCache.put(id, bitmap);

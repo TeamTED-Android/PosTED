@@ -9,13 +9,21 @@ public class AsyncImageLoader extends AsyncTask<String, Void, Bitmap> {
 
     public interface Listener {
 
-        void onImageLoaded(Bitmap bitmap);
+        void onImageLoaded(Bitmap bitmap, long execTime, int position);
     }
 
     private Listener mListener;
+    private long mExecTime;
+    private int mPosition;
 
-    public AsyncImageLoader(Listener listener) {
+    public AsyncImageLoader(Listener listener, int position) {
         this.mListener = listener;
+        this.mPosition = position;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        this.mExecTime = System.currentTimeMillis();
     }
 
     @Override
@@ -37,7 +45,7 @@ public class AsyncImageLoader extends AsyncTask<String, Void, Bitmap> {
 
     protected void onPostExecute(Bitmap resultBitmap) {
         if (this.mListener != null) {
-            this.mListener.onImageLoaded(resultBitmap);
+            this.mListener.onImageLoaded(resultBitmap, this.mExecTime, this.mPosition);
         }
     }
 }
