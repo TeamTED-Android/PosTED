@@ -34,6 +34,8 @@ import android.widget.Toast;
 
 import com.example.posted.MainActivity;
 import com.example.posted.R;
+import com.example.posted.adminApp.AdminMainActivity;
+import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.UsersDatabaseManager;
 
@@ -70,6 +72,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         this.mLoginManager = new LoginManager(this);
+
+        if (this.mLoginManager.isLoggedIn()){
+            finish();
+        }
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -395,10 +401,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         public void succsesLogin() {
-            Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
-            LoginActivity.this.startActivity(myIntent);
+
             mLoginManager.loginUser(mUser);
-           // finish();
+           if (mLoginManager.getLoginUser().getUsername().equals(ConstantsHelper.ADMIN_USERNAME)){
+               Intent myIntent = new Intent(LoginActivity.this, AdminMainActivity.class);
+               LoginActivity.this.startActivity(myIntent);
+           }else {
+               Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
+               LoginActivity.this.startActivity(myIntent);
+           }
+
         }
     }
 }

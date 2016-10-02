@@ -23,5 +23,10 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="home">Home</string>
+    <string name="laptops">Laptops</string>
+    <string name="phones">Phones</string>
+    <string name="add_product">Add product</string>
+    <string name="sign_out">Sign out</string>
 
 </resources>

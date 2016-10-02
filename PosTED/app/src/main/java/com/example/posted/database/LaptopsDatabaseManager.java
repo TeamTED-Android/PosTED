@@ -21,7 +21,7 @@ public class LaptopsDatabaseManager {
     public void insertRecord(HashMap<String, String> queryValues) {
         SQLiteDatabase database = this.databaseManager.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(ConstantsHelper.ID_COLUMN, queryValues.get(ConstantsHelper.ID_COLUMN));
+       // values.put(ConstantsHelper.ID_COLUMN, queryValues.get(ConstantsHelper.ID_COLUMN));
         values.put(ConstantsHelper.MODEL_COLUMN, queryValues.get(ConstantsHelper.MODEL_COLUMN));
         values.put(ConstantsHelper.RAM_COLUMN, queryValues.get(ConstantsHelper.RAM_COLUMN));
         values.put(ConstantsHelper.HDD_COLUMN, queryValues.get(ConstantsHelper.HDD_COLUMN));
@@ -44,7 +44,7 @@ public class LaptopsDatabaseManager {
         if (cursor.moveToFirst()) {
             do {
                 LaptopSqlite current = new LaptopSqlite();
-                current.setId(cursor.getString(0));
+                current.setId(cursor.getInt(0));
                 current.setModel(cursor.getString(1));
                 current.setCapacity_ram(cursor.getString(2));
                 current.setCapacity_hdd(cursor.getString(3));

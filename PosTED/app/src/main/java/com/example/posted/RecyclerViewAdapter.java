@@ -23,7 +23,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private Context mContext;
     private ArrayList<LaptopSqlite> mLaptops;
     private RecyclerViewAdapter.RecyclerViewSelectedElement mOnItemSelectedListener;
-    private Map<String, Bitmap> mPreLoadedBitmaps;
+    private Map<Integer, Bitmap> mPreLoadedBitmaps;
 
     public RecyclerViewAdapter(Context context, ArrayList<LaptopSqlite> laptops, RecyclerViewAdapter.RecyclerViewSelectedElement onItemSelectedListener) {
         this.mContext = context;
@@ -31,7 +31,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.mOnItemSelectedListener = onItemSelectedListener;
     }
 
-    private Map<String, Bitmap> getPreLoadedBitmaps() {
+    private Map<Integer, Bitmap> getPreLoadedBitmaps() {
         if (this.mPreLoadedBitmaps == null) {
             this.mPreLoadedBitmaps = new WeakHashMap<>();
         }
@@ -58,12 +58,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //            holder.mDisplay.setText(current.getDisplay_size());
             holder.mPrice.setText(current.getPrice());
             holder.mCurrency.setText(current.getCurrency());
-            String id = current.getId();
+            int id = current.getId();
             String base64Img = current.getImage();
             if (base64Img.contains(",")) {
                 base64Img = base64Img.substring(current.getImage().indexOf(','));
             }
-            Map<String, Bitmap> bitmapCache = this.getPreLoadedBitmaps();
+            Map<Integer, Bitmap> bitmapCache = this.getPreLoadedBitmaps();
             if (!bitmapCache.containsKey(id)) {
                 AsyncImageLoader imageLoader = new AsyncImageLoader(holder, position);
                 imageLoader.execute(base64Img);
@@ -156,8 +156,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 return;
             }
             LaptopSqlite item = RecyclerViewAdapter.this.mLaptops.get(position);
-            String id = item.getId();
-            Map<String, Bitmap> bitmapCache = RecyclerViewAdapter.this.getPreLoadedBitmaps();
+            int id = item.getId();
+            Map<Integer, Bitmap> bitmapCache = RecyclerViewAdapter.this.getPreLoadedBitmaps();
             bitmapCache.put(id, bitmap);
         }
     }

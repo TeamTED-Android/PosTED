@@ -26,7 +26,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
         String query = "CREATE TABLE IF NOT EXISTS " +
                 ConstantsHelper.LAPTOPS_TABLE_NAME +
-                "( " + ConstantsHelper.ID_COLUMN + " TEXT PRIMARY KEY, " +
+                "( " + ConstantsHelper.ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 ConstantsHelper.MODEL_COLUMN + " TEXT, " +
                 ConstantsHelper.RAM_COLUMN + " TEXT, " +
                 ConstantsHelper.HDD_COLUMN + " TEXT, " +

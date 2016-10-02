@@ -1,9 +1,10 @@
-package com.example.posted;
+package com.example.posted.adminApp;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
@@ -18,7 +19,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-
+import com.example.posted.LoadDataService;
+import com.example.posted.R;
 import com.example.posted.fragments.LaptopFragment;
 import com.example.posted.fragments.MainFragment;
 import com.example.posted.fragments.OverviewFragment;
@@ -27,12 +29,12 @@ import com.example.posted.login.LoginActivity;
 import com.example.posted.login.LoginManager;
 import com.example.posted.models.LaptopSqlite;
 
-import java.util.ArrayList;
-
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,
-        MainFragment.ButtonsExchangeData,
+public class AdminMainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener, MainFragment.ButtonsExchangeData,
         OnLaptopSelectedDataExchange {
+
+
+    private MainFragment mainFragment;
 
     private Context ctx;
     private LoadDataService mLoadDataService;
@@ -44,7 +46,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.admin_activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -66,17 +68,27 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        this.loginManager = new LoginManager(this);
         this.ctx = this;
         this.mServiceIntent = new Intent(this, LoadDataService.class);
         this.startService(this.mServiceIntent);
 
         bindService(this.mServiceIntent, connection, Context.BIND_AUTO_CREATE);
         this.mMainFragment = new MainFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, this.mMainFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, this.mMainFragment).commit();
 
         this.loginManager = new LoginManager(this);
     }
 
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -106,12 +118,15 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_laptops) {
+        if (id == R.id.admin_nav_laptops) {
             OverviewFragment overviewFragment = new OverviewFragment();
-            this.getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment).commit();
-        } else if (id == R.id.nav_phones) {
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment).commit();
+        } else if (id == R.id.admin_nav_phones) {
             // show "coming soon'
-        } else if (id == R.id.nav_sign_out) {
+        } else if (id == R.id.admin_nav_addProduct) {
+            AddProductFragment fragment = new AddProductFragment();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, fragment).commit();
+        } else if (id == R.id.admin_nav_signOut) {
             loginManager.logoutUser();
             Intent intent = new Intent(this, LoginActivity.class);
             this.finish();
@@ -126,22 +141,20 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    @Override
     public void loginButtonClicked() {
         this.mLoadDataService.attemptToLogin();
     }
 
+    @Override
     public void getInfoButtonClicked() {
         this.mLoadDataService.attemptToGetInfo();
     }
 
+    @Override
     public void showResultButtonClicked() {
-//        ArrayList<LaptopSqlite> result = this.mLoadDataService.showResult();
-//        Bundle bundleOverview = new Bundle();
-//        bundleOverview.putParcelableArrayList("result",result);
         OverviewFragment overviewFragment = new OverviewFragment();
-//        overviewFragment.setArguments(bundleOverview);
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment).commit();
-
+        getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment).commit();
     }
 
     @Override
@@ -152,34 +165,14 @@ public class MainActivity extends AppCompatActivity
         laptopFragment.setArguments(bundleLaptop);
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.container, laptopFragment)
+                .replace(R.id.adminContainer, laptopFragment)
                 .commit();
     }
 
     @Override
     public void onBackToOverviewButtonSelected() {
         OverviewFragment overviewFragment = new OverviewFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment).commit();
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        if (mIsBinded) {
-            unbindService(connection);
-        }
-        stopService(this.mServiceIntent);
-        super.onDestroy();
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+        getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment).commit();
     }
 
     ServiceConnection connection = new ServiceConnection() {
@@ -196,5 +189,12 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
-
+    @Override
+    protected void onDestroy() {
+        if (mIsBinded) {
+            unbindService(connection);
+        }
+        stopService(this.mServiceIntent);
+        super.onDestroy();
+    }
 }

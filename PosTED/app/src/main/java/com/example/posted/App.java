@@ -4,8 +4,11 @@ import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Intent;
 
+import com.example.posted.adminApp.AdminMainActivity;
+import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.login.LoginActivity;
 import com.example.posted.login.LoginManager;
+import com.example.posted.login.User;
 
 public class App extends Application {
     private LoginManager loginManager;
@@ -16,7 +19,12 @@ public class App extends Application {
         super.onCreate();
         this.loginManager = new LoginManager(this);
         if (loginManager.isLoggedIn()) {
-            intent = new Intent(this, MainActivity.class);
+            User currentUser = loginManager.getLoginUser();
+            if (currentUser.getUsername().equalsIgnoreCase(ConstantsHelper.ADMIN_USERNAME)){
+                intent = new Intent(this, AdminMainActivity.class);
+            } else {
+                intent = new Intent(this, MainActivity.class);
+            }
 
         } else {
             intent = new Intent(this, LoginActivity.class);

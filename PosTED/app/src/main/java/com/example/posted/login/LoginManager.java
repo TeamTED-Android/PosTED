@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 public class LoginManager {
     private static final String PREFS_NAME = "TEST";
     private static final int PRIVATE_MODE = 0;
+    private static final String USER_ID_KEY = "user id";
     private static final String LOGIN_KEY = "loggin";
     private static final String USERNAME_KEY = "username";
     private static final String USER_PASSWORD = "password";
@@ -24,6 +25,7 @@ public class LoginManager {
 
     public void loginUser(User user){
         if (preferences != null && mEditor != null){
+            this.mEditor.putLong(USERNAME_KEY,user.getId());
             this.mEditor.putString(USERNAME_KEY,user.getUsername());
             this.mEditor.putString(USER_PASSWORD,user.getPassword());
             this.mEditor.putBoolean(LOGIN_KEY,true);
@@ -47,5 +49,13 @@ public class LoginManager {
         }
 
         return this.preferences.getBoolean(LOGIN_KEY,false);
+    }
+
+    public User getLoginUser(){
+        Long userId = this.preferences.getLong(USER_ID_KEY,0);
+        String username = this.preferences.getString(USERNAME_KEY,"");
+        String password = this.preferences.getString(USER_PASSWORD,"");
+
+        return new User(userId,username,password);
     }
 }

@@ -6,6 +6,8 @@ public class ConstantsHelper {
     public static final String DB_NAME = "pos_ted.db";
     public final static int DB_VERSION = 2;
 
+    //Admin username
+    public static final String ADMIN_USERNAME = "admin@admin.com";
     //Users table
     public static final String USERS_TABLE_NAME = "users";
     public static final String USERNAME_COLUMN = "username";

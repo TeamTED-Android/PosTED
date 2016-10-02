@@ -127,7 +127,7 @@ public class LoadDataService extends IntentService {
                 for (LaptopKinvey laptop : laptops) {
                     count++;
                     HashMap<String,String> laptopData = new LinkedHashMap<String, String>();
-                    laptopData.put(ConstantsHelper.ID_COLUMN,String.valueOf(count));
+                    //laptopData.put(ConstantsHelper.ID_COLUMN,String.valueOf(count));
                     laptopData.put(ConstantsHelper.MODEL_COLUMN,laptop.getModel());
                     laptopData.put(ConstantsHelper.RAM_COLUMN,laptop.getCapacity_ram());
                     laptopData.put(ConstantsHelper.HDD_COLUMN,laptop.getCapacity_hdd());

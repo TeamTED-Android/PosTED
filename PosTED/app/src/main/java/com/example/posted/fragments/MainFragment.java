@@ -62,8 +62,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         this.mLogin.setOnClickListener(this);
         this.mGetInfo = (Button) view.findViewById(R.id.get_info);
         this.mGetInfo.setOnClickListener(this);
-        this.mShowResult = (Button) view.findViewById(R.id.show_result);
-        this.mShowResult.setOnClickListener(this);
+      //  this.mShowResult = (Button) view.findViewById(R.id.show_result);
+      //  this.mShowResult.setOnClickListener(this);
         this.mInfoView.setText("My data is stored in Kinvey. Please select first \"Login\" button to login in Kinvey. Then select \"Get info\" button to transfer the data from Kinvey to SQLite. And finally select \"Show result\" button to see the result.");
 
         mBroadcastListener = new MainFragment.BroadcastListener();
@@ -102,9 +102,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             case R.id.get_info:
                 this.mButtonExchangeData.getInfoButtonClicked();
                 break;
-            case R.id.show_result:
-                this.mButtonExchangeData.showResultButtonClicked();
-                break;
+//            case R.id.show_result:
+//                this.mButtonExchangeData.showResultButtonClicked();
+//                break;
         }
 
     }

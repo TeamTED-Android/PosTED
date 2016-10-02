@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 public class LaptopSqlite implements Parcelable {
 
-    private String id;
+    private int id;
     private String model;
     private String capacity_ram;
     private String capacity_hdd;
@@ -41,7 +41,7 @@ public class LaptopSqlite implements Parcelable {
     }
 
     public LaptopSqlite(Parcel in) {
-        id = in.readString();
+        id = in.readInt();
         model = in.readString();
         capacity_ram = in.readString();
         capacity_hdd = in.readString();
@@ -72,7 +72,7 @@ public class LaptopSqlite implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.id);
+        dest.writeInt(this.id);
         dest.writeString(this.model);
         dest.writeString(this.capacity_ram);
         dest.writeString(this.capacity_hdd);
@@ -85,11 +85,11 @@ public class LaptopSqlite implements Parcelable {
 
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
