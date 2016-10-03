@@ -4,14 +4,17 @@ package com.example.posted.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
 
 import com.example.posted.constants.ConstantsHelper;
 
 public class DatabaseManager extends SQLiteOpenHelper {
 
+    private Context mContext;
 
     public DatabaseManager(Context context) {
         super(context, ConstantsHelper.DB_NAME, null, ConstantsHelper.DB_VERSION);
+        this.mContext = context;
     }
 
     @Override
@@ -38,7 +41,6 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 ConstantsHelper.IMAGE_COLUMN + " MEDIUMTEXT )";
         db.execSQL(query);
 
-
         db.execSQL(usersTableQuery);
     }
 
@@ -49,18 +51,11 @@ public class DatabaseManager extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void dropLaptopsTable(){
+    public void deleteRecordsFromTable(String tableName){
         SQLiteDatabase database = this.getWritableDatabase();
-        String query = "DROP TABLE IF EXISTS " + ConstantsHelper.LAPTOPS_TABLE_NAME;
+        Toast.makeText(this.mContext, tableName + " deleted", Toast.LENGTH_SHORT).show();
+        String query = "DELETE FROM " + tableName;
         database.execSQL(query);
-
-    }
-
-    public void dropTempTable(){
-        SQLiteDatabase database = this.getWritableDatabase();
-        String query = "DROP TABLE IF EXISTS " + ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME;
-        database.execSQL(query);
-
     }
 
     //Create Temporary table for all records from Admin panel
@@ -77,6 +72,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
                 ConstantsHelper.PRICE_COLUMN + " TEXT, " +
                 ConstantsHelper.IMAGE_COLUMN + " MEDIUMTEXT )";
+        Toast.makeText(this.mContext, "TEMP table created", Toast.LENGTH_SHORT).show();
         db.execSQL(query);
     }
 }

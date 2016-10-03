@@ -3,7 +3,9 @@ package com.example.posted.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class LaptopSqlite implements Parcelable {
+import com.example.posted.interfaces.Laptop;
+
+public class LaptopSqlite implements Parcelable, Laptop {
 
     private int id;
     private String model;

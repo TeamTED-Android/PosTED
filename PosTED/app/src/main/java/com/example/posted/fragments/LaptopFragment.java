@@ -19,7 +19,7 @@ import com.example.posted.models.LaptopSqlite;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class LaptopFragment extends Fragment implements View.OnClickListener {
+public class LaptopFragment extends Fragment {
 
     private Button mBackToOverview;
     private TextView mCurrentLptModel;
@@ -57,9 +57,6 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_laptop, container, false);
         LaptopSqlite currentLaptop = getArguments().getParcelable("current_laptop");
 
-        this.mBackToOverview = (Button) view.findViewById(R.id.back_to_overview);
-        this.mBackToOverview.setOnClickListener(this);
-
         this.mCurrentLptModel = (TextView) view.findViewById(R.id.current_lpt_model);
         this.mCurrentLptModel.setText(currentLaptop.getModel());
 
@@ -89,8 +86,4 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
-    @Override
-    public void onClick(View view) {
-        this.mBackToOverviewListener.onBackToOverviewButtonSelected();
-    }
 }

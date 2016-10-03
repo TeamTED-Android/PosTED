@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
 import android.view.LayoutInflater;
@@ -31,8 +32,6 @@ import com.example.posted.models.LaptopSqlite;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
@@ -40,27 +39,22 @@ import static android.app.Activity.RESULT_OK;
 
 public class AddProductFragment extends Fragment implements View.OnClickListener {
     private static final int PICK_IMAGE_REQUEST = 1;
-    private EditText model;
-    private EditText price;
-    private EditText hdd;
-    private EditText ram;
-    private EditText displaySize;
-    private EditText processor;
-    private EditText videoCard;
-    private EditText currency;
+    private TextInputEditText model;
+    private TextInputEditText price;
+    private TextInputEditText hdd;
+    private TextInputEditText ram;
+    private TextInputEditText displaySize;
+    private TextInputEditText processor;
+    private TextInputEditText videoCard;
+    private TextInputEditText currency;
     private Button addImageButton;
     private Button addProductButton;
     private Button cancelButton;
     private Context context;
     private String imageAsString;
 
-
-
-
     private DatabaseManager databaseManager;
     private LaptopsDatabaseManager laptopsDatabaseManager;
-
-
     private LoadDataService mLoadDataService;
     private Intent mServiceIntent;
     private boolean mIsBinded;
@@ -91,14 +85,14 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.admin_add_product_fragment, container, false);
-        this.model = (EditText) view.findViewById(R.id.laptopModelEditText);
-        this.price = (EditText) view.findViewById(R.id.priceEditText);
-        this.hdd = (EditText) view.findViewById(R.id.hddEditText);
-        this.ram = (EditText) view.findViewById(R.id.ramEditText);
-        this.displaySize = (EditText) view.findViewById(R.id.displaySizeEditText);
-        this.processor = (EditText) view.findViewById(R.id.processorEditText);
-        this.videoCard = (EditText) view.findViewById(R.id.videoCardEditText);
-        this.currency = (EditText) view.findViewById(R.id.currencyEditText);
+        this.model = (TextInputEditText) view.findViewById(R.id.laptopModelEditText);
+        this.price = (TextInputEditText) view.findViewById(R.id.priceEditText);
+        this.hdd = (TextInputEditText) view.findViewById(R.id.hddEditText);
+        this.ram = (TextInputEditText) view.findViewById(R.id.ramEditText);
+        this.displaySize = (TextInputEditText) view.findViewById(R.id.displaySizeEditText);
+        this.processor = (TextInputEditText) view.findViewById(R.id.processorEditText);
+        this.videoCard = (TextInputEditText) view.findViewById(R.id.videoCardEditText);
+        this.currency = (TextInputEditText) view.findViewById(R.id.currencyEditText);
 
         this.addImageButton = (Button) view.findViewById(R.id.addImageButton);
         this.addProductButton = (Button) view.findViewById(R.id.addProductButton);
@@ -128,18 +122,19 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         if (v.getId() == R.id.addProductButton) {
             if (this.checkInputInfo()) {
-                HashMap<String, String> laptopData = new LinkedHashMap<String, String>();
-              //  laptopData.put(ConstantsHelper.ID_COLUMN,String.valueOf(50));
-                laptopData.put(ConstantsHelper.MODEL_COLUMN, this.model.getText().toString());
-                laptopData.put(ConstantsHelper.RAM_COLUMN, this.ram.getText().toString());
-                laptopData.put(ConstantsHelper.HDD_COLUMN, this.hdd.getText().toString());
-                laptopData.put(ConstantsHelper.PROCESSOR_COLUMN, this.processor.getText().toString());
-                laptopData.put(ConstantsHelper.VIDEO_CARD_COLUMN, this.videoCard.getText().toString());
-                laptopData.put(ConstantsHelper.DISPLAY_COLUMN, this.displaySize.getText().toString());
-                laptopData.put(ConstantsHelper.CURRENCY_COLUMN, this.currency.getText().toString());
-                laptopData.put(ConstantsHelper.PRICE_COLUMN, this.price.getText().toString());
-                laptopData.put(ConstantsHelper.IMAGE_COLUMN, this.imageAsString);
-                this.laptopsDatabaseManager.insertRecord(laptopData,ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+
+                LaptopSqlite currentLaptop = new LaptopSqlite(
+                        this.model.getText().toString(),
+                        this.ram.getText().toString(),
+                        this.hdd.getText().toString(),
+                        this.processor.getText().toString(),
+                        this.videoCard.getText().toString(),
+                        this.displaySize.getText().toString(),
+                        this.currency.getText().toString(),
+                        this.price.getText().toString(),
+                        this.imageAsString);
+
+                this.laptopsDatabaseManager.insertRecord(currentLaptop,ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
                 Toast.makeText(context,"Laptop added to temp database",Toast.LENGTH_SHORT).show();
             }
         } else if (v.getId() == R.id.cancelButton) {
@@ -151,10 +146,8 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
             this.startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
         }else if (v.getId() == R.id.uploadButton){
             ArrayList<LaptopSqlite> tempLaptops = this.laptopsDatabaseManager.getAllLaptops(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
-            this.mLoadDataService.attemptToUploadInfo(tempLaptops);
-            //TODO drop Temp table
-            //this.databaseManager.dropTempTable();
-
+            this.mLoadDataService.uploadLaptops(tempLaptops);
+            this.databaseManager.deleteRecordsFromTable(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
         }
     }
 

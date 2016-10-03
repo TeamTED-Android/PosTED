@@ -1,12 +1,8 @@
 package com.example.posted.adminApp;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -33,13 +29,8 @@ public class AdminMainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         OnLaptopSelectedDataExchange {
 
-
-    private MainFragment mainFragment;
-
     private Context ctx;
-    //private LoadDataService mLoadDataService;
     private Intent mServiceIntent;
-    //private boolean mIsBinded;
     private MainFragment mMainFragment;
     private LoginManager loginManager;
 
@@ -72,8 +63,7 @@ public class AdminMainActivity extends AppCompatActivity
         this.ctx = this;
         this.mServiceIntent = new Intent(this, LoadDataService.class);
         this.startService(this.mServiceIntent);
-//
-//        bindService(this.mServiceIntent, connection, Context.BIND_AUTO_CREATE);
+
         this.mMainFragment = new MainFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, this.mMainFragment).commit();
 
@@ -145,23 +135,6 @@ public class AdminMainActivity extends AppCompatActivity
         return true;
     }
 
-
-//    @Override
-//    public void loginButtonClicked() {
-//        this.mLoadDataService.attemptToLogin();
-//    }
-//
-//    @Override
-//    public void getInfoButtonClicked() {
-//        this.mLoadDataService.attemptToGetInfo();
-//    }
-//
-//    @Override
-//    public void showResultButtonClicked() {
-//        OverviewFragment overviewFragment = new OverviewFragment();
-//        getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment).commit();
-//    }
-
     @Override
     public void onLaptopSelected(LaptopSqlite laptop) {
         Bundle bundleLaptop = new Bundle();
@@ -175,31 +148,9 @@ public class AdminMainActivity extends AppCompatActivity
                 .commit();
     }
 
-    @Override
-    public void onBackToOverviewButtonSelected() {
-        OverviewFragment overviewFragment = new OverviewFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment).commit();
-    }
-
-//    ServiceConnection connection = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName name, IBinder service) {
-//            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
-//            mLoadDataService = binder.getService();
-//            mIsBinded = true;
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName name) {
-//            mIsBinded = false;
-//        }
-//    };
 
     @Override
     protected void onDestroy() {
-//        if (mIsBinded) {
-//            unbindService(connection);
-//        }
         if (this.mServiceIntent != null){
             stopService(this.mServiceIntent);
         }

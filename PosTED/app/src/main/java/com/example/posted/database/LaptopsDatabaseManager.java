@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import com.example.posted.constants.ConstantsHelper;
+import com.example.posted.interfaces.Laptop;
 import com.example.posted.models.LaptopSqlite;
 
 import java.util.ArrayList;
@@ -18,19 +19,18 @@ public class LaptopsDatabaseManager {
         this.databaseManager = databaseManager;
     }
 
-    public void insertRecord(HashMap<String, String> queryValues, String tableName) {
+    public void insertRecord(Laptop currentLaptop, String tableName) {
         SQLiteDatabase database = this.databaseManager.getWritableDatabase();
         ContentValues values = new ContentValues();
-       // values.put(ConstantsHelper.ID_COLUMN, queryValues.get(ConstantsHelper.ID_COLUMN));
-        values.put(ConstantsHelper.MODEL_COLUMN, queryValues.get(ConstantsHelper.MODEL_COLUMN));
-        values.put(ConstantsHelper.RAM_COLUMN, queryValues.get(ConstantsHelper.RAM_COLUMN));
-        values.put(ConstantsHelper.HDD_COLUMN, queryValues.get(ConstantsHelper.HDD_COLUMN));
-        values.put(ConstantsHelper.PROCESSOR_COLUMN, queryValues.get(ConstantsHelper.PROCESSOR_COLUMN));
-        values.put(ConstantsHelper.VIDEO_CARD_COLUMN, queryValues.get(ConstantsHelper.VIDEO_CARD_COLUMN));
-        values.put(ConstantsHelper.DISPLAY_COLUMN, queryValues.get(ConstantsHelper.DISPLAY_COLUMN));
-        values.put(ConstantsHelper.CURRENCY_COLUMN, queryValues.get(ConstantsHelper.CURRENCY_COLUMN));
-        values.put(ConstantsHelper.PRICE_COLUMN, queryValues.get(ConstantsHelper.PRICE_COLUMN));
-        values.put(ConstantsHelper.IMAGE_COLUMN, queryValues.get(ConstantsHelper.IMAGE_COLUMN));
+        values.put(ConstantsHelper.MODEL_COLUMN, currentLaptop.getModel());
+        values.put(ConstantsHelper.RAM_COLUMN, currentLaptop.getCapacity_ram());
+        values.put(ConstantsHelper.HDD_COLUMN, currentLaptop.getCapacity_hdd());
+        values.put(ConstantsHelper.PROCESSOR_COLUMN, currentLaptop.getProcessor_type());
+        values.put(ConstantsHelper.VIDEO_CARD_COLUMN, currentLaptop.getVideo_card_type());
+        values.put(ConstantsHelper.DISPLAY_COLUMN, currentLaptop.getDisplay_size());
+        values.put(ConstantsHelper.CURRENCY_COLUMN, currentLaptop.getCurrency());
+        values.put(ConstantsHelper.PRICE_COLUMN, currentLaptop.getPrice());
+        values.put(ConstantsHelper.IMAGE_COLUMN, currentLaptop.getImage());
 
         database.insert(tableName, null, values);
         database.close();

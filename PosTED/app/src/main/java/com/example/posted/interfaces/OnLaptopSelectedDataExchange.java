@@ -4,5 +4,4 @@ import com.example.posted.models.LaptopSqlite;
 
 public interface OnLaptopSelectedDataExchange {
     void onLaptopSelected(LaptopSqlite laptop);
-    void onBackToOverviewButtonSelected();
 }

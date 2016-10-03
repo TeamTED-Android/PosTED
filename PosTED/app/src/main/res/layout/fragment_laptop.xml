@@ -168,14 +168,6 @@
 
                 </LinearLayout>
 
-                <Button
-                    android:text="Back to Overview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginBottom="3dp"
-                    android:id="@+id/back_to_overview" />
             </RelativeLayout>
         </LinearLayout>
     </android.support.v7.widget.CardView>

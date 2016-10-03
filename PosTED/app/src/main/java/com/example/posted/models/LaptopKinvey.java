@@ -1,10 +1,11 @@
 package com.example.posted.models;
 
+import com.example.posted.interfaces.Laptop;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 import com.kinvey.java.model.KinveyMetaData;
 
-public class LaptopKinvey extends GenericJson {
+public class LaptopKinvey extends GenericJson implements Laptop {
 
     @Key("_id")
     private String id;

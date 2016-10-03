@@ -1,11 +1,8 @@
 package com.example.posted;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -27,16 +24,12 @@ import com.example.posted.login.LoginActivity;
 import com.example.posted.login.LoginManager;
 import com.example.posted.models.LaptopSqlite;
 
-import java.util.ArrayList;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         OnLaptopSelectedDataExchange {
 
     private Context ctx;
-//    private LoadDataService mLoadDataService;
     private Intent mServiceIntent;
-//    private boolean mIsBinded;
     private MainFragment mMainFragment;
     private LoginManager loginManager;
 
@@ -107,7 +100,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_laptops) {
             OverviewFragment overviewFragment = new OverviewFragment();
-            this.getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment).commit();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment).addToBackStack(null).commit();
         } else if (id == R.id.nav_phones) {
             // show "coming soon'
         } else if (id == R.id.nav_sign_out) {
@@ -124,25 +117,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-
-//    public void loginButtonClicked() {
-//        this.mLoadDataService.attemptToLogin();
-//    }
-//
-//    public void getInfoButtonClicked() {
-//        this.mLoadDataService.attemptToGetInfo();
-//    }
-//
-//    public void showResultButtonClicked() {
-////        ArrayList<LaptopSqlite> result = this.mLoadDataService.showResult();
-////        Bundle bundleOverview = new Bundle();
-////        bundleOverview.putParcelableArrayList("result",result);
-//        OverviewFragment overviewFragment = new OverviewFragment();
-////        overviewFragment.setArguments(bundleOverview);
-//        getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment).addToBackStack(null).commit();
-//
-//    }
-
     @Override
     public void onLaptopSelected(LaptopSqlite laptop) {
         Bundle bundleLaptop = new Bundle();
@@ -157,18 +131,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onBackToOverviewButtonSelected() {
-        OverviewFragment overviewFragment = new OverviewFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment).commit();
-    }
-
-
-    @Override
     protected void onDestroy() {
-//        if (mIsBinded) {
-//            unbindService(connection);
-//        }
-
         if (this.mServiceIntent != null){
             stopService(this.mServiceIntent);
         }
@@ -189,20 +152,5 @@ public class MainActivity extends AppCompatActivity
 
         }
     }
-
-//    ServiceConnection connection = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName name, IBinder service) {
-//            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
-//            mLoadDataService = binder.getService();
-//            mIsBinded = true;
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName name) {
-//            mIsBinded = false;
-//        }
-//    };
-
 
 }

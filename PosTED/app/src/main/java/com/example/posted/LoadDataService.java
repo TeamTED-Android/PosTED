@@ -32,9 +32,8 @@ public class LoadDataService extends IntentService {
     private static final String APP_KEY = "kid_Hkz4aiD3";
     private static final String APP_SECRET = "6e30f9fd9c0b4218a6db8d6282ce25a8";
     private static final String COLLECTION_NAME = "laptops";
-    public static final String BROADCAST_ACTION_LOGIN = "com.example.etasheva.kinveytest.login";
-    public static final String BROADCAST_ACTION_GET_INFO = "com.example.etasheva.kinveytest.getinfo";
-   // public static final String BROADCAST_ACTION_SHOW_RESULT = "com.example.etasheva.kinveytest.showresult";
+//    public static final String BROADCAST_ACTION_LOGIN = "com.example.etasheva.kinveytest.login";
+//    public static final String BROADCAST_ACTION_GET_INFO = "com.example.etasheva.kinveytest.getinfo";
     private Client mKinveyClient;
     private IBinder binder;
     private DatabaseManager mController;
@@ -85,20 +84,10 @@ public class LoadDataService extends IntentService {
         //TODO login, transfer info from Kinvey to SQLite
         this.loginToKinvey();
         this.transferDataFromKinvey();
+
         return START_STICKY;
     }
 
-
-    public void attemptToLogin(){
-        if (!this.mKinveyClient.user().isUserLoggedIn()) {
-            this.mKinveyClient.user().login("test@abv.bg", "test123", callback);
-        }else {
-            Intent intentLogin = new Intent(BROADCAST_ACTION_LOGIN);
-            intentLogin.putExtra("info_login", "User already logged in");
-            sendBroadcast(intentLogin);
-        }
-
-    }
 
     //the new method that use to be invoke in onStartCommand
     private void loginToKinvey(){
@@ -119,46 +108,9 @@ public class LoadDataService extends IntentService {
         }
     }
 
-    public void attemptToGetInfo(){
-        final Intent intentGetInfo = new Intent(BROADCAST_ACTION_GET_INFO);
-        AsyncAppData<LaptopKinvey> laptopsInfo = mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
-        laptopsInfo.get(new KinveyListCallback<LaptopKinvey>() {
-            @Override
-            public void onSuccess(LaptopKinvey[] laptops) {
-                intentGetInfo.putExtra("info_get_info","Successfully receive the info");
-                sendBroadcast(intentGetInfo);
-                int count = 0;
-                for (LaptopKinvey laptop : laptops) {
-                    count++;
-                    HashMap<String,String> laptopData = new LinkedHashMap<String, String>();
-                    //laptopData.put(ConstantsHelper.ID_COLUMN,String.valueOf(count));
-                    laptopData.put(ConstantsHelper.MODEL_COLUMN,laptop.getModel());
-                    laptopData.put(ConstantsHelper.RAM_COLUMN,laptop.getCapacity_ram());
-                    laptopData.put(ConstantsHelper.HDD_COLUMN,laptop.getCapacity_hdd());
-                    laptopData.put(ConstantsHelper.PROCESSOR_COLUMN,laptop.getProcessor_type());
-                    laptopData.put(ConstantsHelper.VIDEO_CARD_COLUMN,laptop.getVideo_card_type());
-                    laptopData.put(ConstantsHelper.DISPLAY_COLUMN,laptop.getDisplay_size());
-                    laptopData.put(ConstantsHelper.CURRENCY_COLUMN,laptop.getCurrency());
-                    laptopData.put(ConstantsHelper.PRICE_COLUMN,laptop.getPrice());
-                    laptopData.put(ConstantsHelper.IMAGE_COLUMN,laptop.getImage());
-                    mLaptopsDatabaseManager.insertRecord(laptopData, ConstantsHelper.LAPTOPS_TABLE_NAME);
-                    Toast.makeText(LoadDataService.this, "Laptop model " + laptop.getModel() + " added", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-
-            @Override
-            public void onFailure(Throwable throwable) {
-                intentGetInfo.putExtra("info_get_info","Fail to receive the info");
-                sendBroadcast(intentGetInfo);
-            }
-
-        });
-
-    }
-
     //the new method that use to be invoke in onStartCommand
     private void transferDataFromKinvey(){
+        this.mController.deleteRecordsFromTable(ConstantsHelper.LAPTOPS_TABLE_NAME);
         AsyncAppData<LaptopKinvey> laptopsInfo = mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
         laptopsInfo.get(new KinveyListCallback<LaptopKinvey>() {
             @Override
@@ -167,19 +119,7 @@ public class LoadDataService extends IntentService {
                 int count = 0;
                 for (LaptopKinvey laptop : laptops) {
                     count++;
-                    HashMap<String,String> laptopData = new LinkedHashMap<String, String>();
-                    //laptopData.put(ConstantsHelper.ID_COLUMN,String.valueOf(count));
-                    laptopData.put(ConstantsHelper.MODEL_COLUMN,laptop.getModel());
-                    laptopData.put(ConstantsHelper.RAM_COLUMN,laptop.getCapacity_ram());
-                    laptopData.put(ConstantsHelper.HDD_COLUMN,laptop.getCapacity_hdd());
-                    laptopData.put(ConstantsHelper.PROCESSOR_COLUMN,laptop.getProcessor_type());
-                    laptopData.put(ConstantsHelper.VIDEO_CARD_COLUMN,laptop.getVideo_card_type());
-                    laptopData.put(ConstantsHelper.DISPLAY_COLUMN,laptop.getDisplay_size());
-                    laptopData.put(ConstantsHelper.CURRENCY_COLUMN,laptop.getCurrency());
-                    laptopData.put(ConstantsHelper.PRICE_COLUMN,laptop.getPrice());
-                    laptopData.put(ConstantsHelper.IMAGE_COLUMN,laptop.getImage());
-                    mLaptopsDatabaseManager.insertRecord(laptopData, ConstantsHelper.LAPTOPS_TABLE_NAME);
-                    Toast.makeText(LoadDataService.this, "Laptop model " + laptop.getModel() + " added", Toast.LENGTH_SHORT).show();
+                    mLaptopsDatabaseManager.insertRecord(laptop, ConstantsHelper.LAPTOPS_TABLE_NAME);
                 }
 
             }
@@ -193,7 +133,7 @@ public class LoadDataService extends IntentService {
 
     }
 
-    public void attemptToUploadInfo(ArrayList<LaptopSqlite> tempLaptops){
+    public void uploadLaptops(ArrayList<LaptopSqlite> tempLaptops){
         this.loginToKinvey();
         for (LaptopSqlite tempLaptop : tempLaptops) {
             LaptopKinvey laptopForUpload = new LaptopKinvey(
@@ -230,36 +170,8 @@ public class LoadDataService extends IntentService {
         if (this.mKinveyClient != null){
             this.mKinveyClient.user().logout().execute();
         }
-        if (this.mController != null){
-            this.mController.dropLaptopsTable();
-            Toast.makeText(this, "Table dropped", Toast.LENGTH_SHORT).show();
-        }
-
         super.onDestroy();
     }
-
-//    public ArrayList<LaptopSqlite> showResult(){
-//        ArrayList<LaptopSqlite> result = this.mLaptopsDatabaseManager.getAllLaptops();
-////        Intent intentShowResult = new Intent(BROADCAST_ACTION_SHOW_RESULT);
-////        intentShowResult.putExtra("result_data", result);
-////        sendBroadcast(intentShowResult);
-//        return result;
-//    }
-
-    KinveyClientCallback<User> callback = new KinveyClientCallback<User>() {
-        Intent intentLogin = new Intent(BROADCAST_ACTION_LOGIN);
-        @Override
-        public void onSuccess(User user) {
-            intentLogin.putExtra("info_login", "Successfully logged in");
-            sendBroadcast(intentLogin);
-        }
-
-        @Override
-        public void onFailure(Throwable throwable) {
-            intentLogin.putExtra("info_login", "Something wrong");
-            sendBroadcast(intentLogin);
-        }
-    };
 
     private static boolean doesDatabaseExist(Context context, String dbName) {
         File dbFile = context.getDatabasePath(dbName);
