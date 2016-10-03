@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.example.posted.async.AsyncImageDecoder;
 import com.example.posted.models.LaptopSqlite;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
             Map<Integer, Bitmap> bitmapCache = this.getPreLoadedBitmaps();
             if (!bitmapCache.containsKey(id)) {
-                AsyncImageLoader imageLoader = new AsyncImageLoader(holder, position);
+                AsyncImageDecoder imageLoader = new AsyncImageDecoder(holder, position);
                 imageLoader.execute(base64Img);
             } else {
                 Bitmap bitmap = bitmapCache.get(id);
@@ -80,7 +81,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return this.mLaptops.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AsyncImageLoader.Listener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AsyncImageDecoder.Listener {
 
         private TextView mModel;
 //        private TextView mRam;
@@ -142,7 +143,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
 
         @Override
-        public void onImageLoaded(Bitmap bitmap, long execTime, int position) {
+        public void onImageDecoded(Bitmap bitmap, long execTime, int position) {
             if (execTime < this.mCurrExecTime) {
                 return;
             }

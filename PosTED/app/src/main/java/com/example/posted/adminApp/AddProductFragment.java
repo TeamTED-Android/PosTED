@@ -12,16 +12,14 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
+import com.example.posted.async.AsyncImageEncoder;
 import com.example.posted.LoadDataService;
 import com.example.posted.R;
 import com.example.posted.constants.ConstantsHelper;
@@ -29,7 +27,6 @@ import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
 import com.example.posted.models.LaptopSqlite;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,16 +34,16 @@ import java.util.List;
 import static android.app.Activity.RESULT_OK;
 
 
-public class AddProductFragment extends Fragment implements View.OnClickListener {
+public class AddProductFragment extends Fragment implements View.OnClickListener, AsyncImageEncoder.Listener {
     private static final int PICK_IMAGE_REQUEST = 1;
-    private TextInputEditText model;
-    private TextInputEditText price;
-    private TextInputEditText hdd;
-    private TextInputEditText ram;
-    private TextInputEditText displaySize;
-    private TextInputEditText processor;
-    private TextInputEditText videoCard;
-    private TextInputEditText currency;
+    private EditText model;
+    private EditText price;
+    private EditText hdd;
+    private EditText ram;
+    private EditText displaySize;
+    private EditText processor;
+    private EditText videoCard;
+    private EditText currency;
     private Button addImageButton;
     private Button addProductButton;
     private Button cancelButton;
@@ -85,14 +82,14 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.admin_add_product_fragment, container, false);
-        this.model = (TextInputEditText) view.findViewById(R.id.laptopModelEditText);
-        this.price = (TextInputEditText) view.findViewById(R.id.priceEditText);
-        this.hdd = (TextInputEditText) view.findViewById(R.id.hddEditText);
-        this.ram = (TextInputEditText) view.findViewById(R.id.ramEditText);
-        this.displaySize = (TextInputEditText) view.findViewById(R.id.displaySizeEditText);
-        this.processor = (TextInputEditText) view.findViewById(R.id.processorEditText);
-        this.videoCard = (TextInputEditText) view.findViewById(R.id.videoCardEditText);
-        this.currency = (TextInputEditText) view.findViewById(R.id.currencyEditText);
+        this.model = (EditText) view.findViewById(R.id.laptopModelEditText);
+        this.price = (EditText) view.findViewById(R.id.priceEditText);
+        this.hdd = (EditText) view.findViewById(R.id.hddEditText);
+        this.ram = (EditText) view.findViewById(R.id.ramEditText);
+        this.displaySize = (EditText) view.findViewById(R.id.displaySizeEditText);
+        this.processor = (EditText) view.findViewById(R.id.processorEditText);
+        this.videoCard = (EditText) view.findViewById(R.id.videoCardEditText);
+        this.currency = (EditText) view.findViewById(R.id.currencyEditText);
 
         this.addImageButton = (Button) view.findViewById(R.id.addImageButton);
         this.addProductButton = (Button) view.findViewById(R.id.addProductButton);
@@ -156,17 +153,11 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK && data != null && data.getData() != null) {
-
             Uri uri = data.getData();
-
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.context.getContentResolver(), uri);
-                Toast.makeText(this.context, "Image getted", Toast.LENGTH_SHORT).show();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-                byte[] b = baos.toByteArray();
-                this.imageAsString = Base64.encodeToString(b, Base64.DEFAULT);
-
+                AsyncImageEncoder encoder = new AsyncImageEncoder(this);
+                encoder.execute(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -242,4 +233,9 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         }
     };
 
+    @Override
+    public void onImageEncoded(String base64str) {
+        Toast.makeText(this.context, "Image loaded", Toast.LENGTH_SHORT).show();
+        this.imageAsString = base64str;
+    }
 }

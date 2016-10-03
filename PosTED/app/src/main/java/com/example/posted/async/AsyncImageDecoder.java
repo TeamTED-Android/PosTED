@@ -1,22 +1,22 @@
-package com.example.posted;
+package com.example.posted.async;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Base64;
 
-public class AsyncImageLoader extends AsyncTask<String, Void, Bitmap> {
+public class AsyncImageDecoder extends AsyncTask<String, Void, Bitmap> {
 
     public interface Listener {
 
-        void onImageLoaded(Bitmap bitmap, long execTime, int position);
+        void onImageDecoded(Bitmap bitmap, long execTime, int position);
     }
 
     private Listener mListener;
     private long mExecTime;
     private int mPosition;
 
-    public AsyncImageLoader(Listener listener, int position) {
+    public AsyncImageDecoder(Listener listener, int position) {
         this.mListener = listener;
         this.mPosition = position;
     }
@@ -45,7 +45,7 @@ public class AsyncImageLoader extends AsyncTask<String, Void, Bitmap> {
 
     protected void onPostExecute(Bitmap resultBitmap) {
         if (this.mListener != null) {
-            this.mListener.onImageLoaded(resultBitmap, this.mExecTime, this.mPosition);
+            this.mListener.onImageDecoded(resultBitmap, this.mExecTime, this.mPosition);
         }
     }
 }
