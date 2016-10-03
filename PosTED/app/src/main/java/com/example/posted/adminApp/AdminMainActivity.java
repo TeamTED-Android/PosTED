@@ -30,16 +30,16 @@ import com.example.posted.login.LoginManager;
 import com.example.posted.models.LaptopSqlite;
 
 public class AdminMainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, MainFragment.ButtonsExchangeData,
+        implements NavigationView.OnNavigationItemSelectedListener,
         OnLaptopSelectedDataExchange {
 
 
     private MainFragment mainFragment;
 
     private Context ctx;
-    private LoadDataService mLoadDataService;
+    //private LoadDataService mLoadDataService;
     private Intent mServiceIntent;
-    private boolean mIsBinded;
+    //private boolean mIsBinded;
     private MainFragment mMainFragment;
     private LoginManager loginManager;
 
@@ -72,8 +72,8 @@ public class AdminMainActivity extends AppCompatActivity
         this.ctx = this;
         this.mServiceIntent = new Intent(this, LoadDataService.class);
         this.startService(this.mServiceIntent);
-
-        bindService(this.mServiceIntent, connection, Context.BIND_AUTO_CREATE);
+//
+//        bindService(this.mServiceIntent, connection, Context.BIND_AUTO_CREATE);
         this.mMainFragment = new MainFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, this.mMainFragment).commit();
 
@@ -86,7 +86,12 @@ public class AdminMainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0){
+                super.onBackPressed();
+            }else {
+                getSupportFragmentManager().popBackStack();
+            }
+
         }
     }
 
@@ -120,7 +125,7 @@ public class AdminMainActivity extends AppCompatActivity
 
         if (id == R.id.admin_nav_laptops) {
             OverviewFragment overviewFragment = new OverviewFragment();
-            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment).commit();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment).addToBackStack(null).commit();
         } else if (id == R.id.admin_nav_phones) {
             // show "coming soon'
         } else if (id == R.id.admin_nav_addProduct) {
@@ -141,21 +146,21 @@ public class AdminMainActivity extends AppCompatActivity
     }
 
 
-    @Override
-    public void loginButtonClicked() {
-        this.mLoadDataService.attemptToLogin();
-    }
-
-    @Override
-    public void getInfoButtonClicked() {
-        this.mLoadDataService.attemptToGetInfo();
-    }
-
-    @Override
-    public void showResultButtonClicked() {
-        OverviewFragment overviewFragment = new OverviewFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment).commit();
-    }
+//    @Override
+//    public void loginButtonClicked() {
+//        this.mLoadDataService.attemptToLogin();
+//    }
+//
+//    @Override
+//    public void getInfoButtonClicked() {
+//        this.mLoadDataService.attemptToGetInfo();
+//    }
+//
+//    @Override
+//    public void showResultButtonClicked() {
+//        OverviewFragment overviewFragment = new OverviewFragment();
+//        getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment).commit();
+//    }
 
     @Override
     public void onLaptopSelected(LaptopSqlite laptop) {
@@ -166,6 +171,7 @@ public class AdminMainActivity extends AppCompatActivity
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.adminContainer, laptopFragment)
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -175,26 +181,28 @@ public class AdminMainActivity extends AppCompatActivity
         getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment).commit();
     }
 
-    ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
-            mLoadDataService = binder.getService();
-            mIsBinded = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mIsBinded = false;
-        }
-    };
+//    ServiceConnection connection = new ServiceConnection() {
+//        @Override
+//        public void onServiceConnected(ComponentName name, IBinder service) {
+//            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
+//            mLoadDataService = binder.getService();
+//            mIsBinded = true;
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName name) {
+//            mIsBinded = false;
+//        }
+//    };
 
     @Override
     protected void onDestroy() {
-        if (mIsBinded) {
-            unbindService(connection);
+//        if (mIsBinded) {
+//            unbindService(connection);
+//        }
+        if (this.mServiceIntent != null){
+            stopService(this.mServiceIntent);
         }
-        stopService(this.mServiceIntent);
         super.onDestroy();
     }
 }

@@ -1,10 +1,15 @@
 package com.example.posted.adminApp;
 
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,15 +21,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.posted.LoadDataService;
 import com.example.posted.R;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
+import com.example.posted.models.LaptopSqlite;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -51,6 +60,12 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     private DatabaseManager databaseManager;
     private LaptopsDatabaseManager laptopsDatabaseManager;
 
+
+    private LoadDataService mLoadDataService;
+    private Intent mServiceIntent;
+    private boolean mIsBinded;
+    private Button mUploadButton;
+
     public AddProductFragment() {
     }
 
@@ -62,6 +77,14 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         this.databaseManager = new DatabaseManager(context);
         this.laptopsDatabaseManager = new LaptopsDatabaseManager(this.databaseManager);
 
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        this.context = activity;
+        this.databaseManager = new DatabaseManager(context);
+        this.laptopsDatabaseManager = new LaptopsDatabaseManager(this.databaseManager);
     }
 
     @Nullable
@@ -85,8 +108,21 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         this.cancelButton.setOnClickListener(this);
         this.addImageButton.setOnClickListener(this);
         this.imageAsString = "";
+
+
+        this.laptopsDatabaseManager.createTempTable();
+        this.mUploadButton = (Button) view.findViewById(R.id.uploadButton);
+        this.mUploadButton.setOnClickListener(this);
+        //check if service running and bind
+        this.mServiceIntent = new Intent(this.context, LoadDataService.class);
+        if (!isDataServiceRunning(LoadDataService.class)){
+            this.context.startService(this.mServiceIntent);
+        }
+        this.context.bindService(this.mServiceIntent, connection, Context.BIND_AUTO_CREATE);
+
         return view;
     }
+
 
     @Override
     public void onClick(View v) {
@@ -103,8 +139,8 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
                 laptopData.put(ConstantsHelper.CURRENCY_COLUMN, this.currency.getText().toString());
                 laptopData.put(ConstantsHelper.PRICE_COLUMN, this.price.getText().toString());
                 laptopData.put(ConstantsHelper.IMAGE_COLUMN, this.imageAsString);
-                this.laptopsDatabaseManager.insertRecord(laptopData);
-                Toast.makeText(context,"Laptop added to database",Toast.LENGTH_SHORT).show();
+                this.laptopsDatabaseManager.insertRecord(laptopData,ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+                Toast.makeText(context,"Laptop added to temp database",Toast.LENGTH_SHORT).show();
             }
         } else if (v.getId() == R.id.cancelButton) {
 
@@ -113,6 +149,12 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
             this.startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+        }else if (v.getId() == R.id.uploadButton){
+            ArrayList<LaptopSqlite> tempLaptops = this.laptopsDatabaseManager.getAllLaptops(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+            this.mLoadDataService.attemptToUploadInfo(tempLaptops);
+            //TODO drop Temp table
+            //this.databaseManager.dropTempTable();
+
         }
     }
 
@@ -136,6 +178,14 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mIsBinded) {
+            this.context.unbindService(connection);
+        }
+        super.onDestroy();
     }
 
     private boolean checkInputInfo() {
@@ -172,5 +222,31 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
 
         return true;
     }
+
+    private boolean isDataServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) this.context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> services = manager.getRunningServices(Integer.MAX_VALUE);
+        for (ActivityManager.RunningServiceInfo service : services) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+        ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
+            mLoadDataService = binder.getService();
+            mIsBinded = true;
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mIsBinded = false;
+        }
+    };
 
 }

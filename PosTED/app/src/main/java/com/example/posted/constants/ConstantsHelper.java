@@ -24,4 +24,6 @@ public class ConstantsHelper {
     public static final String CURRENCY_COLUMN = "currency";
     public static final String PRICE_COLUMN = "price";
     public static final String IMAGE_COLUMN = "image";
+    //Temp table
+    public static final String TEMP_LAPTOPS_TABLE_NAME = "temp";
 }

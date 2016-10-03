@@ -22,18 +22,18 @@ import com.example.posted.R;
  */
 public class MainFragment extends Fragment implements View.OnClickListener {
 
-    public interface ButtonsExchangeData{
-        void loginButtonClicked();
-        void getInfoButtonClicked();
-        void showResultButtonClicked();
-    }
+//    public interface ButtonsExchangeData{
+//        void loginButtonClicked();
+//        void getInfoButtonClicked();
+//        void showResultButtonClicked();
+//    }
 
     private TextView mInfoView;
-    private Button mLogin;
-    private Button mGetInfo;
-    private Button mShowResult;
-    private MainFragment.BroadcastListener mBroadcastListener;
-    private ButtonsExchangeData mButtonExchangeData;
+//    private Button mLogin;
+//    private Button mGetInfo;
+//    private Button mShowResult;
+//    private MainFragment.BroadcastListener mBroadcastListener;
+//    private ButtonsExchangeData mButtonExchangeData;
 
     public MainFragment() {
         // Required empty public constructor
@@ -42,13 +42,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        this.mButtonExchangeData = (ButtonsExchangeData) context;
+        //this.mButtonExchangeData = (ButtonsExchangeData) context;
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        this.mButtonExchangeData = (ButtonsExchangeData) activity;
+        //this.mButtonExchangeData = (ButtonsExchangeData) activity;
     }
 
     @Override
@@ -58,54 +58,54 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
         this.mInfoView = (TextView) view.findViewById(R.id.info);
-        this.mLogin = (Button) view.findViewById(R.id.log);
-        this.mLogin.setOnClickListener(this);
-        this.mGetInfo = (Button) view.findViewById(R.id.get_info);
-        this.mGetInfo.setOnClickListener(this);
-      //  this.mShowResult = (Button) view.findViewById(R.id.show_result);
-      //  this.mShowResult.setOnClickListener(this);
-        this.mInfoView.setText("My data is stored in Kinvey. Please select first \"Login\" button to login in Kinvey. Then select \"Get info\" button to transfer the data from Kinvey to SQLite. And finally select \"Show result\" button to see the result.");
-
-        mBroadcastListener = new MainFragment.BroadcastListener();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(LoadDataService.BROADCAST_ACTION_LOGIN);
-        filter.addAction(LoadDataService.BROADCAST_ACTION_GET_INFO);
-        getContext().registerReceiver(mBroadcastListener, filter);
+//        this.mLogin = (Button) view.findViewById(R.id.log);
+//        this.mLogin.setOnClickListener(this);
+//        this.mGetInfo = (Button) view.findViewById(R.id.get_info);
+//        this.mGetInfo.setOnClickListener(this);
+//        this.mShowResult = (Button) view.findViewById(R.id.show_result);
+//        this.mShowResult.setOnClickListener(this);
+        this.mInfoView.setText("Home Page");
+//
+//        mBroadcastListener = new MainFragment.BroadcastListener();
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction(LoadDataService.BROADCAST_ACTION_LOGIN);
+//        filter.addAction(LoadDataService.BROADCAST_ACTION_GET_INFO);
+//        getContext().registerReceiver(mBroadcastListener, filter);
 
         return view;
     }
 
-    private class BroadcastListener extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(LoadDataService.BROADCAST_ACTION_LOGIN)) {
-                mInfoView.setText(intent.getStringExtra("info_login"));
-            }else if (intent.getAction().equals(LoadDataService.BROADCAST_ACTION_GET_INFO)){
-                mInfoView.setText(intent.getStringExtra("info_get_info"));
-            }
-        }
-    }
+//    private class BroadcastListener extends BroadcastReceiver {
+//
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            if (intent.getAction().equals(LoadDataService.BROADCAST_ACTION_LOGIN)) {
+//                mInfoView.setText(intent.getStringExtra("info_login"));
+//            }else if (intent.getAction().equals(LoadDataService.BROADCAST_ACTION_GET_INFO)){
+//                mInfoView.setText(intent.getStringExtra("info_get_info"));
+//            }
+//        }
+//    }
 
     @Override
     public void onDestroy() {
-        getContext().unregisterReceiver(this.mBroadcastListener);
+        //getContext().unregisterReceiver(this.mBroadcastListener);
         super.onDestroy();
     }
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
-            case R.id.log:
-                this.mButtonExchangeData.loginButtonClicked();
-                break;
-            case R.id.get_info:
-                this.mButtonExchangeData.getInfoButtonClicked();
-                break;
+//        switch (view.getId()){
+//            case R.id.log:
+//                this.mButtonExchangeData.loginButtonClicked();
+//                break;
+//            case R.id.get_info:
+//                this.mButtonExchangeData.getInfoButtonClicked();
+//                break;
 //            case R.id.show_result:
 //                this.mButtonExchangeData.showResultButtonClicked();
 //                break;
-        }
+//        }
 
     }
 }

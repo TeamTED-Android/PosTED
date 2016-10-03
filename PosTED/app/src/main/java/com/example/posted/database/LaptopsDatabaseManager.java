@@ -18,7 +18,7 @@ public class LaptopsDatabaseManager {
         this.databaseManager = databaseManager;
     }
 
-    public void insertRecord(HashMap<String, String> queryValues) {
+    public void insertRecord(HashMap<String, String> queryValues, String tableName) {
         SQLiteDatabase database = this.databaseManager.getWritableDatabase();
         ContentValues values = new ContentValues();
        // values.put(ConstantsHelper.ID_COLUMN, queryValues.get(ConstantsHelper.ID_COLUMN));
@@ -32,13 +32,13 @@ public class LaptopsDatabaseManager {
         values.put(ConstantsHelper.PRICE_COLUMN, queryValues.get(ConstantsHelper.PRICE_COLUMN));
         values.put(ConstantsHelper.IMAGE_COLUMN, queryValues.get(ConstantsHelper.IMAGE_COLUMN));
 
-        database.insert(ConstantsHelper.LAPTOPS_TABLE_NAME, null, values);
+        database.insert(tableName, null, values);
         database.close();
     }
 
-    public ArrayList<LaptopSqlite> getAllLaptops(){
+    public ArrayList<LaptopSqlite> getAllLaptops(String tableName){
         ArrayList<LaptopSqlite> result = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + ConstantsHelper.LAPTOPS_TABLE_NAME;
+        String selectQuery = "SELECT * FROM " + tableName;
         SQLiteDatabase database = this.databaseManager.getWritableDatabase();
         Cursor cursor = database.rawQuery(selectQuery, null);
         if (cursor.moveToFirst()) {
@@ -63,5 +63,11 @@ public class LaptopsDatabaseManager {
         }
         database.close();
         return result;
+    }
+
+    //Using temporary table for all records from Admin...After that upload all new records in Kinvey and drop the temporary table
+    public void createTempTable() {
+        SQLiteDatabase database = this.databaseManager.getWritableDatabase();
+        this.databaseManager.createTempLaptopTable(database);
     }
 }

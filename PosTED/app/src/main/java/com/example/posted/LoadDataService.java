@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 
@@ -46,11 +47,7 @@ public class LoadDataService extends IntentService {
         }
     }
 
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
-     */
+
     public LoadDataService() {
         super("Download service");
     }
@@ -85,23 +82,11 @@ public class LoadDataService extends IntentService {
         mDatabase = this.mController.getWritableDatabase();
         this.mController.onCreate(mDatabase);
 
+        //TODO login, transfer info from Kinvey to SQLite
+        this.loginToKinvey();
+        this.transferDataFromKinvey();
         return START_STICKY;
     }
-
-    @Override
-    public void onDestroy() {
-        Toast.makeText(this, "Service destroyed", Toast.LENGTH_SHORT).show();
-        if (this.mKinveyClient != null){
-            this.mKinveyClient.user().logout().execute();
-        }
-       if (this.mController != null){
-           this.mController.dropTable();
-           Toast.makeText(this, "Table dropped", Toast.LENGTH_SHORT).show();
-       }
-
-        super.onDestroy();
-    }
-
 
 
     public void attemptToLogin(){
@@ -113,6 +98,25 @@ public class LoadDataService extends IntentService {
             sendBroadcast(intentLogin);
         }
 
+    }
+
+    //the new method that use to be invoke in onStartCommand
+    private void loginToKinvey(){
+        if (!this.mKinveyClient.user().isUserLoggedIn()){
+            this.mKinveyClient.user().login("test@abv.bg", "test123", new KinveyClientCallback<User>() {
+                @Override
+                public void onSuccess(User user) {
+                    Toast.makeText(LoadDataService.this, "Successfully logged in", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+                    Toast.makeText(LoadDataService.this, "Fail to logged in", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }else {
+            Toast.makeText(LoadDataService.this, "User already logged in", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void attemptToGetInfo(){
@@ -137,8 +141,8 @@ public class LoadDataService extends IntentService {
                     laptopData.put(ConstantsHelper.CURRENCY_COLUMN,laptop.getCurrency());
                     laptopData.put(ConstantsHelper.PRICE_COLUMN,laptop.getPrice());
                     laptopData.put(ConstantsHelper.IMAGE_COLUMN,laptop.getImage());
-                    mLaptopsDatabaseManager.insertRecord(laptopData);
-                    Toast.makeText(LoadDataService.this, "LaptopKinvey model " + laptop.getModel() + " added", Toast.LENGTH_SHORT).show();
+                    mLaptopsDatabaseManager.insertRecord(laptopData, ConstantsHelper.LAPTOPS_TABLE_NAME);
+                    Toast.makeText(LoadDataService.this, "Laptop model " + laptop.getModel() + " added", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -153,13 +157,94 @@ public class LoadDataService extends IntentService {
 
     }
 
-    public ArrayList<LaptopSqlite> showResult(){
-        ArrayList<LaptopSqlite> result = this.mLaptopsDatabaseManager.getAllLaptops();
-//        Intent intentShowResult = new Intent(BROADCAST_ACTION_SHOW_RESULT);
-//        intentShowResult.putExtra("result_data", result);
-//        sendBroadcast(intentShowResult);
-        return result;
+    //the new method that use to be invoke in onStartCommand
+    private void transferDataFromKinvey(){
+        AsyncAppData<LaptopKinvey> laptopsInfo = mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
+        laptopsInfo.get(new KinveyListCallback<LaptopKinvey>() {
+            @Override
+            public void onSuccess(LaptopKinvey[] laptops) {
+                Toast.makeText(LoadDataService.this, "Successfully receive the info", Toast.LENGTH_SHORT).show();
+                int count = 0;
+                for (LaptopKinvey laptop : laptops) {
+                    count++;
+                    HashMap<String,String> laptopData = new LinkedHashMap<String, String>();
+                    //laptopData.put(ConstantsHelper.ID_COLUMN,String.valueOf(count));
+                    laptopData.put(ConstantsHelper.MODEL_COLUMN,laptop.getModel());
+                    laptopData.put(ConstantsHelper.RAM_COLUMN,laptop.getCapacity_ram());
+                    laptopData.put(ConstantsHelper.HDD_COLUMN,laptop.getCapacity_hdd());
+                    laptopData.put(ConstantsHelper.PROCESSOR_COLUMN,laptop.getProcessor_type());
+                    laptopData.put(ConstantsHelper.VIDEO_CARD_COLUMN,laptop.getVideo_card_type());
+                    laptopData.put(ConstantsHelper.DISPLAY_COLUMN,laptop.getDisplay_size());
+                    laptopData.put(ConstantsHelper.CURRENCY_COLUMN,laptop.getCurrency());
+                    laptopData.put(ConstantsHelper.PRICE_COLUMN,laptop.getPrice());
+                    laptopData.put(ConstantsHelper.IMAGE_COLUMN,laptop.getImage());
+                    mLaptopsDatabaseManager.insertRecord(laptopData, ConstantsHelper.LAPTOPS_TABLE_NAME);
+                    Toast.makeText(LoadDataService.this, "Laptop model " + laptop.getModel() + " added", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                Toast.makeText(LoadDataService.this, "Fail to receive the info", Toast.LENGTH_SHORT).show();
+            }
+
+        });
+
     }
+
+    public void attemptToUploadInfo(ArrayList<LaptopSqlite> tempLaptops){
+        this.loginToKinvey();
+        for (LaptopSqlite tempLaptop : tempLaptops) {
+            LaptopKinvey laptopForUpload = new LaptopKinvey(
+                    tempLaptop.getModel(),
+                    tempLaptop.getCapacity_ram(),
+                    tempLaptop.getCapacity_hdd(),
+                    tempLaptop.getProcessor_type(),
+                    tempLaptop.getVideo_card_type(),
+                    tempLaptop.getDisplay_size(),
+                    tempLaptop.getCurrency(),
+                    tempLaptop.getPrice(),
+                    tempLaptop.getImage());
+            AsyncAppData<LaptopKinvey> tempLaptopInfo = mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
+            tempLaptopInfo.save(laptopForUpload, new KinveyClientCallback<LaptopKinvey>() {
+                @Override
+                public void onSuccess(LaptopKinvey laptopKinvey) {
+                    Toast.makeText(LoadDataService.this, "Laptop " + laptopKinvey.getModel() + " Successfully uploaded", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+                    Toast.makeText(LoadDataService.this, "Fail to upload laptop", Toast.LENGTH_SHORT).show();
+                    Log.d("Service",throwable.getMessage());
+                }
+            });
+
+        }
+
+    }
+
+    @Override
+    public void onDestroy() {
+        Toast.makeText(this, "Service destroyed", Toast.LENGTH_SHORT).show();
+        if (this.mKinveyClient != null){
+            this.mKinveyClient.user().logout().execute();
+        }
+        if (this.mController != null){
+            this.mController.dropLaptopsTable();
+            Toast.makeText(this, "Table dropped", Toast.LENGTH_SHORT).show();
+        }
+
+        super.onDestroy();
+    }
+
+//    public ArrayList<LaptopSqlite> showResult(){
+//        ArrayList<LaptopSqlite> result = this.mLaptopsDatabaseManager.getAllLaptops();
+////        Intent intentShowResult = new Intent(BROADCAST_ACTION_SHOW_RESULT);
+////        intentShowResult.putExtra("result_data", result);
+////        sendBroadcast(intentShowResult);
+//        return result;
+//    }
 
     KinveyClientCallback<User> callback = new KinveyClientCallback<User>() {
         Intent intentLogin = new Intent(BROADCAST_ACTION_LOGIN);

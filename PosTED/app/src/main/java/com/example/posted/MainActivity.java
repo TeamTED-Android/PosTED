@@ -31,13 +31,12 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        MainFragment.ButtonsExchangeData,
         OnLaptopSelectedDataExchange {
 
     private Context ctx;
-    private LoadDataService mLoadDataService;
+//    private LoadDataService mLoadDataService;
     private Intent mServiceIntent;
-    private boolean mIsBinded;
+//    private boolean mIsBinded;
     private MainFragment mMainFragment;
     private LoginManager loginManager;
 
@@ -69,8 +68,8 @@ public class MainActivity extends AppCompatActivity
         this.ctx = this;
         this.mServiceIntent = new Intent(this, LoadDataService.class);
         this.startService(this.mServiceIntent);
-
-        bindService(this.mServiceIntent, connection, Context.BIND_AUTO_CREATE);
+//
+//        bindService(this.mServiceIntent, connection, Context.BIND_AUTO_CREATE);
         this.mMainFragment = new MainFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.container, this.mMainFragment).commit();
 
@@ -126,23 +125,23 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    public void loginButtonClicked() {
-        this.mLoadDataService.attemptToLogin();
-    }
-
-    public void getInfoButtonClicked() {
-        this.mLoadDataService.attemptToGetInfo();
-    }
-
-    public void showResultButtonClicked() {
-//        ArrayList<LaptopSqlite> result = this.mLoadDataService.showResult();
-//        Bundle bundleOverview = new Bundle();
-//        bundleOverview.putParcelableArrayList("result",result);
-        OverviewFragment overviewFragment = new OverviewFragment();
-//        overviewFragment.setArguments(bundleOverview);
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment).commit();
-
-    }
+//    public void loginButtonClicked() {
+//        this.mLoadDataService.attemptToLogin();
+//    }
+//
+//    public void getInfoButtonClicked() {
+//        this.mLoadDataService.attemptToGetInfo();
+//    }
+//
+//    public void showResultButtonClicked() {
+////        ArrayList<LaptopSqlite> result = this.mLoadDataService.showResult();
+////        Bundle bundleOverview = new Bundle();
+////        bundleOverview.putParcelableArrayList("result",result);
+//        OverviewFragment overviewFragment = new OverviewFragment();
+////        overviewFragment.setArguments(bundleOverview);
+//        getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment).addToBackStack(null).commit();
+//
+//    }
 
     @Override
     public void onLaptopSelected(LaptopSqlite laptop) {
@@ -153,6 +152,7 @@ public class MainActivity extends AppCompatActivity
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, laptopFragment)
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -165,10 +165,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        if (mIsBinded) {
-            unbindService(connection);
+//        if (mIsBinded) {
+//            unbindService(connection);
+//        }
+
+        if (this.mServiceIntent != null){
+            stopService(this.mServiceIntent);
         }
-        stopService(this.mServiceIntent);
         super.onDestroy();
     }
 
@@ -178,23 +181,28 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0){
+                super.onBackPressed();
+            }else {
+                getSupportFragmentManager().popBackStack();
+            }
+
         }
     }
 
-    ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
-            mLoadDataService = binder.getService();
-            mIsBinded = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mIsBinded = false;
-        }
-    };
+//    ServiceConnection connection = new ServiceConnection() {
+//        @Override
+//        public void onServiceConnected(ComponentName name, IBinder service) {
+//            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
+//            mLoadDataService = binder.getService();
+//            mIsBinded = true;
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName name) {
+//            mIsBinded = false;
+//        }
+//    };
 
 
 }

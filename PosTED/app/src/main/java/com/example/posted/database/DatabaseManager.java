@@ -49,10 +49,34 @@ public class DatabaseManager extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void dropTable(){
+    public void dropLaptopsTable(){
         SQLiteDatabase database = this.getWritableDatabase();
         String query = "DROP TABLE IF EXISTS " + ConstantsHelper.LAPTOPS_TABLE_NAME;
         database.execSQL(query);
 
+    }
+
+    public void dropTempTable(){
+        SQLiteDatabase database = this.getWritableDatabase();
+        String query = "DROP TABLE IF EXISTS " + ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME;
+        database.execSQL(query);
+
+    }
+
+    //Create Temporary table for all records from Admin panel
+    public void createTempLaptopTable(SQLiteDatabase db) {
+        String query = "CREATE TABLE IF NOT EXISTS " +
+                ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME +
+                "( " + ConstantsHelper.ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                ConstantsHelper.MODEL_COLUMN + " TEXT, " +
+                ConstantsHelper.RAM_COLUMN + " TEXT, " +
+                ConstantsHelper.HDD_COLUMN + " TEXT, " +
+                ConstantsHelper.PROCESSOR_COLUMN + " TEXT, " +
+                ConstantsHelper.VIDEO_CARD_COLUMN + " TEXT, " +
+                ConstantsHelper.DISPLAY_COLUMN + " TEXT, " +
+                ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
+                ConstantsHelper.PRICE_COLUMN + " TEXT, " +
+                ConstantsHelper.IMAGE_COLUMN + " MEDIUMTEXT )";
+        db.execSQL(query);
     }
 }
