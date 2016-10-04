@@ -75,4 +75,28 @@ public class DatabaseManager extends SQLiteOpenHelper {
         Toast.makeText(this.mContext, "TEMP table created", Toast.LENGTH_SHORT).show();
         db.execSQL(query);
     }
+
+    public void createCurrentOrderTable(SQLiteDatabase db){
+
+        String query = "CREATE TABLE IF NOT EXISTS " +
+                ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME +
+                "( " + ConstantsHelper.ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                ConstantsHelper.MODEL_COLUMN + " TEXT, " +
+                ConstantsHelper.RAM_COLUMN + " TEXT, " +
+                ConstantsHelper.HDD_COLUMN + " TEXT, " +
+                ConstantsHelper.PROCESSOR_COLUMN + " TEXT, " +
+                ConstantsHelper.VIDEO_CARD_COLUMN + " TEXT, " +
+                ConstantsHelper.DISPLAY_COLUMN + " TEXT, " +
+                ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
+                ConstantsHelper.PRICE_COLUMN + " TEXT, " +
+                ConstantsHelper.IMAGE_COLUMN + " MEDIUMTEXT )";
+        Toast.makeText(this.mContext, "Orders table created", Toast.LENGTH_SHORT).show();
+        db.execSQL(query);
+    }
+
+    public void dropCurrentOrderTable(SQLiteDatabase db){
+        String query = "DROP TABLE IF EXISTS " + ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME;
+        Toast.makeText(this.mContext, "Orders table dropped", Toast.LENGTH_SHORT).show();
+        db.execSQL(query);
+    }
 }

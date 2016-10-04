@@ -9,9 +9,6 @@ import android.widget.TextView;
 
 import java.io.ByteArrayOutputStream;
 
-/**
- * Created by Todor Ilchev on 2016-10-03.
- */
 
 public class AsyncImageEncoder extends AsyncTask<Bitmap, Integer, String> {
 

@@ -3,6 +3,7 @@ package com.example.posted.login;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.example.posted.database.DatabaseManager;
 
 
 public class LoginManager {
@@ -16,11 +17,13 @@ public class LoginManager {
     private Context mContext;
     private SharedPreferences preferences;
     private SharedPreferences.Editor mEditor;
+    private DatabaseManager databaseManager;
 
     public LoginManager(Context mContext) {
         this.mContext = mContext;
         this.preferences = mContext.getSharedPreferences(PREFS_NAME,PRIVATE_MODE);
         this.mEditor = this.preferences.edit();
+        this.databaseManager = new DatabaseManager(mContext);
     }
 
     public void loginUser(User user){
@@ -30,6 +33,7 @@ public class LoginManager {
             this.mEditor.putString(USER_PASSWORD,user.getPassword());
             this.mEditor.putBoolean(LOGIN_KEY,true);
             this.mEditor.apply();
+            this.databaseManager.createCurrentOrderTable(databaseManager.getWritableDatabase());
         }
     }
 
@@ -39,6 +43,8 @@ public class LoginManager {
             this.mEditor.putString(USER_PASSWORD,"");
             this.mEditor.putBoolean(LOGIN_KEY,false);
             this.mEditor.apply();
+
+            this.databaseManager.dropCurrentOrderTable(databaseManager.getWritableDatabase());
         }
     }
 

@@ -11,15 +11,20 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.posted.R;
+import com.example.posted.constants.ConstantsHelper;
+import com.example.posted.database.DatabaseManager;
+import com.example.posted.database.LaptopsDatabaseManager;
 import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
+import com.example.posted.interfaces.RemoveLaptopListener;
 import com.example.posted.models.LaptopSqlite;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class LaptopFragment extends Fragment {
+public class LaptopFragment extends Fragment implements View.OnClickListener{
 
     private Button mBackToOverview;
     private TextView mCurrentLptModel;
@@ -31,11 +36,26 @@ public class LaptopFragment extends Fragment {
     private TextView mCurrentLptPrice;
     private TextView mCurrentLptCurrency;
     private ImageView mCurrentLptImage;
+    private Button laptopFragmentButton;
     private OnLaptopSelectedDataExchange mBackToOverviewListener;
+    private DatabaseManager databaseManager;
+    private LaptopsDatabaseManager laptopsDatabaseManager;
+    private static RemoveLaptopListener removeLaptopListener;
+
 
 
     public LaptopFragment() {
         // Required empty public constructor
+    }
+
+    public static LaptopFragment newInstance(LaptopSqlite laptop,RemoveLaptopListener listener) {
+        LaptopFragment fragment = new LaptopFragment();
+        Bundle bundleLaptop = new Bundle();
+        bundleLaptop.putParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY, laptop);
+        bundleLaptop.putBoolean("is_cart",true);
+        fragment.setArguments(bundleLaptop);
+        removeLaptopListener = listener;
+        return fragment;
     }
 
     @Override
@@ -55,7 +75,7 @@ public class LaptopFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_laptop, container, false);
-        LaptopSqlite currentLaptop = getArguments().getParcelable("current_laptop");
+        LaptopSqlite currentLaptop = getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
 
         this.mCurrentLptModel = (TextView) view.findViewById(R.id.current_lpt_model);
         this.mCurrentLptModel.setText(currentLaptop.getModel());
@@ -83,7 +103,33 @@ public class LaptopFragment extends Fragment {
 
         this.mCurrentLptImage = (ImageView) view.findViewById(R.id.current_lpt_image);
         //TODO set image
+
+        this.laptopFragmentButton = (Button) view.findViewById(R.id.laptop_fragment_button);
+        this.laptopFragmentButton.setOnClickListener(this);
+        if (this.getArguments().getBoolean("is_cart")){
+            this.laptopFragmentButton.setText("Remove from cart");
+        } else {
+            this.laptopFragmentButton.setText("Add to cart");
+        }
+
+
+        this.databaseManager = new DatabaseManager(view.getContext());
+        this.laptopsDatabaseManager = new LaptopsDatabaseManager(this.databaseManager);
+
         return view;
     }
 
+    @Override
+    public void onClick(View v) {
+        if (this.getArguments().getBoolean("is_cart")){
+            LaptopSqlite laptop = this.getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
+            this.laptopsDatabaseManager.deleteRecord(laptop,ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+            removeLaptopListener.onRemoved();
+          //  Toast.makeText(getContext(),"Laptop deleted from cart",Toast.LENGTH_SHORT).show();
+        } else {
+            LaptopSqlite laptop = this.getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
+            this.laptopsDatabaseManager.insertRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+            Toast.makeText(getContext(),"Laptop added to cart",Toast.LENGTH_SHORT).show();
+        }
+    }
 }

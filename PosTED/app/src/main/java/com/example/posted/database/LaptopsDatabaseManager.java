@@ -70,4 +70,11 @@ public class LaptopsDatabaseManager {
         SQLiteDatabase database = this.databaseManager.getWritableDatabase();
         this.databaseManager.createTempLaptopTable(database);
     }
+
+    public void deleteRecord(Laptop currentLaptop, String tableName){
+        SQLiteDatabase database = this.databaseManager.getWritableDatabase();
+        LaptopSqlite laptopSqlite = (LaptopSqlite) currentLaptop;
+        database.delete(tableName,"id=?",new String[]{Integer.toString(laptopSqlite.getId())});
+
+    }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
         <item
@@ -15,9 +16,9 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Phones" />
         <item
-            android:id="@+id/nav_card"
+            android:id="@+id/nav_cart"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Card" />
+            android:title="Cart" />
         <item
             android:id="@+id/nav_sign_out"
             android:icon="@drawable/ic_menu_manage"

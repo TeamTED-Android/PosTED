@@ -26,4 +26,8 @@ public class ConstantsHelper {
     public static final String IMAGE_COLUMN = "image";
     //Temp table
     public static final String TEMP_LAPTOPS_TABLE_NAME = "temp";
+    //Current order table
+    public static final String CURRENT_ORDERS_LAPTOPS_TABLE_NAME = "current_order";
+
+    public static final String LAPTOP_FRAGMENT_PARCELABLE_KEY="current_laptop";
 }
