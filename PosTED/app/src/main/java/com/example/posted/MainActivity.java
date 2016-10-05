@@ -1,7 +1,6 @@
 package com.example.posted;
 
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,7 +9,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -27,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 
+import com.example.posted.adapters.SectionsPagerAdapter;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.fragments.LaptopFragment;
 import com.example.posted.fragments.MainFragment;
@@ -37,6 +36,7 @@ import com.example.posted.login.LoginActivity;
 import com.example.posted.login.LoginManager;
 import com.example.posted.models.LaptopSqlite;
 import com.example.posted.receivers.NetworkStateReceiver;
+import com.example.posted.services.LoadDataService;
 
 
 public class MainActivity extends AppCompatActivity
@@ -67,19 +67,20 @@ public class MainActivity extends AppCompatActivity
                         .setAction("send us email", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Intent i = new Intent(Intent.ACTION_SEND);
-                                i.setType("message/rfc822");
-                                i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"office.posted@gmail.com"});
-                                i.putExtra(Intent.EXTRA_SUBJECT, "subject of email");
-                                i.putExtra(Intent.EXTRA_TEXT   , "body of email");
-                                try {
-                                    startActivity(Intent.createChooser(i, "Send mail..."));
-                                } catch (android.content.ActivityNotFoundException ex) {
-                                    Toast.makeText(MainActivity.this,"There are no email clients installed.",Toast.LENGTH_SHORT).show();
-                                }
+                                sendMail();
                             }
                         }).show();
             }
+        });
+
+        fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                sendMail();
+                return true;
+            }
+
+
         });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -110,7 +111,6 @@ public class MainActivity extends AppCompatActivity
         this.containerFrameLayoyt = (FrameLayout) this.findViewById(R.id.container);
         this.conteinerViewPager = (ViewPager) this.findViewById(R.id.containerViewPager);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -199,9 +199,6 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
-        if (!this.checkForInternetConnection()){
-            this.attemptToTurnOnWiFi();
-        }
     }
 
     @Override
@@ -212,14 +209,6 @@ public class MainActivity extends AppCompatActivity
         }
         unregisterReceiver(this.networkStateReceiver);
     }
-
-//    @Override
-//    protected void onDestroy() {
-//        if (this.mServiceIntent != null) {
-//            stopService(this.mServiceIntent);
-//        }
-//        super.onDestroy();
-//    }
 
     @Override
     public void onBackPressed() {
@@ -264,4 +253,18 @@ public class MainActivity extends AppCompatActivity
         dialog.show();
 
     }
+
+    private void sendMail() {
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("message/rfc822");
+        i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"office.posted@gmail.com"});
+        i.putExtra(Intent.EXTRA_SUBJECT, "subject of email");
+        i.putExtra(Intent.EXTRA_TEXT   , "body of email");
+        try {
+            startActivity(Intent.createChooser(i, "Send mail..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(MainActivity.this,"There are no email clients installed.",Toast.LENGTH_SHORT).show();
+        }
+    }
+
 }

@@ -1,4 +1,4 @@
-package com.example.posted;
+package com.example.posted.adapters;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;

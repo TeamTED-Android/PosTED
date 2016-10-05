@@ -1,4 +1,4 @@
-package com.example.posted;
+package com.example.posted.services;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -30,8 +30,6 @@ public class LoadDataService extends IntentService {
     private static final String APP_KEY = "kid_Hkz4aiD3";
     private static final String APP_SECRET = "6e30f9fd9c0b4218a6db8d6282ce25a8";
     private static final String COLLECTION_NAME = "laptops";
-//    public static final String BROADCAST_ACTION_LOGIN = "com.example.etasheva.kinveytest.login";
-//    public static final String BROADCAST_ACTION_GET_INFO = "com.example.etasheva.kinveytest.getinfo";
     private Client mKinveyClient;
     private IBinder binder;
     private DatabaseManager mController;

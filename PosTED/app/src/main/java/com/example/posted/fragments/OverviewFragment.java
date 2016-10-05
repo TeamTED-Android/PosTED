@@ -2,12 +2,8 @@ package com.example.posted.fragments;
 
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,9 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-import com.example.posted.LoadDataService;
 import com.example.posted.R;
-import com.example.posted.RecyclerViewAdapter;
+import com.example.posted.adapters.RecyclerViewAdapter;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;

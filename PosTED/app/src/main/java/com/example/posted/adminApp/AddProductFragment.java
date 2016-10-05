@@ -20,7 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.example.posted.async.AsyncImageEncoder;
-import com.example.posted.LoadDataService;
+import com.example.posted.services.LoadDataService;
 import com.example.posted.R;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;

@@ -1,4 +1,4 @@
-package com.example.posted;
+package com.example.posted.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.posted.R;
 import com.example.posted.async.AsyncImageDecoder;
 import com.example.posted.models.LaptopSqlite;
 

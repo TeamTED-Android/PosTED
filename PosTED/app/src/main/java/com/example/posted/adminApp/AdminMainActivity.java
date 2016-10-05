@@ -22,7 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.posted.LoadDataService;
+import com.example.posted.services.LoadDataService;
 import com.example.posted.R;
 import com.example.posted.fragments.LaptopFragment;
 import com.example.posted.fragments.MainFragment;
@@ -60,19 +60,19 @@ public class AdminMainActivity extends AppCompatActivity
                         .setAction("send us email", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Intent i = new Intent(Intent.ACTION_SEND);
-                                i.setType("message/rfc822");
-                                i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"office.posted@gmail.com"});
-                                i.putExtra(Intent.EXTRA_SUBJECT, "subject of email");
-                                i.putExtra(Intent.EXTRA_TEXT   , "body of email");
-                                try {
-                                    startActivity(Intent.createChooser(i, "Send mail..."));
-                                } catch (android.content.ActivityNotFoundException ex) {
-                                    Toast.makeText(AdminMainActivity.this,"There are no email clients installed.",Toast.LENGTH_SHORT).show();
-                                }
+                                sendMail();
                             }
                         }).show();
             }
+        });
+        fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                sendMail();
+                return true;
+            }
+
+
         });
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -188,9 +188,6 @@ public class AdminMainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
-        if (!this.checkForInternetConnection()){
-            this.attemptToTurnOnWiFi();
-        }
     }
 
     @Override
@@ -201,14 +198,6 @@ public class AdminMainActivity extends AppCompatActivity
         }
         unregisterReceiver(this.networkStateReceiver);
     }
-
-//    @Override
-//    protected void onDestroy() {
-//        if (this.mServiceIntent != null){
-//            stopService(this.mServiceIntent);
-//        }
-//        super.onDestroy();
-//    }
 
     private boolean checkForInternetConnection() {
         ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -236,5 +225,18 @@ public class AdminMainActivity extends AppCompatActivity
         AlertDialog dialog = builder.create();
         dialog.show();
 
+    }
+
+    private void sendMail() {
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("message/rfc822");
+        i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"office.posted@gmail.com"});
+        i.putExtra(Intent.EXTRA_SUBJECT, "subject of email");
+        i.putExtra(Intent.EXTRA_TEXT   , "body of email");
+        try {
+            startActivity(Intent.createChooser(i, "Send mail..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(AdminMainActivity.this,"There are no email clients installed.",Toast.LENGTH_SHORT).show();
+        }
     }
 }
