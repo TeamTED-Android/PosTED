@@ -8,12 +8,10 @@ import com.example.posted.interfaces.Laptop;
 import com.example.posted.models.LaptopSqlite;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class LaptopsDatabaseManager {
 
-
-   private DatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
 
     public LaptopsDatabaseManager(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
@@ -36,7 +34,7 @@ public class LaptopsDatabaseManager {
         database.close();
     }
 
-    public ArrayList<LaptopSqlite> getAllLaptops(String tableName){
+    public ArrayList<LaptopSqlite> getAllLaptops(String tableName) {
         ArrayList<LaptopSqlite> result = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + tableName;
         SQLiteDatabase database = this.databaseManager.getWritableDatabase();
@@ -58,23 +56,23 @@ public class LaptopsDatabaseManager {
             } while (cursor.moveToNext());
 
         }
-        if (cursor != null && !cursor.isClosed()){
+        if (cursor != null && !cursor.isClosed()) {
             cursor.close();
         }
         database.close();
         return result;
     }
 
-    //Using temporary table for all records from Admin...After that upload all new records in Kinvey and drop the temporary table
+    // Using temporary table for all records from Admin...
+    // After that upload all new records in Kinvey and drop the temporary table
     public void createTempTable() {
         SQLiteDatabase database = this.databaseManager.getWritableDatabase();
         this.databaseManager.createTempLaptopTable(database);
     }
 
-    public void deleteRecord(Laptop currentLaptop, String tableName){
+    public void deleteRecord(Laptop currentLaptop, String tableName) {
         SQLiteDatabase database = this.databaseManager.getWritableDatabase();
         LaptopSqlite laptopSqlite = (LaptopSqlite) currentLaptop;
-        database.delete(tableName,"id=?",new String[]{Integer.toString(laptopSqlite.getId())});
-
+        database.delete(tableName, "id=?", new String[]{Integer.toString(laptopSqlite.getId())});
     }
 }

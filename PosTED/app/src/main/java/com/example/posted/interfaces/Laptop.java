@@ -20,7 +20,7 @@ public interface Laptop {
 
     String getVideo_card_type();
 
-    void setVideo_card_type(String video_card_type) ;
+    void setVideo_card_type(String video_card_type);
 
     String getDisplay_size();
 

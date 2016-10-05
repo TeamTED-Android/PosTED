@@ -3,9 +3,9 @@ package com.example.posted.constants;
 
 
 public class ConstantsHelper {
-    public static final String DB_NAME = "pos_ted.db";
-    public final static int DB_VERSION = 2;
 
+    public static final String DB_NAME = "pos_ted.db";
+    public static final int DB_VERSION = 2;
     //Admin username
     public static final String ADMIN_USERNAME = "admin@admin.com";
     //Users table

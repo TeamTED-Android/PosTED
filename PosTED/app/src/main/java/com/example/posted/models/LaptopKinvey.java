@@ -69,7 +69,7 @@ public class LaptopKinvey extends GenericJson implements Laptop {
 
 
     public String getModel() {
-        return model;
+        return this.model;
     }
 
     public void setModel(String model) {
@@ -77,7 +77,7 @@ public class LaptopKinvey extends GenericJson implements Laptop {
     }
 
     public String getCapacity_ram() {
-        return capacity_ram;
+        return this.capacity_ram;
     }
 
     public void setCapacity_ram(String capacity_ram) {
@@ -85,7 +85,7 @@ public class LaptopKinvey extends GenericJson implements Laptop {
     }
 
     public String getCapacity_hdd() {
-        return capacity_hdd;
+        return this.capacity_hdd;
     }
 
     public void setCapacity_hdd(String capacity_hdd) {
@@ -93,7 +93,7 @@ public class LaptopKinvey extends GenericJson implements Laptop {
     }
 
     public String getProcessor_type() {
-        return processor_type;
+        return this.processor_type;
     }
 
     public void setProcessor_type(String processor_type) {
@@ -101,7 +101,7 @@ public class LaptopKinvey extends GenericJson implements Laptop {
     }
 
     public String getVideo_card_type() {
-        return video_card_type;
+        return this.video_card_type;
     }
 
     public void setVideo_card_type(String video_card_type) {
@@ -109,7 +109,7 @@ public class LaptopKinvey extends GenericJson implements Laptop {
     }
 
     public String getDisplay_size() {
-        return display_size;
+        return this.display_size;
     }
 
     public void setDisplay_size(String display_size) {
@@ -117,7 +117,7 @@ public class LaptopKinvey extends GenericJson implements Laptop {
     }
 
     public String getCurrency() {
-        return currency;
+        return this.currency;
     }
 
     public void setCurrency(String currency) {
@@ -125,7 +125,7 @@ public class LaptopKinvey extends GenericJson implements Laptop {
     }
 
     public String getPrice() {
-        return price;
+        return this.price;
     }
 
     public void setPrice(String price) {
@@ -133,7 +133,7 @@ public class LaptopKinvey extends GenericJson implements Laptop {
     }
 
     public String getImage() {
-        return image;
+        return this.image;
     }
 
     public void setImage(String image) {

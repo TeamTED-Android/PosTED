@@ -17,8 +17,6 @@ import com.example.posted.R;
  */
 public class MainFragment extends Fragment {
 
-    private TextView mInfoView;
-
     public MainFragment() {
         // Required empty public constructor
     }
@@ -39,8 +37,8 @@ public class MainFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
-        this.mInfoView = (TextView) view.findViewById(R.id.info);
-        this.mInfoView.setText("Home Page");
+        TextView mInfoView = (TextView) view.findViewById(R.id.info);
+        mInfoView.setText("Home Page");
 
         return view;
     }

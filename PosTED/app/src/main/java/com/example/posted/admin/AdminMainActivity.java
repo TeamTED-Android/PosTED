@@ -1,4 +1,4 @@
-package com.example.posted.adminApp;
+package com.example.posted.admin;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -21,8 +22,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
-import com.example.posted.services.LoadDataService;
 import com.example.posted.R;
 import com.example.posted.fragments.LaptopFragment;
 import com.example.posted.fragments.MainFragment;
@@ -33,13 +32,13 @@ import com.example.posted.login.LoginActivity;
 import com.example.posted.login.LoginManager;
 import com.example.posted.models.LaptopSqlite;
 import com.example.posted.receivers.NetworkStateReceiver;
+import com.example.posted.services.LoadDataService;
 
 public class AdminMainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         OnLaptopSelectedDataExchange,
         NetworkStateReceiverListener {
 
-    private Context ctx;
     private Intent mServiceIntent;
     private MainFragment mMainFragment;
     private LoginManager loginManager;
@@ -48,11 +47,11 @@ public class AdminMainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.admin_activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        this.setContentView(R.layout.admin_activity_main);
+        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
+        this.setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) this.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -60,7 +59,7 @@ public class AdminMainActivity extends AppCompatActivity
                         .setAction("send us email", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                sendMail();
+                                AdminMainActivity.this.sendMail();
                             }
                         }).show();
             }
@@ -68,42 +67,38 @@ public class AdminMainActivity extends AppCompatActivity
         fab.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                sendMail();
+                AdminMainActivity.this.sendMail();
                 return true;
             }
-
-
         });
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = (NavigationView) this.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         this.networkStateReceiver = new NetworkStateReceiver();
         this.networkStateReceiver.addListener(this);
-        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager
+                .CONNECTIVITY_ACTION));
 
-        this.ctx = this;
-        if (!this.checkForInternetConnection()){
+        if (!this.checkForInternetConnection()) {
             this.attemptToTurnOnWiFi();
         }
 
         this.loginManager = new LoginManager(this);
-        this.ctx = this;
-
         this.mMainFragment = new MainFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, this.mMainFragment).commit();
+        this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, this.mMainFragment).commit();
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        this.getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -124,20 +119,21 @@ public class AdminMainActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.admin_nav_laptops) {
             OverviewFragment overviewFragment = new OverviewFragment();
-            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment).addToBackStack(null).commit();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment)
+                    .addToBackStack(null).commit();
         } else if (id == R.id.admin_nav_phones) {
             // show "coming soon'
         } else if (id == R.id.admin_nav_addProduct) {
             AddProductFragment fragment = new AddProductFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, fragment).commit();
         } else if (id == R.id.admin_nav_signOut) {
-            loginManager.logoutUser();
+            this.loginManager.logoutUser();
             Intent intent = new Intent(this, LoginActivity.class);
             this.finish();
             this.startActivity(intent);
@@ -145,7 +141,7 @@ public class AdminMainActivity extends AppCompatActivity
             // show home
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -156,7 +152,7 @@ public class AdminMainActivity extends AppCompatActivity
         bundleLaptop.putParcelable("current_laptop", laptop);
         LaptopFragment laptopFragment = new LaptopFragment();
         laptopFragment.setArguments(bundleLaptop);
-        getSupportFragmentManager()
+        this.getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.adminContainer, laptopFragment)
                 .addToBackStack(null)
@@ -165,16 +161,15 @@ public class AdminMainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            if (getSupportFragmentManager().getBackStackEntryCount() == 0){
+            if (this.getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 super.onBackPressed();
-            }else {
-                getSupportFragmentManager().popBackStack();
+            } else {
+                this.getSupportFragmentManager().popBackStack();
             }
-
         }
     }
 
@@ -187,20 +182,22 @@ public class AdminMainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager
+                .CONNECTIVITY_ACTION));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         if (this.mServiceIntent != null) {
-            stopService(this.mServiceIntent);
+            this.stopService(this.mServiceIntent);
         }
-        unregisterReceiver(this.networkStateReceiver);
+        this.unregisterReceiver(this.networkStateReceiver);
     }
 
     private boolean checkForInternetConnection() {
-        ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectionManager = (ConnectivityManager) this.getSystemService(Context
+                .CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = connectionManager.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
@@ -212,7 +209,7 @@ public class AdminMainActivity extends AppCompatActivity
         builder.setPositiveButton("Turn on WiFi", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+                WifiManager wifiManager = (WifiManager) AdminMainActivity.this.getSystemService(Context.WIFI_SERVICE);
                 wifiManager.setWifiEnabled(true);
             }
         });
@@ -230,13 +227,13 @@ public class AdminMainActivity extends AppCompatActivity
     private void sendMail() {
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("message/rfc822");
-        i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"office.posted@gmail.com"});
+        i.putExtra(Intent.EXTRA_EMAIL, new String[]{"office.posted@gmail.com"});
         i.putExtra(Intent.EXTRA_SUBJECT, "subject of email");
-        i.putExtra(Intent.EXTRA_TEXT   , "body of email");
+        i.putExtra(Intent.EXTRA_TEXT, "body of email");
         try {
-            startActivity(Intent.createChooser(i, "Send mail..."));
+            this.startActivity(Intent.createChooser(i, "Send mail..."));
         } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(AdminMainActivity.this,"There are no email clients installed.",Toast.LENGTH_SHORT).show();
+            Toast.makeText(AdminMainActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -10,8 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-
 import com.example.posted.R;
 import com.example.posted.adapters.RecyclerViewAdapter;
 import com.example.posted.constants.ConstantsHelper;
@@ -29,8 +27,7 @@ import java.util.ArrayList;
 public class OverviewFragment extends Fragment implements RecyclerViewAdapter.RecyclerViewSelectedElement {
 
     private OnLaptopSelectedDataExchange mLaptopSelectedDataExchange;
-    private Context ctx;
-//    private LoadDataService mLoadDataService;
+    //    private LoadDataService mLoadDataService;
 //    private Intent mServiceIntent;
 //    private boolean mIsBinded;
 //    private OverviewFragment mFragment;
@@ -67,18 +64,17 @@ public class OverviewFragment extends Fragment implements RecyclerViewAdapter.Re
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_overview, container, false);
 
-        this.ctx = getContext();
 //        this.mFragment = this;
 //        this.mServiceIntent = new Intent(this.ctx, LoadDataService.class);
 //        getContext().bindService(this.mServiceIntent,connection,Context.BIND_AUTO_CREATE);
 
-
         ArrayList<LaptopSqlite> result = this.laptopsDatabaseManager.getAllLaptops(ConstantsHelper.LAPTOPS_TABLE_NAME);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this.getContext(), LinearLayoutManager
+                .VERTICAL, false);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(layoutManager);
 
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(getContext(), result, this);
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this.getContext(), result, this);
         recyclerView.setAdapter(adapter);
         return view;
     }
@@ -95,7 +91,8 @@ public class OverviewFragment extends Fragment implements RecyclerViewAdapter.Re
 //            mLoadDataService = binder.getService();
 //            mIsBinded = true;
 //            ArrayList<LaptopSqlite> result = mLoadDataService.showResult();
-//            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+//            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager
+// .VERTICAL, false);
 //            RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.recyclerView);
 //            recyclerView.setLayoutManager(layoutManager);
 //

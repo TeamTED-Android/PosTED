@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.example.posted.R;
 import com.example.posted.async.AsyncImageDecoder;
 import com.example.posted.models.LaptopSqlite;
@@ -19,7 +18,8 @@ import java.util.WeakHashMap;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
-    public interface RecyclerViewSelectedElement{
+    public interface RecyclerViewSelectedElement {
+
         void onItemSelected(LaptopSqlite laptop);
     }
 
@@ -28,7 +28,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private RecyclerViewAdapter.RecyclerViewSelectedElement mOnItemSelectedListener;
     private Map<Integer, Bitmap> mPreLoadedBitmaps;
 
-    public RecyclerViewAdapter(Context context, ArrayList<LaptopSqlite> laptops, RecyclerViewAdapter.RecyclerViewSelectedElement onItemSelectedListener) {
+    public RecyclerViewAdapter(Context context, ArrayList<LaptopSqlite> laptops, RecyclerViewAdapter
+            .RecyclerViewSelectedElement onItemSelectedListener) {
         this.mContext = context;
         this.mLaptops = laptops;
         this.mOnItemSelectedListener = onItemSelectedListener;
@@ -83,7 +84,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return this.mLaptops.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AsyncImageDecoder.Listener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AsyncImageDecoder
+            .Listener {
 
         private TextView mModel;
 //        private TextView mRam;

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.widget.Toast;
-
 import com.example.posted.constants.ConstantsHelper;
 
 public class DatabaseManager extends SQLiteOpenHelper {
@@ -48,10 +47,10 @@ public class DatabaseManager extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         String query = "DROP TABLE IF EXISTS " + ConstantsHelper.LAPTOPS_TABLE_NAME;
         db.execSQL(query);
-        onCreate(db);
+        this.onCreate(db);
     }
 
-    public void deleteRecordsFromTable(String tableName){
+    public void deleteRecordsFromTable(String tableName) {
         SQLiteDatabase database = this.getWritableDatabase();
         Toast.makeText(this.mContext, tableName + " deleted", Toast.LENGTH_SHORT).show();
         String query = "DELETE FROM " + tableName;
@@ -76,7 +75,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         db.execSQL(query);
     }
 
-    public void createCurrentOrderTable(SQLiteDatabase db){
+    public void createCurrentOrderTable(SQLiteDatabase db) {
 
         String query = "CREATE TABLE IF NOT EXISTS " +
                 ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME +
@@ -94,7 +93,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         db.execSQL(query);
     }
 
-    public void dropCurrentOrderTable(SQLiteDatabase db){
+    public void dropCurrentOrderTable(SQLiteDatabase db) {
         String query = "DROP TABLE IF EXISTS " + ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME;
         Toast.makeText(this.mContext, "Orders table dropped", Toast.LENGTH_SHORT).show();
         db.execSQL(query);

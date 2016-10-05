@@ -8,8 +8,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
-
-
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
@@ -33,10 +31,10 @@ public class LoadDataService extends IntentService {
     private Client mKinveyClient;
     private IBinder binder;
     private DatabaseManager mController;
-    private SQLiteDatabase mDatabase;
     private LaptopsDatabaseManager mLaptopsDatabaseManager;
 
     public class LoadDataServiceBinder extends Binder {
+
         public LoadDataService getService() {
             return LoadDataService.this;
         }
@@ -50,7 +48,7 @@ public class LoadDataService extends IntentService {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return binder;
+        return this.binder;
     }
 
     @Override
@@ -66,25 +64,23 @@ public class LoadDataService extends IntentService {
 //            this.mController = new LaptopsDatabaseManager(getApplicationContext());
 //        }
 
-        this.mController = new DatabaseManager(getApplicationContext());
+        this.mController = new DatabaseManager(this.getApplicationContext());
         this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(this.mController);
+        this.loginToKinvey();
+        this.transferDataFromKinvey();
         super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Toast.makeText(this, "Service started", Toast.LENGTH_SHORT).show();
-        mDatabase = this.mController.getWritableDatabase();
+        SQLiteDatabase mDatabase = this.mController.getWritableDatabase();
         this.mController.onCreate(mDatabase);
-
-        this.loginToKinvey();
-        this.transferDataFromKinvey();
-
         return START_STICKY;
     }
 
-    private void loginToKinvey(){
-        if (!this.mKinveyClient.user().isUserLoggedIn()){
+    private void loginToKinvey() {
+        if (!this.mKinveyClient.user().isUserLoggedIn()) {
             this.mKinveyClient.user().login("test@abv.bg", "test123", new KinveyClientCallback<User>() {
                 @Override
                 public void onSuccess(User user) {
@@ -96,20 +92,21 @@ public class LoadDataService extends IntentService {
                     Toast.makeText(LoadDataService.this, "Fail to logged in", Toast.LENGTH_SHORT).show();
                 }
             });
-        }else {
+        } else {
             Toast.makeText(LoadDataService.this, "User already logged in", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void transferDataFromKinvey(){
+    private void transferDataFromKinvey() {
         this.mController.deleteRecordsFromTable(ConstantsHelper.LAPTOPS_TABLE_NAME);
-        AsyncAppData<LaptopKinvey> laptopsInfo = mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
+        AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
         laptopsInfo.get(new KinveyListCallback<LaptopKinvey>() {
             @Override
             public void onSuccess(LaptopKinvey[] laptops) {
                 Toast.makeText(LoadDataService.this, "Successfully receive the info", Toast.LENGTH_SHORT).show();
                 for (LaptopKinvey laptop : laptops) {
-                    mLaptopsDatabaseManager.insertRecord(laptop, ConstantsHelper.LAPTOPS_TABLE_NAME);
+                    LoadDataService.this.mLaptopsDatabaseManager.insertRecord(laptop, ConstantsHelper
+                            .LAPTOPS_TABLE_NAME);
                 }
 
             }
@@ -123,7 +120,7 @@ public class LoadDataService extends IntentService {
 
     }
 
-    public void uploadLaptops(ArrayList<LaptopSqlite> tempLaptops){
+    public void uploadLaptops(ArrayList<LaptopSqlite> tempLaptops) {
         this.loginToKinvey();
         for (LaptopSqlite tempLaptop : tempLaptops) {
             LaptopKinvey laptopForUpload = new LaptopKinvey(
@@ -136,17 +133,18 @@ public class LoadDataService extends IntentService {
                     tempLaptop.getCurrency(),
                     tempLaptop.getPrice(),
                     tempLaptop.getImage());
-            AsyncAppData<LaptopKinvey> tempLaptopInfo = mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
+            AsyncAppData<LaptopKinvey> tempLaptopInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
             tempLaptopInfo.save(laptopForUpload, new KinveyClientCallback<LaptopKinvey>() {
                 @Override
                 public void onSuccess(LaptopKinvey laptopKinvey) {
-                    Toast.makeText(LoadDataService.this, "Laptop " + laptopKinvey.getModel() + " Successfully uploaded", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoadDataService.this, "Laptop " + laptopKinvey.getModel() + " Successfully " +
+                            "uploaded", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onFailure(Throwable throwable) {
                     Toast.makeText(LoadDataService.this, "Fail to upload laptop", Toast.LENGTH_SHORT).show();
-                    Log.d("Service",throwable.getMessage());
+                    Log.d("Service", throwable.getMessage());
                 }
             });
 
@@ -157,7 +155,7 @@ public class LoadDataService extends IntentService {
     @Override
     public void onDestroy() {
         Toast.makeText(this, "Service destroyed", Toast.LENGTH_SHORT).show();
-        if (this.mKinveyClient != null){
+        if (this.mKinveyClient != null) {
             this.mKinveyClient.user().logout().execute();
         }
         super.onDestroy();

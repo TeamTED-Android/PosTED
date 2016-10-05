@@ -3,25 +3,23 @@ package com.example.posted;
 import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Intent;
-
-import com.example.posted.adminApp.AdminMainActivity;
+import com.example.posted.admin.AdminMainActivity;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.login.LoginActivity;
 import com.example.posted.login.LoginManager;
 import com.example.posted.login.User;
 
 public class App extends Application {
-    private LoginManager loginManager;
-    private Intent intent;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        this.loginManager = new LoginManager(this);
+        LoginManager loginManager = new LoginManager(this);
 
+        Intent intent;
         if (loginManager.isLoggedIn()) {
             User currentUser = loginManager.getLoginUser();
-            if (currentUser.getUsername().equalsIgnoreCase(ConstantsHelper.ADMIN_USERNAME)){
+            if (currentUser.getUsername().equalsIgnoreCase(ConstantsHelper.ADMIN_USERNAME)) {
                 intent = new Intent(this, AdminMainActivity.class);
             } else {
                 intent = new Intent(this, MainActivity.class);
@@ -36,8 +34,6 @@ public class App extends Application {
         try {
             pendingIntent.send();
         } catch (PendingIntent.CanceledException e) {
-
-
             e.printStackTrace();
         }
     }

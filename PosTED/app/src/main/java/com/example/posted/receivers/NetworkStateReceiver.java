@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-
 import com.example.posted.interfaces.NetworkStateReceiverListener;
 
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public class NetworkStateReceiver extends BroadcastReceiver {
             this.mConnected = false;
         }
 
-        notifyStateToAll();
+        this.notifyStateToAll();
     }
 
     public void addListener(NetworkStateReceiverListener networkListener){
@@ -60,7 +59,8 @@ public class NetworkStateReceiver extends BroadcastReceiver {
     }
 
     private void notifyStateToAll() {
-        for(NetworkStateReceiverListener listener : this.mNetworkListeners)
-            notifyState(listener);
+        for(NetworkStateReceiverListener listener : this.mNetworkListeners) {
+            this.notifyState(listener);
+        }
     }
 }

@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.posted.R;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
@@ -24,7 +23,7 @@ import com.example.posted.models.LaptopSqlite;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class LaptopFragment extends Fragment implements View.OnClickListener{
+public class LaptopFragment extends Fragment implements View.OnClickListener {
 
     private Button mBackToOverview;
     private TextView mCurrentLptModel;
@@ -42,17 +41,15 @@ public class LaptopFragment extends Fragment implements View.OnClickListener{
     private LaptopsDatabaseManager laptopsDatabaseManager;
     private static RemoveLaptopListener removeLaptopListener;
 
-
-
     public LaptopFragment() {
         // Required empty public constructor
     }
 
-    public static LaptopFragment newInstance(LaptopSqlite laptop,RemoveLaptopListener listener) {
+    public static LaptopFragment newInstance(LaptopSqlite laptop, RemoveLaptopListener listener) {
         LaptopFragment fragment = new LaptopFragment();
         Bundle bundleLaptop = new Bundle();
         bundleLaptop.putParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY, laptop);
-        bundleLaptop.putBoolean("is_cart",true);
+        bundleLaptop.putBoolean("is_cart", true);
         fragment.setArguments(bundleLaptop);
         removeLaptopListener = listener;
         return fragment;
@@ -75,9 +72,12 @@ public class LaptopFragment extends Fragment implements View.OnClickListener{
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_laptop, container, false);
-        LaptopSqlite currentLaptop = getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
+        LaptopSqlite currentLaptop = this.getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
 
         this.mCurrentLptModel = (TextView) view.findViewById(R.id.current_lpt_model);
+        if (currentLaptop == null) {
+            return null;
+        }
         this.mCurrentLptModel.setText(currentLaptop.getModel());
 
         this.mCurrentLptRam = (TextView) view.findViewById(R.id.current_lpt_ram);
@@ -106,7 +106,7 @@ public class LaptopFragment extends Fragment implements View.OnClickListener{
 
         this.laptopFragmentButton = (Button) view.findViewById(R.id.laptop_fragment_button);
         this.laptopFragmentButton.setOnClickListener(this);
-        if (this.getArguments().getBoolean("is_cart")){
+        if (this.getArguments().getBoolean("is_cart")) {
             this.laptopFragmentButton.setText("Remove from cart");
         } else {
             this.laptopFragmentButton.setText("Add to cart");
@@ -121,15 +121,15 @@ public class LaptopFragment extends Fragment implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
-        if (this.getArguments().getBoolean("is_cart")){
+        if (this.getArguments().getBoolean("is_cart")) {
             LaptopSqlite laptop = this.getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
-            this.laptopsDatabaseManager.deleteRecord(laptop,ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+            this.laptopsDatabaseManager.deleteRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
             removeLaptopListener.onRemoved();
-          //  Toast.makeText(getContext(),"Laptop deleted from cart",Toast.LENGTH_SHORT).show();
+            //  Toast.makeText(getContext(),"Laptop deleted from cart",Toast.LENGTH_SHORT).show();
         } else {
             LaptopSqlite laptop = this.getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
             this.laptopsDatabaseManager.insertRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
-            Toast.makeText(getContext(),"Laptop added to cart",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this.getContext(), "Laptop added to cart", Toast.LENGTH_SHORT).show();
         }
     }
 }

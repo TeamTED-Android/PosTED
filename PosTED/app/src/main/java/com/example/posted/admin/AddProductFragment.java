@@ -1,4 +1,4 @@
-package com.example.posted.adminApp;
+package com.example.posted.admin;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -16,26 +16,25 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
-import com.example.posted.async.AsyncImageEncoder;
-import com.example.posted.services.LoadDataService;
+import android.widget.*;
 import com.example.posted.R;
+import com.example.posted.async.AsyncImageEncoder;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
 import com.example.posted.models.LaptopSqlite;
+import com.example.posted.services.LoadDataService;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.Activity.RESULT_OK;
-
 
 public class AddProductFragment extends Fragment implements View.OnClickListener, AsyncImageEncoder.Listener {
+
     private static final int PICK_IMAGE_REQUEST = 1;
+    private static final int CAMERA_REQUEST = 2;
+
     private EditText model;
     private EditText price;
     private EditText hdd;
@@ -44,6 +43,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     private EditText processor;
     private EditText videoCard;
     private EditText currency;
+    private ProgressBar progressBar;
     private Button addImageButton;
     private Button addProductButton;
     private Button cancelButton;
@@ -57,6 +57,25 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     private boolean mIsBinded;
     private Button mUploadButton;
 
+    private Button getCameraButton(View root) {
+        Button cameraButton = (Button) root.findViewById(R.id.camera_button);
+        return cameraButton;
+    }
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
+            AddProductFragment.this.mLoadDataService = binder.getService();
+            AddProductFragment.this.mIsBinded = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            AddProductFragment.this.mIsBinded = false;
+        }
+    };
+
     public AddProductFragment() {
     }
 
@@ -67,51 +86,58 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         this.context = context;
         this.databaseManager = new DatabaseManager(context);
         this.laptopsDatabaseManager = new LaptopsDatabaseManager(this.databaseManager);
-
     }
 
+    @SuppressWarnings("deprecation")
+    /*
+        NOTE: Deprecated method is kept for backwards compatibility
+     */
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         this.context = activity;
-        this.databaseManager = new DatabaseManager(context);
+        this.databaseManager = new DatabaseManager(this.context);
         this.laptopsDatabaseManager = new LaptopsDatabaseManager(this.databaseManager);
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.admin_add_product_fragment, container, false);
-        this.model = (EditText) view.findViewById(R.id.laptopModelEditText);
-        this.price = (EditText) view.findViewById(R.id.priceEditText);
-        this.hdd = (EditText) view.findViewById(R.id.hddEditText);
-        this.ram = (EditText) view.findViewById(R.id.ramEditText);
-        this.displaySize = (EditText) view.findViewById(R.id.displaySizeEditText);
-        this.processor = (EditText) view.findViewById(R.id.processorEditText);
-        this.videoCard = (EditText) view.findViewById(R.id.videoCardEditText);
-        this.currency = (EditText) view.findViewById(R.id.currencyEditText);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle
+            savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.admin_add_product_fragment, container, false);
+        this.model = (EditText) rootView.findViewById(R.id.laptopModelEditText);
+        this.price = (EditText) rootView.findViewById(R.id.priceEditText);
+        this.hdd = (EditText) rootView.findViewById(R.id.hddEditText);
+        this.ram = (EditText) rootView.findViewById(R.id.ramEditText);
+        this.displaySize = (EditText) rootView.findViewById(R.id.displaySizeEditText);
+        this.processor = (EditText) rootView.findViewById(R.id.processorEditText);
+        this.videoCard = (EditText) rootView.findViewById(R.id.videoCardEditText);
+        this.currency = (EditText) rootView.findViewById(R.id.currencyEditText);
+        this.addImageButton = (Button) rootView.findViewById(R.id.browse_button);
+        this.addProductButton = (Button) rootView.findViewById(R.id.addProductButton);
+        this.cancelButton = (Button) rootView.findViewById(R.id.cancelButton);
+        this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
+        Button cameraButton = this.getCameraButton(rootView);
 
-        this.addImageButton = (Button) view.findViewById(R.id.addImageButton);
-        this.addProductButton = (Button) view.findViewById(R.id.addProductButton);
-        this.cancelButton = (Button) view.findViewById(R.id.cancelButton);
-
+        this.progressBar.setMax(100);
+        this.progressBar.setVisibility(View.GONE);
+        cameraButton.setOnClickListener(this);
         this.addProductButton.setOnClickListener(this);
         this.cancelButton.setOnClickListener(this);
         this.addImageButton.setOnClickListener(this);
-        this.imageAsString = "";
-
+//        this.imageAsString = "";
 
         this.laptopsDatabaseManager.createTempTable();
-        this.mUploadButton = (Button) view.findViewById(R.id.uploadButton);
+        this.mUploadButton = (Button) rootView.findViewById(R.id.uploadButton);
         this.mUploadButton.setOnClickListener(this);
         //check if service running and bind
         this.mServiceIntent = new Intent(this.context, LoadDataService.class);
-        if (!isDataServiceRunning(LoadDataService.class)){
+        if (!this.isDataServiceRunning(LoadDataService.class)) {
             this.context.startService(this.mServiceIntent);
         }
-        this.context.bindService(this.mServiceIntent, connection, Context.BIND_AUTO_CREATE);
+        this.context.bindService(this.mServiceIntent, this.connection, Context.BIND_AUTO_CREATE);
 
-        return view;
+        return rootView;
     }
 
 
@@ -119,7 +145,6 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         if (v.getId() == R.id.addProductButton) {
             if (this.checkInputInfo()) {
-
                 LaptopSqlite currentLaptop = new LaptopSqlite(
                         this.model.getText().toString(),
                         this.ram.getText().toString(),
@@ -130,44 +155,63 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
                         this.currency.getText().toString(),
                         this.price.getText().toString(),
                         this.imageAsString);
-
-                this.laptopsDatabaseManager.insertRecord(currentLaptop,ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
-                Toast.makeText(context,"Laptop added to temp database",Toast.LENGTH_SHORT).show();
+                this.laptopsDatabaseManager.insertRecord(currentLaptop, ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+                Toast.makeText(this.context, "Laptop added to temp database", Toast.LENGTH_SHORT).show();
             }
         } else if (v.getId() == R.id.cancelButton) {
 
-        } else if (v.getId() == R.id.addImageButton) {
+        } else if (v.getId() == R.id.browse_button) {
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
             this.startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
-        }else if (v.getId() == R.id.uploadButton){
-            ArrayList<LaptopSqlite> tempLaptops = this.laptopsDatabaseManager.getAllLaptops(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+        } else if (v.getId() == R.id.uploadButton) {
+            ArrayList<LaptopSqlite> tempLaptops = this.laptopsDatabaseManager.getAllLaptops(ConstantsHelper
+                    .TEMP_LAPTOPS_TABLE_NAME);
             this.mLoadDataService.uploadLaptops(tempLaptops);
             this.databaseManager.deleteRecordsFromTable(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+        } else if (v.getId() == R.id.camera_button) {
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            this.startActivityForResult(intent, CAMERA_REQUEST);
         }
     }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Uri uri = data.getData();
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.context.getContentResolver(), uri);
-                AsyncImageEncoder encoder = new AsyncImageEncoder(this);
-                encoder.execute(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (resultCode != Activity.RESULT_OK || data == null) {
+            return;
+        }
+        if (requestCode == PICK_IMAGE_REQUEST) {
+            this.onBrowseResult(data);
+        } else if (requestCode == CAMERA_REQUEST) {
+            this.onCameraResult(data);
+        }
+    }
+
+    private void onCameraResult(Intent data) {
+        Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+        AsyncImageEncoder encoder = new AsyncImageEncoder(this);
+        encoder.setProgressBar(this.progressBar);
+        encoder.execute(bitmap);
+    }
+
+    private void onBrowseResult(Intent data) {
+        Uri uri = data.getData();
+        try {
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.context.getContentResolver(), uri);
+            AsyncImageEncoder encoder = new AsyncImageEncoder(this);
+            encoder.setProgressBar(this.progressBar);
+            encoder.execute(bitmap);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public void onDestroy() {
-        if (mIsBinded) {
-            this.context.unbindService(connection);
+        if (this.mIsBinded) {
+            this.context.unbindService(this.connection);
         }
         super.onDestroy();
     }
@@ -217,21 +261,6 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         }
         return false;
     }
-
-        ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
-            mLoadDataService = binder.getService();
-            mIsBinded = true;
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mIsBinded = false;
-        }
-    };
 
     @Override
     public void onImageEncoded(String base64str) {

@@ -2,7 +2,8 @@ package com.example.posted.login;
 
 
 public class User {
-    private  long id;
+
+    private long id;
     private String username;
     private String password;
 
@@ -13,15 +14,15 @@ public class User {
     }
 
     public long getId() {
-        return id;
+        return this.id;
     }
 
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     public void setId(long id) {

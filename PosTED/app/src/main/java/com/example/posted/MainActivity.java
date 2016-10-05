@@ -23,8 +23,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
-
-
 import com.example.posted.adapters.SectionsPagerAdapter;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.fragments.LaptopFragment;
@@ -55,11 +53,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        this.setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
+        this.setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) this.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -67,7 +65,7 @@ public class MainActivity extends AppCompatActivity
                         .setAction("send us email", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                sendMail();
+                                MainActivity.this.sendMail();
                             }
                         }).show();
             }
@@ -76,35 +74,36 @@ public class MainActivity extends AppCompatActivity
         fab.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                sendMail();
+                MainActivity.this.sendMail();
                 return true;
             }
 
 
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = (NavigationView) this.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         this.networkStateReceiver = new NetworkStateReceiver();
         this.networkStateReceiver.addListener(this);
-        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager
+                .CONNECTIVITY_ACTION));
 
         this.ctx = this;
 
-        if (!this.checkForInternetConnection()){
+        if (!this.checkForInternetConnection()) {
             this.attemptToTurnOnWiFi();
         }
 
 //        bindService(this.mServiceIntent, connection, Context.BIND_AUTO_CREATE);
         this.mMainFragment = new MainFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, this.mMainFragment).commit();
+        this.getSupportFragmentManager().beginTransaction().replace(R.id.container, this.mMainFragment).commit();
 
         this.loginManager = new LoginManager(this);
 
@@ -115,7 +114,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        this.getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -146,7 +145,8 @@ public class MainActivity extends AppCompatActivity
                 this.containerFrameLayoyt.setVisibility(View.VISIBLE);
             }
             OverviewFragment overviewFragment = new OverviewFragment();
-            this.getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment).addToBackStack(null).commit();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment)
+                    .addToBackStack(null).commit();
         } else if (id == R.id.nav_phones) {
             // show "coming soon'
         } else if (id == R.id.nav_sign_out) {
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity
                 this.conteinerViewPager.setVisibility(View.INVISIBLE);
                 this.containerFrameLayoyt.setVisibility(View.VISIBLE);
             }
-            loginManager.logoutUser();
+            this.loginManager.logoutUser();
             Intent intent = new Intent(this, LoginActivity.class);
             this.finish();
             this.startActivity(intent);
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity
             viewPager.setAdapter(adapter);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity
         bundleLaptop.putParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY, laptop);
         LaptopFragment laptopFragment = new LaptopFragment();
         laptopFragment.setArguments(bundleLaptop);
-        getSupportFragmentManager()
+        this.getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, laptopFragment)
                 .addToBackStack(null)
@@ -198,35 +198,36 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager
+                .CONNECTIVITY_ACTION));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         if (this.mServiceIntent != null) {
-            stopService(this.mServiceIntent);
+            this.stopService(this.mServiceIntent);
         }
-        unregisterReceiver(this.networkStateReceiver);
+        this.unregisterReceiver(this.networkStateReceiver);
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+            if (this.getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 super.onBackPressed();
             } else {
-                getSupportFragmentManager().popBackStack();
+                this.getSupportFragmentManager().popBackStack();
             }
-
         }
     }
 
     private boolean checkForInternetConnection() {
-        ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectionManager = (ConnectivityManager) this.getSystemService(Context
+                .CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = connectionManager.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
@@ -238,7 +239,7 @@ public class MainActivity extends AppCompatActivity
         builder.setPositiveButton("Turn on WiFi", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+                WifiManager wifiManager = (WifiManager) MainActivity.this.getSystemService(Context.WIFI_SERVICE);
                 wifiManager.setWifiEnabled(true);
                 //startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
             }
@@ -251,20 +252,18 @@ public class MainActivity extends AppCompatActivity
         });
         AlertDialog dialog = builder.create();
         dialog.show();
-
     }
 
     private void sendMail() {
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("message/rfc822");
-        i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"office.posted@gmail.com"});
+        i.putExtra(Intent.EXTRA_EMAIL, new String[]{"office.posted@gmail.com"});
         i.putExtra(Intent.EXTRA_SUBJECT, "subject of email");
-        i.putExtra(Intent.EXTRA_TEXT   , "body of email");
+        i.putExtra(Intent.EXTRA_TEXT, "body of email");
         try {
-            startActivity(Intent.createChooser(i, "Send mail..."));
+            this.startActivity(Intent.createChooser(i, "Send mail..."));
         } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(MainActivity.this,"There are no email clients installed.",Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
         }
     }
-
 }

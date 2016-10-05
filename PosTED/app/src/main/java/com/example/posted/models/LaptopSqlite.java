@@ -2,7 +2,6 @@ package com.example.posted.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import com.example.posted.interfaces.Laptop;
 
 public class LaptopSqlite implements Parcelable, Laptop {
@@ -19,14 +18,14 @@ public class LaptopSqlite implements Parcelable, Laptop {
     private String image;
 
     public LaptopSqlite(String model,
-                  String capacity_ram,
-                  String capacity_hdd,
-                  String processor_type,
-                  String video_card_type,
-                  String display_size,
-                  String currency,
-                  String price,
-                  String image) {
+                        String capacity_ram,
+                        String capacity_hdd,
+                        String processor_type,
+                        String video_card_type,
+                        String display_size,
+                        String currency,
+                        String price,
+                        String image) {
         this.model = model;
         this.capacity_ram = capacity_ram;
         this.capacity_hdd = capacity_hdd;
@@ -38,21 +37,21 @@ public class LaptopSqlite implements Parcelable, Laptop {
         this.image = image;
     }
 
-    public LaptopSqlite(){
+    public LaptopSqlite() {
 
     }
 
     public LaptopSqlite(Parcel in) {
-        id = in.readInt();
-        model = in.readString();
-        capacity_ram = in.readString();
-        capacity_hdd = in.readString();
-        processor_type = in.readString();
-        video_card_type = in.readString();
-        display_size = in.readString();
-        currency = in.readString();
-        price = in.readString();
-        image = in.readString();
+        this.id = in.readInt();
+        this.model = in.readString();
+        this.capacity_ram = in.readString();
+        this.capacity_hdd = in.readString();
+        this.processor_type = in.readString();
+        this.video_card_type = in.readString();
+        this.display_size = in.readString();
+        this.currency = in.readString();
+        this.price = in.readString();
+        this.image = in.readString();
     }
 
     public static final Creator<LaptopSqlite> CREATOR = new Creator<LaptopSqlite>() {
@@ -88,7 +87,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
     }
 
     public int getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(int id) {
@@ -96,7 +95,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
     }
 
     public String getModel() {
-        return model;
+        return this.model;
     }
 
     public void setModel(String model) {
@@ -104,7 +103,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
     }
 
     public String getCapacity_ram() {
-        return capacity_ram;
+        return this.capacity_ram;
     }
 
     public void setCapacity_ram(String capacity_ram) {
@@ -112,7 +111,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
     }
 
     public String getCapacity_hdd() {
-        return capacity_hdd;
+        return this.capacity_hdd;
     }
 
     public void setCapacity_hdd(String capacity_hdd) {
@@ -120,7 +119,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
     }
 
     public String getProcessor_type() {
-        return processor_type;
+        return this.processor_type;
     }
 
     public void setProcessor_type(String processor_type) {
@@ -128,7 +127,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
     }
 
     public String getVideo_card_type() {
-        return video_card_type;
+        return this.video_card_type;
     }
 
     public void setVideo_card_type(String video_card_type) {
@@ -136,7 +135,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
     }
 
     public String getDisplay_size() {
-        return display_size;
+        return this.display_size;
     }
 
     public void setDisplay_size(String display_size) {
@@ -144,7 +143,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
     }
 
     public String getCurrency() {
-        return currency;
+        return this.currency;
     }
 
     public void setCurrency(String currency) {
@@ -152,7 +151,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
     }
 
     public String getPrice() {
-        return price;
+        return this.price;
     }
 
     public void setPrice(String price) {
@@ -160,7 +159,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
     }
 
     public String getImage() {
-        return image;
+        return this.image;
     }
 
     public void setImage(String image) {

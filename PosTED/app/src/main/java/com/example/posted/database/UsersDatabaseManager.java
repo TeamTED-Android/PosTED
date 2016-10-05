@@ -1,23 +1,18 @@
 package com.example.posted.database;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.widget.Toast;
-
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.login.User;
 
 
 public class UsersDatabaseManager {
 
-
     private DatabaseManager databaseManager;
 
     public UsersDatabaseManager(DatabaseManager databaseManager) {
-       this.databaseManager = databaseManager;
+        this.databaseManager = databaseManager;
     }
 
     public User insertUser(User queryValues) {
@@ -37,7 +32,8 @@ public class UsersDatabaseManager {
         values.put("password", queryValues.getPassword());
         queryValues.setId(database.insert(ConstantsHelper.USERS_TABLE_NAME, null, values));
         database.close();
-        return database.update(ConstantsHelper.USERS_TABLE_NAME, values, ConstantsHelper.ID_COLUMN + " = ?", new String[]{String.valueOf(queryValues.getId())});
+        return database.update(ConstantsHelper.USERS_TABLE_NAME, values, ConstantsHelper.ID_COLUMN + " = ?", new
+                String[]{String.valueOf(queryValues.getId())});
     }
 
     public User getUser(String username) {
