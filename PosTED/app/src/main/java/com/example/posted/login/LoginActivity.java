@@ -73,11 +73,25 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
         this.mLoginManager = new LoginManager(this);
 
-        if (this.mLoginManager.isLoggedIn()){
-            finish();
+//        if (this.mLoginManager.isLoggedIn()){
+//
+//            finish();
+//        }
+
+        Intent intent = null;
+        if (this.mLoginManager.isLoggedIn()) {
+            User currentUser = this.mLoginManager.getLoginUser();
+            if (currentUser.getUsername().equalsIgnoreCase(ConstantsHelper.ADMIN_USERNAME)) {
+                intent = new Intent(this, AdminMainActivity.class);
+            } else {
+                intent = new Intent(this, MainActivity.class);
+            }
+            startActivity(intent);
+            this.finish();
         }
 
-        // Set up the login form.
+
+            // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
 
@@ -103,6 +117,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     private void populateAutoComplete() {
@@ -279,7 +298,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
+        int a = 5;
     }
 
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {

@@ -18,6 +18,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         this.loginManager = new LoginManager(this);
+
         if (loginManager.isLoggedIn()) {
             User currentUser = loginManager.getLoginUser();
             if (currentUser.getUsername().equalsIgnoreCase(ConstantsHelper.ADMIN_USERNAME)){

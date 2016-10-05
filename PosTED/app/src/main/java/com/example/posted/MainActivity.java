@@ -1,8 +1,16 @@
 package com.example.posted;
 
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -23,15 +31,18 @@ import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.fragments.LaptopFragment;
 import com.example.posted.fragments.MainFragment;
 import com.example.posted.fragments.OverviewFragment;
+import com.example.posted.interfaces.NetworkStateReceiverListener;
 import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
 import com.example.posted.login.LoginActivity;
 import com.example.posted.login.LoginManager;
 import com.example.posted.models.LaptopSqlite;
+import com.example.posted.receivers.NetworkStateReceiver;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        OnLaptopSelectedDataExchange {
+        OnLaptopSelectedDataExchange,
+        NetworkStateReceiverListener {
 
     private Context ctx;
     private Intent mServiceIntent;
@@ -39,7 +50,7 @@ public class MainActivity extends AppCompatActivity
     private LoginManager loginManager;
     private FrameLayout containerFrameLayoyt;
     private ViewPager conteinerViewPager;
-
+    private NetworkStateReceiver networkStateReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,10 +91,16 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        this.networkStateReceiver = new NetworkStateReceiver();
+        this.networkStateReceiver.addListener(this);
+        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+
         this.ctx = this;
-        this.mServiceIntent = new Intent(this, LoadDataService.class);
-        this.startService(this.mServiceIntent);
-//
+
+        if (!this.checkForInternetConnection()){
+            this.attemptToTurnOnWiFi();
+        }
+
 //        bindService(this.mServiceIntent, connection, Context.BIND_AUTO_CREATE);
         this.mMainFragment = new MainFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.container, this.mMainFragment).commit();
@@ -173,12 +190,36 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onDestroy() {
+    public void networkAvailable() {
+        this.mServiceIntent = new Intent(this, LoadDataService.class);
+        this.startService(this.mServiceIntent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        if (!this.checkForInternetConnection()){
+            this.attemptToTurnOnWiFi();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
         if (this.mServiceIntent != null) {
             stopService(this.mServiceIntent);
         }
-        super.onDestroy();
+        unregisterReceiver(this.networkStateReceiver);
     }
+
+//    @Override
+//    protected void onDestroy() {
+//        if (this.mServiceIntent != null) {
+//            stopService(this.mServiceIntent);
+//        }
+//        super.onDestroy();
+//    }
 
     @Override
     public void onBackPressed() {
@@ -193,5 +234,34 @@ public class MainActivity extends AppCompatActivity
             }
 
         }
+    }
+
+    private boolean checkForInternetConnection() {
+        ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = connectionManager.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
+
+    private void attemptToTurnOnWiFi() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("No internet connection!");
+        builder.setMessage("This App needs Internet connection to update the database!");
+        builder.setPositiveButton("Turn on WiFi", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+                wifiManager.setWifiEnabled(true);
+                //startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+            }
+        });
+        builder.setNeutralButton("Work Offline", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
     }
 }

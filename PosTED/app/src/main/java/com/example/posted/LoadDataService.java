@@ -23,8 +23,6 @@ import com.kinvey.java.core.KinveyClientCallback;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 
 public class LoadDataService extends IntentService {
@@ -81,15 +79,12 @@ public class LoadDataService extends IntentService {
         mDatabase = this.mController.getWritableDatabase();
         this.mController.onCreate(mDatabase);
 
-        //TODO login, transfer info from Kinvey to SQLite
         this.loginToKinvey();
         this.transferDataFromKinvey();
 
         return START_STICKY;
     }
 
-
-    //the new method that use to be invoke in onStartCommand
     private void loginToKinvey(){
         if (!this.mKinveyClient.user().isUserLoggedIn()){
             this.mKinveyClient.user().login("test@abv.bg", "test123", new KinveyClientCallback<User>() {
@@ -108,7 +103,6 @@ public class LoadDataService extends IntentService {
         }
     }
 
-    //the new method that use to be invoke in onStartCommand
     private void transferDataFromKinvey(){
         this.mController.deleteRecordsFromTable(ConstantsHelper.LAPTOPS_TABLE_NAME);
         AsyncAppData<LaptopKinvey> laptopsInfo = mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
@@ -116,9 +110,7 @@ public class LoadDataService extends IntentService {
             @Override
             public void onSuccess(LaptopKinvey[] laptops) {
                 Toast.makeText(LoadDataService.this, "Successfully receive the info", Toast.LENGTH_SHORT).show();
-                int count = 0;
                 for (LaptopKinvey laptop : laptops) {
-                    count++;
                     mLaptopsDatabaseManager.insertRecord(laptop, ConstantsHelper.LAPTOPS_TABLE_NAME);
                 }
 
@@ -177,6 +169,4 @@ public class LoadDataService extends IntentService {
         File dbFile = context.getDatabasePath(dbName);
         return dbFile.exists();
     }
-
-
 }

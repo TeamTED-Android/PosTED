@@ -1,7 +1,13 @@
 package com.example.posted.adminApp;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -21,19 +27,23 @@ import com.example.posted.R;
 import com.example.posted.fragments.LaptopFragment;
 import com.example.posted.fragments.MainFragment;
 import com.example.posted.fragments.OverviewFragment;
+import com.example.posted.interfaces.NetworkStateReceiverListener;
 import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
 import com.example.posted.login.LoginActivity;
 import com.example.posted.login.LoginManager;
 import com.example.posted.models.LaptopSqlite;
+import com.example.posted.receivers.NetworkStateReceiver;
 
 public class AdminMainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        OnLaptopSelectedDataExchange {
+        OnLaptopSelectedDataExchange,
+        NetworkStateReceiverListener {
 
     private Context ctx;
     private Intent mServiceIntent;
     private MainFragment mMainFragment;
     private LoginManager loginManager;
+    private NetworkStateReceiver networkStateReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,30 +83,21 @@ public class AdminMainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        this.networkStateReceiver = new NetworkStateReceiver();
+        this.networkStateReceiver.addListener(this);
+        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+
+        this.ctx = this;
+        if (!this.checkForInternetConnection()){
+            this.attemptToTurnOnWiFi();
+        }
+
         this.loginManager = new LoginManager(this);
         this.ctx = this;
-        this.mServiceIntent = new Intent(this, LoadDataService.class);
-        this.startService(this.mServiceIntent);
 
         this.mMainFragment = new MainFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, this.mMainFragment).commit();
 
-        this.loginManager = new LoginManager(this);
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            if (getSupportFragmentManager().getBackStackEntryCount() == 0){
-                super.onBackPressed();
-            }else {
-                getSupportFragmentManager().popBackStack();
-            }
-
-        }
     }
 
     @Override
@@ -162,12 +163,78 @@ public class AdminMainActivity extends AppCompatActivity
                 .commit();
     }
 
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0){
+                super.onBackPressed();
+            }else {
+                getSupportFragmentManager().popBackStack();
+            }
+
+        }
+    }
 
     @Override
-    protected void onDestroy() {
-        if (this.mServiceIntent != null){
+    public void networkAvailable() {
+        this.mServiceIntent = new Intent(this, LoadDataService.class);
+        this.startService(this.mServiceIntent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        if (!this.checkForInternetConnection()){
+            this.attemptToTurnOnWiFi();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (this.mServiceIntent != null) {
             stopService(this.mServiceIntent);
         }
-        super.onDestroy();
+        unregisterReceiver(this.networkStateReceiver);
+    }
+
+//    @Override
+//    protected void onDestroy() {
+//        if (this.mServiceIntent != null){
+//            stopService(this.mServiceIntent);
+//        }
+//        super.onDestroy();
+//    }
+
+    private boolean checkForInternetConnection() {
+        ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = connectionManager.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
+
+    private void attemptToTurnOnWiFi() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("No internet connection!");
+        builder.setMessage("This App needs Internet connection to update the database!");
+        builder.setPositiveButton("Turn on WiFi", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+                wifiManager.setWifiEnabled(true);
+            }
+        });
+        builder.setNeutralButton("Work Offline", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
     }
 }
