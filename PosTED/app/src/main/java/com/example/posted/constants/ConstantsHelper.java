@@ -30,4 +30,5 @@ public class ConstantsHelper {
     public static final String CURRENT_ORDERS_LAPTOPS_TABLE_NAME = "current_order";
 
     public static final String LAPTOP_FRAGMENT_PARCELABLE_KEY="current_laptop";
+    public static final String FROM_WHERE_IS_INVOKED_KEY="invocation";
 }

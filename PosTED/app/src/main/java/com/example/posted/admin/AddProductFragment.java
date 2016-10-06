@@ -47,7 +47,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     private Button addImageButton;
     private Button addProductButton;
     private Button cancelButton;
-    private Context context;
+    private Context mContext;
     private String imageAsString;
 
     private DatabaseManager databaseManager;
@@ -57,24 +57,6 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     private boolean mIsBinded;
     private Button mUploadButton;
 
-    private Button getCameraButton(View root) {
-        Button cameraButton = (Button) root.findViewById(R.id.camera_button);
-        return cameraButton;
-    }
-
-    private ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
-            AddProductFragment.this.mLoadDataService = binder.getService();
-            AddProductFragment.this.mIsBinded = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            AddProductFragment.this.mIsBinded = false;
-        }
-    };
 
     public AddProductFragment() {
     }
@@ -83,7 +65,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        this.context = context;
+        this.mContext = context;
         this.databaseManager = new DatabaseManager(context);
         this.laptopsDatabaseManager = new LaptopsDatabaseManager(this.databaseManager);
     }
@@ -95,8 +77,8 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        this.context = activity;
-        this.databaseManager = new DatabaseManager(this.context);
+        this.mContext = activity;
+        this.databaseManager = new DatabaseManager(this.mContext);
         this.laptopsDatabaseManager = new LaptopsDatabaseManager(this.databaseManager);
     }
 
@@ -131,11 +113,11 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         this.mUploadButton = (Button) rootView.findViewById(R.id.uploadButton);
         this.mUploadButton.setOnClickListener(this);
         //check if service running and bind
-        this.mServiceIntent = new Intent(this.context, LoadDataService.class);
+        this.mServiceIntent = new Intent(this.mContext, LoadDataService.class);
         if (!this.isDataServiceRunning(LoadDataService.class)) {
-            this.context.startService(this.mServiceIntent);
+            this.mContext.startService(this.mServiceIntent);
         }
-        this.context.bindService(this.mServiceIntent, this.connection, Context.BIND_AUTO_CREATE);
+        this.mContext.bindService(this.mServiceIntent, this.connection, Context.BIND_AUTO_CREATE);
 
         return rootView;
     }
@@ -156,7 +138,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
                         this.price.getText().toString(),
                         this.imageAsString);
                 this.laptopsDatabaseManager.insertRecord(currentLaptop, ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
-                Toast.makeText(this.context, "Laptop added to temp database", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.mContext, "Laptop added to temp database", Toast.LENGTH_SHORT).show();
             }
         } else if (v.getId() == R.id.cancelButton) {
 
@@ -170,6 +152,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
                     .TEMP_LAPTOPS_TABLE_NAME);
             this.mLoadDataService.uploadLaptops(tempLaptops);
             this.databaseManager.deleteRecordsFromTable(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+            this.mLoadDataService.transferDataFromKinvey();
         } else if (v.getId() == R.id.camera_button) {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             this.startActivityForResult(intent, CAMERA_REQUEST);
@@ -189,6 +172,12 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         }
     }
 
+    @Override
+    public void onImageEncoded(String base64str) {
+        Toast.makeText(this.mContext, "Image loaded", Toast.LENGTH_SHORT).show();
+        this.imageAsString = base64str;
+    }
+
     private void onCameraResult(Intent data) {
         Bitmap bitmap = (Bitmap) data.getExtras().get("data");
         AsyncImageEncoder encoder = new AsyncImageEncoder(this);
@@ -199,7 +188,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     private void onBrowseResult(Intent data) {
         Uri uri = data.getData();
         try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.context.getContentResolver(), uri);
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.mContext.getContentResolver(), uri);
             AsyncImageEncoder encoder = new AsyncImageEncoder(this);
             encoder.setProgressBar(this.progressBar);
             encoder.execute(bitmap);
@@ -211,7 +200,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     @Override
     public void onDestroy() {
         if (this.mIsBinded) {
-            this.context.unbindService(this.connection);
+            this.mContext.unbindService(this.connection);
         }
         super.onDestroy();
     }
@@ -252,7 +241,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     }
 
     private boolean isDataServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) this.context.getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager manager = (ActivityManager) this.mContext.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningServiceInfo> services = manager.getRunningServices(Integer.MAX_VALUE);
         for (ActivityManager.RunningServiceInfo service : services) {
             if (serviceClass.getName().equals(service.service.getClassName())) {
@@ -262,9 +251,22 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         return false;
     }
 
-    @Override
-    public void onImageEncoded(String base64str) {
-        Toast.makeText(this.context, "Image loaded", Toast.LENGTH_SHORT).show();
-        this.imageAsString = base64str;
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
+            AddProductFragment.this.mLoadDataService = binder.getService();
+            AddProductFragment.this.mIsBinded = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            AddProductFragment.this.mIsBinded = false;
+        }
+    };
+
+    private Button getCameraButton(View root) {
+        Button cameraButton = (Button) root.findViewById(R.id.camera_button);
+        return cameraButton;
     }
 }

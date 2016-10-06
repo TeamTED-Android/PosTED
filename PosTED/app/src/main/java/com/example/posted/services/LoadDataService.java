@@ -11,13 +11,17 @@ import android.widget.Toast;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
+import com.example.posted.interfaces.Laptop;
 import com.example.posted.models.LaptopKinvey;
 import com.example.posted.models.LaptopSqlite;
 import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.Client;
+import com.kinvey.android.callback.KinveyDeleteCallback;
 import com.kinvey.android.callback.KinveyListCallback;
+import com.kinvey.java.Query;
 import com.kinvey.java.User;
 import com.kinvey.java.core.KinveyClientCallback;
+import com.kinvey.java.model.KinveyDeleteResponse;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,6 +36,10 @@ public class LoadDataService extends IntentService {
     private IBinder binder;
     private DatabaseManager mController;
     private LaptopsDatabaseManager mLaptopsDatabaseManager;
+
+    ///////////////////////////////////////////////////////////////////////////////
+    public static final String BROADCAST_START_LOADING = "com.example.posted.start";
+    public static final String BROADCAST_END_LOADING = "com.example.posted.end";
 
     public class LoadDataServiceBinder extends Binder {
 
@@ -58,6 +66,7 @@ public class LoadDataService extends IntentService {
 
     @Override
     public void onCreate() {
+        Toast.makeText(this, "Service created", Toast.LENGTH_SHORT).show();
         this.binder = new LoadDataServiceBinder();
         this.mKinveyClient = new Client.Builder(APP_KEY, APP_SECRET, this.getApplicationContext()).build();
 //        if (!doesDatabaseExist(getApplicationContext(),LaptopsDatabaseManager.DB_NAME)) {
@@ -97,7 +106,11 @@ public class LoadDataService extends IntentService {
         }
     }
 
-    private void transferDataFromKinvey() {
+    public void transferDataFromKinvey() {
+        /////////////////////////////////////////////////////////
+        Intent startLoading = new Intent(BROADCAST_START_LOADING);
+        sendBroadcast(startLoading);
+
         this.mController.deleteRecordsFromTable(ConstantsHelper.LAPTOPS_TABLE_NAME);
         AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
         laptopsInfo.get(new KinveyListCallback<LaptopKinvey>() {
@@ -107,6 +120,10 @@ public class LoadDataService extends IntentService {
                 for (LaptopKinvey laptop : laptops) {
                     LoadDataService.this.mLaptopsDatabaseManager.insertRecord(laptop, ConstantsHelper
                             .LAPTOPS_TABLE_NAME);
+
+                    ///////////////////////////////////////////////////////
+                    Intent endLoading = new Intent(BROADCAST_END_LOADING);
+                    sendBroadcast(endLoading);
                 }
 
             }
@@ -114,6 +131,10 @@ public class LoadDataService extends IntentService {
             @Override
             public void onFailure(Throwable throwable) {
                 Toast.makeText(LoadDataService.this, "Fail to receive the info", Toast.LENGTH_SHORT).show();
+
+                ////////////////////////////////////////////////////////
+                Intent endLoading = new Intent(BROADCAST_END_LOADING);
+                sendBroadcast(endLoading);
             }
 
         });
@@ -133,8 +154,8 @@ public class LoadDataService extends IntentService {
                     tempLaptop.getCurrency(),
                     tempLaptop.getPrice(),
                     tempLaptop.getImage());
-            AsyncAppData<LaptopKinvey> tempLaptopInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
-            tempLaptopInfo.save(laptopForUpload, new KinveyClientCallback<LaptopKinvey>() {
+            AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
+            laptopsInfo.save(laptopForUpload, new KinveyClientCallback<LaptopKinvey>() {
                 @Override
                 public void onSuccess(LaptopKinvey laptopKinvey) {
                     Toast.makeText(LoadDataService.this, "Laptop " + laptopKinvey.getModel() + " Successfully " +
@@ -149,6 +170,26 @@ public class LoadDataService extends IntentService {
             });
 
         }
+
+    }
+
+    public void removeLaptopFromKinvey(final Laptop laptopToRemove){
+        this.loginToKinvey();
+        Query query = new Query();
+        query.equals("model",laptopToRemove.getModel());
+        AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
+        laptopsInfo.delete(query, new KinveyDeleteCallback() {
+            @Override
+            public void onSuccess(KinveyDeleteResponse kinveyDeleteResponse) {
+                Toast.makeText(LoadDataService.this, "Laptop " + laptopToRemove.getModel() + " Successfully " +
+                        "deleted", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                Toast.makeText(LoadDataService.this, "Fail to delete laptop", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 

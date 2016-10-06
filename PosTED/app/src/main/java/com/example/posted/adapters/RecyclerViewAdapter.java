@@ -64,6 +64,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             holder.mCurrency.setText(current.getCurrency());
             int id = current.getId();
             String base64Img = current.getImage();
+            //TODO if image is null
             if (base64Img.contains(",")) {
                 base64Img = base64Img.substring(current.getImage().indexOf(','));
             }

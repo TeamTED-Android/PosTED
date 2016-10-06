@@ -1,6 +1,7 @@
 package com.example.posted;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +30,7 @@ import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.fragments.LaptopFragment;
 import com.example.posted.fragments.MainFragment;
 import com.example.posted.fragments.OverviewFragment;
+import com.example.posted.fragments.SpinnerFragment;
 import com.example.posted.interfaces.NetworkStateReceiverListener;
 import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
 import com.example.posted.login.LoginActivity;
@@ -49,6 +52,9 @@ public class MainActivity extends AppCompatActivity
     private FrameLayout containerFrameLayoyt;
     private ViewPager conteinerViewPager;
     private NetworkStateReceiver networkStateReceiver;
+    private DrawerLayout mDrawer;
+
+    private MainActivity.BroadcastListener mBroadcastListener; ///////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,10 +87,11 @@ public class MainActivity extends AppCompatActivity
 
         });
 
-        DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
+        this.mDrawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
+        //drawer.openDrawer(Gravity.LEFT);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+                this, this.mDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        this.mDrawer.setDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) this.findViewById(R.id.nav_view);
@@ -109,6 +116,15 @@ public class MainActivity extends AppCompatActivity
 
         this.containerFrameLayoyt = (FrameLayout) this.findViewById(R.id.container);
         this.conteinerViewPager = (ViewPager) this.findViewById(R.id.containerViewPager);
+
+        //////////////////////////////////////////////////////////////////
+        mBroadcastListener = new MainActivity.BroadcastListener();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(LoadDataService.BROADCAST_START_LOADING);
+        filter.addAction(LoadDataService.BROADCAST_END_LOADING);
+        this.registerReceiver(mBroadcastListener, filter);
+
+
     }
 
     @Override
@@ -180,6 +196,7 @@ public class MainActivity extends AppCompatActivity
     public void onLaptopSelected(LaptopSqlite laptop) {
         Bundle bundleLaptop = new Bundle();
         bundleLaptop.putParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY, laptop);
+        bundleLaptop.putCharSequence(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY,"user");
         LaptopFragment laptopFragment = new LaptopFragment();
         laptopFragment.setArguments(bundleLaptop);
         this.getSupportFragmentManager()
@@ -193,6 +210,9 @@ public class MainActivity extends AppCompatActivity
     public void networkAvailable() {
         this.mServiceIntent = new Intent(this, LoadDataService.class);
         this.startService(this.mServiceIntent);
+        ////////////////////////////////////////////////////////////////////
+        Intent endLoading = new Intent(LoadDataService.BROADCAST_END_LOADING);
+        sendBroadcast(endLoading);
     }
 
     @Override
@@ -200,6 +220,11 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager
                 .CONNECTIVITY_ACTION));
+        ////////////////////////////////////////////////////////
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(LoadDataService.BROADCAST_START_LOADING);
+        filter.addAction(LoadDataService.BROADCAST_END_LOADING);
+        this.registerReceiver(mBroadcastListener, filter);
     }
 
     @Override
@@ -209,6 +234,8 @@ public class MainActivity extends AppCompatActivity
             this.stopService(this.mServiceIntent);
         }
         this.unregisterReceiver(this.networkStateReceiver);
+        ////////////////////////////////////////////////
+        this.unregisterReceiver(this.mBroadcastListener);
     }
 
     @Override
@@ -241,6 +268,9 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialog, int which) {
                 WifiManager wifiManager = (WifiManager) MainActivity.this.getSystemService(Context.WIFI_SERVICE);
                 wifiManager.setWifiEnabled(true);
+                ////////////////////////////////////////////////////////////////////////
+                Intent startLoading = new Intent(LoadDataService.BROADCAST_START_LOADING);
+                sendBroadcast(startLoading);
                 //startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
             }
         });
@@ -264,6 +294,21 @@ public class MainActivity extends AppCompatActivity
             this.startActivity(Intent.createChooser(i, "Send mail..."));
         } catch (android.content.ActivityNotFoundException ex) {
             Toast.makeText(MainActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //////////////////////////////////////////////////////////////////
+    private class BroadcastListener extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            SpinnerFragment spinnerFragment = new SpinnerFragment();
+            if (intent.getAction().equals(LoadDataService.BROADCAST_START_LOADING)) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.container,spinnerFragment).addToBackStack(null).commit();
+            }else if (intent.getAction().equals(LoadDataService.BROADCAST_END_LOADING)){
+                getSupportFragmentManager().popBackStack();
+                //mDrawer.openDrawer(Gravity.LEFT);
+            }
         }
     }
 }

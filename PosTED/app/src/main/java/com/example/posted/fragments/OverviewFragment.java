@@ -27,10 +27,6 @@ import java.util.ArrayList;
 public class OverviewFragment extends Fragment implements RecyclerViewAdapter.RecyclerViewSelectedElement {
 
     private OnLaptopSelectedDataExchange mLaptopSelectedDataExchange;
-    //    private LoadDataService mLoadDataService;
-//    private Intent mServiceIntent;
-//    private boolean mIsBinded;
-//    private OverviewFragment mFragment;
 
     private DatabaseManager databaseManager;
     private LaptopsDatabaseManager laptopsDatabaseManager;
@@ -64,10 +60,6 @@ public class OverviewFragment extends Fragment implements RecyclerViewAdapter.Re
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_overview, container, false);
 
-//        this.mFragment = this;
-//        this.mServiceIntent = new Intent(this.ctx, LoadDataService.class);
-//        getContext().bindService(this.mServiceIntent,connection,Context.BIND_AUTO_CREATE);
-
         ArrayList<LaptopSqlite> result = this.laptopsDatabaseManager.getAllLaptops(ConstantsHelper.LAPTOPS_TABLE_NAME);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this.getContext(), LinearLayoutManager
                 .VERTICAL, false);
@@ -83,26 +75,4 @@ public class OverviewFragment extends Fragment implements RecyclerViewAdapter.Re
     public void onItemSelected(LaptopSqlite laptop) {
         this.mLaptopSelectedDataExchange.onLaptopSelected(laptop);
     }
-
-//    ServiceConnection connection = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName name, IBinder service) {
-//            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
-//            mLoadDataService = binder.getService();
-//            mIsBinded = true;
-//            ArrayList<LaptopSqlite> result = mLoadDataService.showResult();
-//            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager
-// .VERTICAL, false);
-//            RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.recyclerView);
-//            recyclerView.setLayoutManager(layoutManager);
-//
-//            RecyclerViewAdapter adapter = new RecyclerViewAdapter(ctx, result, mFragment);
-//            recyclerView.setAdapter(adapter);
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName name) {
-//            mIsBinded = false;
-//        }
-//    };
 }
