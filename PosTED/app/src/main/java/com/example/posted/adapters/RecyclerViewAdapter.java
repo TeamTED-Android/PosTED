@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.posted.R;
-import com.example.posted.async.AsyncImageDecoder;
+import com.example.posted.async.AsyncListImageDecoder;
 import com.example.posted.models.LaptopSqlite;
 
 import java.util.ArrayList;
@@ -64,16 +64,19 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             holder.mCurrency.setText(current.getCurrency());
             int id = current.getId();
             String base64Img = current.getImage();
-            //TODO if image is null
+            if (base64Img == null) {
+                return;
+            }
             if (base64Img.contains(",")) {
                 base64Img = base64Img.substring(current.getImage().indexOf(','));
             }
             Map<Integer, Bitmap> bitmapCache = this.getPreLoadedBitmaps();
-            if (!bitmapCache.containsKey(id)) {
-                AsyncImageDecoder imageLoader = new AsyncImageDecoder(holder, position);
+            Bitmap bitmap = bitmapCache.get(id);
+            if (bitmap == null) {
+                AsyncListImageDecoder imageLoader = new AsyncListImageDecoder(holder, position);
                 imageLoader.execute(base64Img);
             } else {
-                Bitmap bitmap = bitmapCache.get(id);
+                bitmap = bitmapCache.get(id);
                 holder.setImageViewBitmap(bitmap);
             }
         }
@@ -85,7 +88,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return this.mLaptops.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AsyncImageDecoder
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AsyncListImageDecoder
             .Listener {
 
         private TextView mModel;

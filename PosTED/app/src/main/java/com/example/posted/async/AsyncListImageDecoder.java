@@ -5,17 +5,25 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Base64;
 
-public class AsyncImageDecoder extends AsyncTask<String, Void, Bitmap> {
+public class AsyncListImageDecoder extends AsyncTask<String, Void, Bitmap> {
 
     public interface Listener {
 
-        void onImageDecoded(Bitmap bitmap);
+        void onImageDecoded(Bitmap bitmap, long execTime, int position);
     }
 
     private Listener mListener;
+    private long mExecTime;
+    private int mPosition;
 
-    public AsyncImageDecoder(Listener listener) {
+    public AsyncListImageDecoder(Listener listener, int position) {
         this.mListener = listener;
+        this.mPosition = position;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        this.mExecTime = System.currentTimeMillis();
     }
 
     @Override
@@ -37,7 +45,7 @@ public class AsyncImageDecoder extends AsyncTask<String, Void, Bitmap> {
 
     protected void onPostExecute(Bitmap resultBitmap) {
         if (this.mListener != null) {
-            this.mListener.onImageDecoded(resultBitmap);
+            this.mListener.onImageDecoded(resultBitmap, this.mExecTime, this.mPosition);
         }
     }
 }

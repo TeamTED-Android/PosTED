@@ -16,7 +16,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 import com.example.posted.R;
 import com.example.posted.async.AsyncImageEncoder;
 import com.example.posted.constants.ConstantsHelper;
@@ -57,10 +60,8 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     private boolean mIsBinded;
     private Button mUploadButton;
 
-
     public AddProductFragment() {
     }
-
 
     @Override
     public void onAttach(Context context) {
@@ -126,37 +127,57 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.addProductButton) {
-            if (this.checkInputInfo()) {
-                LaptopSqlite currentLaptop = new LaptopSqlite(
-                        this.model.getText().toString(),
-                        this.ram.getText().toString(),
-                        this.hdd.getText().toString(),
-                        this.processor.getText().toString(),
-                        this.videoCard.getText().toString(),
-                        this.displaySize.getText().toString(),
-                        this.currency.getText().toString(),
-                        this.price.getText().toString(),
-                        this.imageAsString);
-                this.laptopsDatabaseManager.insertRecord(currentLaptop, ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
-                Toast.makeText(this.mContext, "Laptop added to temp database", Toast.LENGTH_SHORT).show();
-            }
+            this.onAddProductButtonClicked();
         } else if (v.getId() == R.id.cancelButton) {
-
+            this.onCancelButtonClicked();
         } else if (v.getId() == R.id.browse_button) {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            this.startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+            this.onBrowseButtonClicked();
         } else if (v.getId() == R.id.uploadButton) {
-            ArrayList<LaptopSqlite> tempLaptops = this.laptopsDatabaseManager.getAllLaptops(ConstantsHelper
-                    .TEMP_LAPTOPS_TABLE_NAME);
-            this.mLoadDataService.uploadLaptops(tempLaptops);
-            this.databaseManager.deleteRecordsFromTable(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
-            this.mLoadDataService.transferDataFromKinvey();
+            this.onUploadButtonClicked();
         } else if (v.getId() == R.id.camera_button) {
-            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            this.startActivityForResult(intent, CAMERA_REQUEST);
+            this.onCameraButtonClicked();
         }
+    }
+
+    private void onCameraButtonClicked() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        this.startActivityForResult(intent, CAMERA_REQUEST);
+    }
+
+    private void onUploadButtonClicked() {
+        ArrayList<LaptopSqlite> tempLaptops = this.laptopsDatabaseManager.getAllLaptops(ConstantsHelper
+                .TEMP_LAPTOPS_TABLE_NAME);
+        this.mLoadDataService.uploadLaptops(tempLaptops);
+        this.databaseManager.deleteRecordsFromTable(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+        this.mLoadDataService.transferDataFromKinvey();
+    }
+
+    private void onBrowseButtonClicked() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        this.startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    private void onCancelButtonClicked() {
+    }
+
+    private void onAddProductButtonClicked() {
+        if (!this.checkInputInfo()) {
+            return;
+        }
+        LaptopSqlite currentLaptop = new LaptopSqlite(
+                this.model.getText().toString(),
+                this.ram.getText().toString(),
+                this.hdd.getText().toString(),
+                this.processor.getText().toString(),
+                this.videoCard.getText().toString(),
+                this.displaySize.getText().toString(),
+                this.currency.getText().toString(),
+                this.price.getText().toString(),
+                this.imageAsString);
+        this.laptopsDatabaseManager.insertRecord(currentLaptop, ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+        Toast.makeText(this.mContext, "Laptop added to temp database", Toast.LENGTH_SHORT).show();
     }
 
     @Override
