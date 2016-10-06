@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -18,7 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.posted.R;
-import com.example.posted.admin.AddProductFragment;
+import com.example.posted.async.AsyncImageDecoder;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
@@ -32,7 +33,7 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class LaptopFragment extends Fragment implements View.OnClickListener {
+public class LaptopFragment extends Fragment implements View.OnClickListener, AsyncImageDecoder.Listener {
 
     private TextView mCurrentLptModel;
     private TextView mCurrentLptRam;
@@ -89,11 +90,20 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_laptop, container, false);
         LaptopSqlite currentLaptop = this.getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
-
-        this.mCurrentLptModel = (TextView) view.findViewById(R.id.current_lpt_model);
         if (currentLaptop == null) {
             return null;
         }
+        String base64Img = currentLaptop.getImage();
+        if (base64Img == null) {
+            return null;
+        }
+        if (base64Img.contains(",")) {
+            base64Img = base64Img.substring(base64Img.indexOf(','));
+        }
+        AsyncImageDecoder decoder = new AsyncImageDecoder(this);
+        decoder.execute(base64Img);
+
+        this.mCurrentLptModel = (TextView) view.findViewById(R.id.current_lpt_model);
         this.mCurrentLptModel.setText(currentLaptop.getModel());
 
         this.mCurrentLptRam = (TextView) view.findViewById(R.id.current_lpt_ram);
@@ -162,7 +172,7 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
             if (this.currentUser.equals("admin")){
                 this.mLoadDataService.removeLaptopFromKinvey(laptop);
                 this.mLoadDataService.transferDataFromKinvey();
-                getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
+                this.getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
             }
         }
     }
@@ -198,5 +208,14 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
             }
         }
         return false;
+    }
+
+    @Override
+    public void onImageDecoded(Bitmap bitmap) {
+        if (bitmap == null) {
+            this.mCurrentLptImage.setImageResource(R.mipmap.no_image_black);
+        } else {
+            this.mCurrentLptImage.setImageBitmap(bitmap);
+        }
     }
 }
