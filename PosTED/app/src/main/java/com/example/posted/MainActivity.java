@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity
     private ViewPager conteinerViewPager;
     private NetworkStateReceiver networkStateReceiver;
     private DrawerLayout mDrawer;
+    private long back_pressed;
 
     private MainActivity.BroadcastListener mBroadcastListener; ///////////////////
 
@@ -154,6 +155,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        this.getSupportFragmentManager().popBackStack();
 
         if (id == R.id.nav_laptops) {
             if (this.conteinerViewPager.getVisibility() == View.VISIBLE) {
@@ -162,7 +164,7 @@ public class MainActivity extends AppCompatActivity
             }
             OverviewFragment overviewFragment = new OverviewFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment)
-                    .addToBackStack(null).commit();
+                    .commit();
         } else if (id == R.id.nav_phones) {
             // show "coming soon'
         } else if (id == R.id.nav_sign_out) {
@@ -175,7 +177,8 @@ public class MainActivity extends AppCompatActivity
             this.finish();
             this.startActivity(intent);
         } else if (id == R.id.home) {
-            // show home
+            MainFragment mainFragment = new MainFragment();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.container,mainFragment).commit();
         } else if (id == R.id.nav_cart) {
             if (this.containerFrameLayoyt.getVisibility() == View.VISIBLE) {
                 this.containerFrameLayoyt.setVisibility(View.INVISIBLE);
@@ -238,15 +241,22 @@ public class MainActivity extends AppCompatActivity
         this.unregisterReceiver(this.mBroadcastListener);
     }
 
+
     @Override
     public void onBackPressed() {
+        if (this.back_pressed + 1500 > System.currentTimeMillis()){
+            super.onBackPressed();
+        }
+        this.back_pressed = System.currentTimeMillis();
+
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             if (this.getSupportFragmentManager().getBackStackEntryCount() == 0) {
-                super.onBackPressed();
-            } else {
+                MainFragment mainFragment = new MainFragment();
+                this.getSupportFragmentManager().beginTransaction().replace(R.id.container,mainFragment).commit();
+            } else  {
                 this.getSupportFragmentManager().popBackStack();
             }
         }

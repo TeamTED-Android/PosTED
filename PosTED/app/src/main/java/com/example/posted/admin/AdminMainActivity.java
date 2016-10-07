@@ -49,6 +49,7 @@ public class AdminMainActivity extends AppCompatActivity
     private MainFragment mMainFragment;
     private LoginManager loginManager;
     private NetworkStateReceiver networkStateReceiver;
+    private long back_pressed;
 
     /////////////////////////////////////////////////////////
     private AdminMainActivity.BroadcastListener mBroadcastListener;
@@ -139,23 +140,26 @@ public class AdminMainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+       this.getSupportFragmentManager().popBackStack();
 
         if (id == R.id.admin_nav_laptops) {
             OverviewFragment overviewFragment = new OverviewFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment)
-                    .addToBackStack(null).commit();
+                    .commit();
         } else if (id == R.id.admin_nav_phones) {
             // show "coming soon'
         } else if (id == R.id.admin_nav_addProduct) {
             AddProductFragment fragment = new AddProductFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, fragment).commit();
+
         } else if (id == R.id.admin_nav_signOut) {
             this.loginManager.logoutUser();
             Intent intent = new Intent(this, LoginActivity.class);
             this.finish();
             this.startActivity(intent);
         } else if (id == R.id.home) {
-            // show home
+            MainFragment mainFragment = new MainFragment();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,mainFragment).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
@@ -179,12 +183,18 @@ public class AdminMainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
+        if (this.back_pressed + 1500 > System.currentTimeMillis()){
+            super.onBackPressed();
+        }
+        this.back_pressed = System.currentTimeMillis();
+
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             if (this.getSupportFragmentManager().getBackStackEntryCount() == 0) {
-                super.onBackPressed();
+                MainFragment mainFragment = new MainFragment();
+               this.getSupportFragmentManager().beginTransaction().replace(R.id.container,mainFragment).commit();
             } else {
                 this.getSupportFragmentManager().popBackStack();
             }
