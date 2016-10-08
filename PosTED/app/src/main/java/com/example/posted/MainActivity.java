@@ -154,6 +154,10 @@ public class MainActivity extends AppCompatActivity
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment)
                     .commit();
         } else if (id == R.id.nav_phones) {
+            if (this.mConteinerViewPager.getVisibility() == View.VISIBLE) {
+                this.mConteinerViewPager.setVisibility(View.INVISIBLE);
+                this.mContainerFrameLayoyt.setVisibility(View.VISIBLE);
+            }
             PhonesFragment phonesFragment = new PhonesFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, phonesFragment).commit();
         } else if (id == R.id.nav_sign_out) {
@@ -166,6 +170,10 @@ public class MainActivity extends AppCompatActivity
             this.finish();
             this.startActivity(intent);
         } else if (id == R.id.nav_home) {
+            if (this.mConteinerViewPager.getVisibility() == View.VISIBLE) {
+                this.mConteinerViewPager.setVisibility(View.INVISIBLE);
+                this.mContainerFrameLayoyt.setVisibility(View.VISIBLE);
+            }
             MainFragment mainFragment = new MainFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
         } else if (id == R.id.nav_cart) {
@@ -178,6 +186,10 @@ public class MainActivity extends AppCompatActivity
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.containerViewPager);
             viewPager.setAdapter(adapter);
         } else if(id == R.id.nav_profile){
+            if (this.mConteinerViewPager.getVisibility() == View.VISIBLE) {
+                this.mConteinerViewPager.setVisibility(View.INVISIBLE);
+                this.mContainerFrameLayoyt.setVisibility(View.VISIBLE);
+            }
             ProfileFragment profileFragment = new ProfileFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container,profileFragment).commit();
         }
