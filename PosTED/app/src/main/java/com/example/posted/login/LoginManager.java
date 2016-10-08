@@ -14,51 +14,51 @@ public class LoginManager {
     private static final String USERNAME_KEY = "username";
     private static final String USER_PASSWORD = "password";
 
-    private SharedPreferences preferences;
+    private SharedPreferences mPreferences;
     private SharedPreferences.Editor mEditor;
-    private DatabaseManager databaseManager;
+    private DatabaseManager mDatabaseManager;
 
-    public LoginManager(Context mContext) {
-        this.preferences = mContext.getSharedPreferences(PREFS_NAME, PRIVATE_MODE);
-        this.mEditor = this.preferences.edit();
-        this.databaseManager = new DatabaseManager(mContext);
+    public LoginManager(Context context) {
+        this.mPreferences = context.getSharedPreferences(PREFS_NAME, PRIVATE_MODE);
+        this.mEditor = this.mPreferences.edit();
+        this.mDatabaseManager = new DatabaseManager(context);
     }
 
     public void loginUser(User user) {
-        if (this.preferences != null && this.mEditor != null) {
+        if (this.mPreferences != null && this.mEditor != null) {
             this.mEditor.putLong(USERNAME_KEY, user.getId());
             this.mEditor.putString(USERNAME_KEY, user.getUsername());
             this.mEditor.putString(USER_PASSWORD, user.getPassword());
             this.mEditor.putBoolean(LOGIN_KEY, true);
             this.mEditor.apply();
-            this.databaseManager.createCurrentOrderTable(this.databaseManager.getWritableDatabase());
+            this.mDatabaseManager.createCurrentOrderTable(this.mDatabaseManager.getWritableDatabase());
         }
     }
 
     public void logoutUser() {
-        if (this.preferences != null && this.mEditor != null) {
+        if (this.mPreferences != null && this.mEditor != null) {
             this.mEditor.putString(USERNAME_KEY, "");
             this.mEditor.putString(USER_PASSWORD, "");
             this.mEditor.putBoolean(LOGIN_KEY, false);
             this.mEditor.apply();
 
-            this.databaseManager.dropCurrentOrderTable(this.databaseManager.getWritableDatabase());
+            this.mDatabaseManager.dropCurrentOrderTable(this.mDatabaseManager.getWritableDatabase());
         }
     }
 
     public boolean isLoggedIn() {
 
-        if (this.preferences == null) {
+        if (this.mPreferences == null) {
             return false;
         }
 
-        return this.preferences.getBoolean(LOGIN_KEY, false);
+        return this.mPreferences.getBoolean(LOGIN_KEY, false);
     }
 
     public User getLoginUser() {
-        Long userId = this.preferences.getLong(USER_ID_KEY, 0);
-        String username = this.preferences.getString(USERNAME_KEY, "");
-        String password = this.preferences.getString(USER_PASSWORD, "");
+        Long userId = this.mPreferences.getLong(USER_ID_KEY, 0);
+        String username = this.mPreferences.getString(USERNAME_KEY, "");
+        String password = this.mPreferences.getString(USER_PASSWORD, "");
 
         return new User(userId, username, password);
     }

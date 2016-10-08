@@ -38,23 +38,23 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final int CAMERA_REQUEST = 2;
 
-    private EditText model;
-    private EditText price;
-    private EditText hdd;
-    private EditText ram;
-    private EditText displaySize;
-    private EditText processor;
-    private EditText videoCard;
-    private EditText currency;
-    private ProgressBar progressBar;
-    private Button addImageButton;
-    private Button addProductButton;
-    private Button cancelButton;
+    private EditText mModel;
+    private EditText mPrice;
+    private EditText mHdd;
+    private EditText mRam;
+    private EditText mDisplaySize;
+    private EditText mProcessor;
+    private EditText mVideoCard;
+    private EditText mCurrency;
+    private ProgressBar mProgressBar;
+    private Button mAddImageButton;
+    private Button mAddProductButton;
+    private Button mCancelButton;
     private Context mContext;
-    private String imageAsString;
+    private String mImageAsString;
 
-    private DatabaseManager databaseManager;
-    private LaptopsDatabaseManager laptopsDatabaseManager;
+    private DatabaseManager mDatabaseManager;
+    private LaptopsDatabaseManager mLaptopsDatabaseManager;
     private LoadDataService mLoadDataService;
     private Intent mServiceIntent;
     private boolean mIsBinded;
@@ -67,8 +67,8 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     public void onAttach(Context context) {
         super.onAttach(context);
         this.mContext = context;
-        this.databaseManager = new DatabaseManager(context);
-        this.laptopsDatabaseManager = new LaptopsDatabaseManager(this.databaseManager);
+        this.mDatabaseManager = new DatabaseManager(context);
+        this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(this.mDatabaseManager);
     }
 
     @SuppressWarnings("deprecation")
@@ -79,8 +79,8 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         this.mContext = activity;
-        this.databaseManager = new DatabaseManager(this.mContext);
-        this.laptopsDatabaseManager = new LaptopsDatabaseManager(this.databaseManager);
+        this.mDatabaseManager = new DatabaseManager(this.mContext);
+        this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(this.mDatabaseManager);
     }
 
     @Nullable
@@ -88,29 +88,29 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle
             savedInstanceState) {
         View rootView = inflater.inflate(R.layout.admin_add_product_fragment, container, false);
-        this.model = (EditText) rootView.findViewById(R.id.laptopModelEditText);
-        this.price = (EditText) rootView.findViewById(R.id.priceEditText);
-        this.hdd = (EditText) rootView.findViewById(R.id.hddEditText);
-        this.ram = (EditText) rootView.findViewById(R.id.ramEditText);
-        this.displaySize = (EditText) rootView.findViewById(R.id.displaySizeEditText);
-        this.processor = (EditText) rootView.findViewById(R.id.processorEditText);
-        this.videoCard = (EditText) rootView.findViewById(R.id.videoCardEditText);
-        this.currency = (EditText) rootView.findViewById(R.id.currencyEditText);
-        this.addImageButton = (Button) rootView.findViewById(R.id.browse_button);
-        this.addProductButton = (Button) rootView.findViewById(R.id.addProductButton);
-        this.cancelButton = (Button) rootView.findViewById(R.id.cancelButton);
-        this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
+        this.mModel = (EditText) rootView.findViewById(R.id.laptopModelEditText);
+        this.mPrice = (EditText) rootView.findViewById(R.id.priceEditText);
+        this.mHdd = (EditText) rootView.findViewById(R.id.hddEditText);
+        this.mRam = (EditText) rootView.findViewById(R.id.ramEditText);
+        this.mDisplaySize = (EditText) rootView.findViewById(R.id.displaySizeEditText);
+        this.mProcessor = (EditText) rootView.findViewById(R.id.processorEditText);
+        this.mVideoCard = (EditText) rootView.findViewById(R.id.videoCardEditText);
+        this.mCurrency = (EditText) rootView.findViewById(R.id.currencyEditText);
+        this.mAddImageButton = (Button) rootView.findViewById(R.id.browse_button);
+        this.mAddProductButton = (Button) rootView.findViewById(R.id.addProductButton);
+        this.mCancelButton = (Button) rootView.findViewById(R.id.cancelButton);
+        this.mProgressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
         Button cameraButton = this.getCameraButton(rootView);
 
-        this.progressBar.setMax(100);
-        this.progressBar.setVisibility(View.GONE);
+        this.mProgressBar.setMax(100);
+        this.mProgressBar.setVisibility(View.GONE);
         cameraButton.setOnClickListener(this);
-        this.addProductButton.setOnClickListener(this);
-        this.cancelButton.setOnClickListener(this);
-        this.addImageButton.setOnClickListener(this);
-        this.imageAsString = "";
+        this.mAddProductButton.setOnClickListener(this);
+        this.mCancelButton.setOnClickListener(this);
+        this.mAddImageButton.setOnClickListener(this);
+        this.mImageAsString = "";
 
-        this.laptopsDatabaseManager.createTempTable();
+        this.mLaptopsDatabaseManager.createTempTable();
         this.mUploadButton = (Button) rootView.findViewById(R.id.uploadButton);
         this.mUploadButton.setOnClickListener(this);
         //check if service running and bind
@@ -145,10 +145,10 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     }
 
     private void onUploadButtonClicked() {
-        ArrayList<LaptopSqlite> tempLaptops = this.laptopsDatabaseManager.getAllLaptops(ConstantsHelper
+        ArrayList<LaptopSqlite> tempLaptops = this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper
                 .TEMP_LAPTOPS_TABLE_NAME);
         this.mLoadDataService.uploadLaptops(tempLaptops);
-        this.databaseManager.deleteRecordsFromTable(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+        this.mDatabaseManager.deleteRecordsFromTable(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
         this.mLoadDataService.transferDataFromKinvey();
     }
 
@@ -167,16 +167,16 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
             return;
         }
         LaptopSqlite currentLaptop = new LaptopSqlite(
-                this.model.getText().toString(),
-                this.ram.getText().toString(),
-                this.hdd.getText().toString(),
-                this.processor.getText().toString(),
-                this.videoCard.getText().toString(),
-                this.displaySize.getText().toString(),
-                this.currency.getText().toString(),
-                this.price.getText().toString(),
-                this.imageAsString);
-        this.laptopsDatabaseManager.insertRecord(currentLaptop, ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+                this.mModel.getText().toString(),
+                this.mRam.getText().toString(),
+                this.mHdd.getText().toString(),
+                this.mProcessor.getText().toString(),
+                this.mVideoCard.getText().toString(),
+                this.mDisplaySize.getText().toString(),
+                this.mCurrency.getText().toString(),
+                this.mPrice.getText().toString(),
+                this.mImageAsString);
+        this.mLaptopsDatabaseManager.insertRecord(currentLaptop, ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
         Toast.makeText(this.mContext, "Laptop added to temp database", Toast.LENGTH_SHORT).show();
     }
 
@@ -196,13 +196,13 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     @Override
     public void onImageEncoded(String base64str) {
         Toast.makeText(this.mContext, "Image loaded", Toast.LENGTH_SHORT).show();
-        this.imageAsString = base64str;
+        this.mImageAsString = base64str;
     }
 
     private void onCameraResult(Intent data) {
         Bitmap bitmap = (Bitmap) data.getExtras().get("data");
         AsyncImageEncoder encoder = new AsyncImageEncoder(this);
-        encoder.setProgressBar(this.progressBar);
+        encoder.setProgressBar(this.mProgressBar);
         encoder.execute(bitmap);
     }
 
@@ -211,7 +211,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.mContext.getContentResolver(), uri);
             AsyncImageEncoder encoder = new AsyncImageEncoder(this);
-            encoder.setProgressBar(this.progressBar);
+            encoder.setProgressBar(this.mProgressBar);
             encoder.execute(bitmap);
         } catch (IOException e) {
             e.printStackTrace();
@@ -228,33 +228,33 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
 
     private boolean checkInputInfo() {
 
-        if (this.model == null || this.model.getText().toString().equals("")) {
-            this.model.setError("Laptop model cannot be empty");
-            this.model.requestFocus();
+        if (this.mModel != null && this.mModel.getText().toString().equals("")) {
+            this.mModel.setError("Laptop mModel cannot be empty");
+            this.mModel.requestFocus();
             return false;
-        } else if (this.hdd == null || this.hdd.getText().toString().equals("")) {
-            this.hdd.setError("HDD cannot be empty");
-            this.hdd.requestFocus();
+        } else if (this.mHdd != null && this.mHdd.getText().toString().equals("")) {
+            this.mHdd.setError("HDD cannot be empty");
+            this.mHdd.requestFocus();
             return false;
-        } else if (this.displaySize == null || this.displaySize.getText().toString().equals("")) {
-            this.displaySize.setError("Display size cannot be empty");
-            this.displaySize.requestFocus();
+        } else if (this.mDisplaySize != null && this.mDisplaySize.getText().toString().equals("")) {
+            this.mDisplaySize.setError("Display size cannot be empty");
+            this.mDisplaySize.requestFocus();
             return false;
-        } else if (this.processor == null || this.processor.getText().toString().equals("")) {
-            this.processor.setError("Processor cannot be empty");
-            this.processor.requestFocus();
+        } else if (this.mProcessor != null && this.mProcessor.getText().toString().equals("")) {
+            this.mProcessor.setError("Processor cannot be empty");
+            this.mProcessor.requestFocus();
             return false;
-        } else if (this.videoCard == null || this.videoCard.getText().toString().equals("")) {
-            this.videoCard.setError("Video card cannot be empty");
-            this.videoCard.requestFocus();
+        } else if (this.mVideoCard != null && this.mVideoCard.getText().toString().equals("")) {
+            this.mVideoCard.setError("Video card cannot be empty");
+            this.mVideoCard.requestFocus();
             return false;
-        } else if (this.currency == null || this.currency.getText().toString().equals("")) {
-            this.currency.setError("Currency cannot be empty");
-            this.currency.requestFocus();
+        } else if (this.mCurrency != null && this.mCurrency.getText().toString().equals("")) {
+            this.mCurrency.setError("Currency cannot be empty");
+            this.mCurrency.requestFocus();
             return false;
-        } else if (this.price == null || this.price.getText().toString().equals("")) {
-            this.price.setError("Price cannot be empty");
-            this.price.requestFocus();
+        } else if (this.mPrice != null && this.mPrice.getText().toString().equals("")) {
+            this.mPrice.setError("Price cannot be empty");
+            this.mPrice.requestFocus();
             return false;
         }
 

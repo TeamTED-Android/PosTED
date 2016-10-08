@@ -5,4 +5,6 @@
     <color name="colorAccent">#FF4081</color>
     <color name="logo_background">#C0C0C0</color>
     <color name="fragment_background">#FFFFFF</color>
+    <color name="logo_orange">#FFB601</color>
+    <color name="logo_blue">#4E61AD</color>
 </resources>

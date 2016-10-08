@@ -12,14 +12,14 @@ import java.util.ArrayList;
 
 public class LaptopsDatabaseManager {
 
-    private DatabaseManager databaseManager;
+    private DatabaseManager mDatabaseManager;
 
     public LaptopsDatabaseManager(DatabaseManager databaseManager) {
-        this.databaseManager = databaseManager;
+        this.mDatabaseManager = databaseManager;
     }
 
     public void insertRecord(Laptop currentLaptop, String tableName) {
-        SQLiteDatabase database = this.databaseManager.getWritableDatabase();
+        SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(ConstantsHelper.MODEL_COLUMN, currentLaptop.getModel());
         values.put(ConstantsHelper.RAM_COLUMN, currentLaptop.getCapacity_ram());
@@ -38,7 +38,7 @@ public class LaptopsDatabaseManager {
     public ArrayList<LaptopSqlite> getAllLaptops(String tableName) {
         ArrayList<LaptopSqlite> result = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + tableName;
-        SQLiteDatabase database = this.databaseManager.getWritableDatabase();
+        SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
         Cursor cursor = database.rawQuery(selectQuery, null);
         while (cursor.moveToNext()) {
             LaptopSqlite current = new LaptopSqlite();
@@ -64,12 +64,12 @@ public class LaptopsDatabaseManager {
     // Using temporary table for all records from Admin...
     // After that upload all new records in Kinvey and drop the temporary table
     public void createTempTable() {
-        SQLiteDatabase database = this.databaseManager.getWritableDatabase();
-        this.databaseManager.createTempLaptopTable(database);
+        SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
+        this.mDatabaseManager.createTempLaptopTable(database);
     }
 
     public void deleteRecord(Laptop currentLaptop, String tableName) {
-        SQLiteDatabase database = this.databaseManager.getWritableDatabase();
+        SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
         LaptopSqlite laptopSqlite = (LaptopSqlite) currentLaptop;
         database.delete(tableName, "id=?", new String[]{Integer.toString(laptopSqlite.getId())});
     }

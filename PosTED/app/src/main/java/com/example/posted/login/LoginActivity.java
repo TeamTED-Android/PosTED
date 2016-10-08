@@ -3,6 +3,7 @@ package com.example.posted.login;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Dialog;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.*;
 import android.content.pm.PackageManager;
@@ -322,13 +323,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         private final String mEmail;
         private final String mPassword;
         private final Context mContext;
-        private DatabaseManager databaseManager;
+        private DatabaseManager mDatabaseManager;
 
         UserLoginTask(String email, String password, Context context) {
             this.mEmail = email;
             this.mPassword = password;
             this.mContext = context;
-            this.databaseManager = new DatabaseManager(LoginActivity.this.getApplicationContext());
+            this.mDatabaseManager = new DatabaseManager(LoginActivity.this.getApplicationContext());
         }
 
         @Override
@@ -336,7 +337,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // TODO: attempt authentication against a network service.
             UsersDatabaseManager usersDatabaseManager = null;
             try {
-                usersDatabaseManager = new UsersDatabaseManager(this.databaseManager);
+                usersDatabaseManager = new UsersDatabaseManager(this.mDatabaseManager);
                 LoginActivity.this.mUser = usersDatabaseManager.getUser(this.mEmail);
 
                 if (LoginActivity.this.mUser.getId() > 0) {
@@ -350,8 +351,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     return true;
                 }
             } finally {
-                if (this.databaseManager != null) {
-                    this.databaseManager.close();
+                if (this.mDatabaseManager != null) {
+                    this.mDatabaseManager.close();
                 }
 
             }
@@ -376,17 +377,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                     try {
                                         LoginActivity.this.finish();
                                         usersDatabaseManager = new UsersDatabaseManager(UserLoginTask.this
-                                                .databaseManager);
+                                                .mDatabaseManager);
                                         LoginActivity.this.mUser = usersDatabaseManager.insertUser(LoginActivity.this
                                                 .mUser);
-                                        Toast myToast = Toast.makeText(UserLoginTask.this.mContext, "dateting " +
-                                                "report", Toast.LENGTH_SHORT);
-                                        myToast.show();
                                         UserLoginTask.this.succsesLogin();
                                         LoginActivity.this.finish();
                                     } finally {
-                                        if (UserLoginTask.this.databaseManager != null)
-                                            UserLoginTask.this.databaseManager.close();
+                                        if (UserLoginTask.this.mDatabaseManager != null)
+                                            UserLoginTask.this.mDatabaseManager.close();
                                     }
                                     break;
 
@@ -400,8 +398,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     };
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(this.mContext);
-                    builder.setMessage("register").setPositiveButton("Yes", dialogClickListener)
-                            .setNegativeButton("no", dialogClickListener).show();
+                    builder.setMessage(R.string.register_question).setPositiveButton(R.string.yes, dialogClickListener)
+                            .setNegativeButton(R.string.no, dialogClickListener);
+                    Dialog dialog = builder.create();
+                    dialog.show();
+                    dialog.getWindow().setBackgroundDrawableResource(R.color.logo_blue);
+
                 }
             } else {
                 LoginActivity.this.mPasswordView.setError(LoginActivity.this.getString(R.string.error_incorrect_password));

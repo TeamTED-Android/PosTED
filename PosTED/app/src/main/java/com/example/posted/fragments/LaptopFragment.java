@@ -44,13 +44,13 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
     private TextView mCurrentLptPrice;
     private TextView mCurrentLptCurrency;
     private ImageView mCurrentLptImage;
-    private Button laptopFragmentButton;
+    private Button mLaptopFragmentButton;
     private OnLaptopSelectedDataExchange mBackToOverviewListener;
-    private DatabaseManager databaseManager;
-    private LaptopsDatabaseManager laptopsDatabaseManager;
-    private static RemoveLaptopListener removeLaptopListener;
+    private DatabaseManager mDatabaseManager;
+    private LaptopsDatabaseManager mLaptopsDatabaseManager;
+    private static RemoveLaptopListener mRemoveLaptopListener;
 
-    private String currentUser;
+    private String mCurrentUser;
     private LoadDataService mLoadDataService;
     private Intent mServiceIntent;
     private boolean mIsBinded;
@@ -66,7 +66,7 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
         bundleLaptop.putParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY, laptop);
         bundleLaptop.putBoolean("is_cart", true);
         fragment.setArguments(bundleLaptop);
-        removeLaptopListener = listener;
+        mRemoveLaptopListener = listener;
         return fragment;
     }
 
@@ -130,15 +130,15 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
         this.mCurrentLptImage = (ImageView) view.findViewById(R.id.current_lpt_image);
         //TODO set image
 
-        this.laptopFragmentButton = (Button) view.findViewById(R.id.laptop_fragment_button);
-        this.laptopFragmentButton.setOnClickListener(this);
+        this.mLaptopFragmentButton = (Button) view.findViewById(R.id.laptop_fragment_button);
+        this.mLaptopFragmentButton.setOnClickListener(this);
 
         if (this.getArguments().getBoolean("is_cart")) {
-            this.laptopFragmentButton.setText("Remove from cart");
+            this.mLaptopFragmentButton.setText("Remove from cart");
         } else {
-            this.currentUser = this.getArguments().getString(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY);
-            if (this.currentUser.equals("admin")){
-                this.laptopFragmentButton.setText("Remove from database");
+            this.mCurrentUser = this.getArguments().getString(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY);
+            if (this.mCurrentUser.equals("admin")){
+                this.mLaptopFragmentButton.setText("Remove from database");
                 //check if service running and bind
                 this.mServiceIntent = new Intent(this.mContext, LoadDataService.class);
                 if (!this.isDataServiceRunning(LoadDataService.class)) {
@@ -146,13 +146,13 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
                 }
                 this.mContext.bindService(this.mServiceIntent, this.connection, Context.BIND_AUTO_CREATE);
             }
-            if (this.currentUser.equals("user")) {
-                this.laptopFragmentButton.setText("Add to cart");
+            if (this.mCurrentUser.equals("user")) {
+                this.mLaptopFragmentButton.setText("Add to cart");
             }
         }
 
-        this.databaseManager = new DatabaseManager(view.getContext());
-        this.laptopsDatabaseManager = new LaptopsDatabaseManager(this.databaseManager);
+        this.mDatabaseManager = new DatabaseManager(view.getContext());
+        this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(this.mDatabaseManager);
 
         return view;
     }
@@ -161,15 +161,15 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
     public void onClick(View v) {
         LaptopSqlite laptop = this.getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
         if (this.getArguments().getBoolean("is_cart")) {
-            this.laptopsDatabaseManager.deleteRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
-            removeLaptopListener.onRemoved();
+            this.mLaptopsDatabaseManager.deleteRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+            mRemoveLaptopListener.onRemoved();
             //  Toast.makeText(getContext(),"Laptop deleted from cart",Toast.LENGTH_SHORT).show();
         } else {
-            if (this.currentUser.equals("user")) {
-                this.laptopsDatabaseManager.insertRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+            if (this.mCurrentUser.equals("user")) {
+                this.mLaptopsDatabaseManager.insertRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
                 Toast.makeText(this.getContext(), "Laptop added to cart", Toast.LENGTH_SHORT).show();
             }
-            if (this.currentUser.equals("admin")){
+            if (this.mCurrentUser.equals("admin")){
                 this.mLoadDataService.removeLaptopFromKinvey(laptop);
                 this.mLoadDataService.transferDataFromKinvey();
                 this.getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();

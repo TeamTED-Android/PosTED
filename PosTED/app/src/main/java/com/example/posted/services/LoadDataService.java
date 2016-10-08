@@ -33,7 +33,7 @@ public class LoadDataService extends IntentService {
     private static final String APP_SECRET = "6e30f9fd9c0b4218a6db8d6282ce25a8";
     private static final String COLLECTION_NAME = "laptops";
     private Client mKinveyClient;
-    private IBinder binder;
+    private IBinder mBinder;
     private DatabaseManager mController;
     private LaptopsDatabaseManager mLaptopsDatabaseManager;
 
@@ -56,7 +56,7 @@ public class LoadDataService extends IntentService {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return this.binder;
+        return this.mBinder;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class LoadDataService extends IntentService {
     @Override
     public void onCreate() {
         Toast.makeText(this, "Service created", Toast.LENGTH_SHORT).show();
-        this.binder = new LoadDataServiceBinder();
+        this.mBinder = new LoadDataServiceBinder();
         this.mKinveyClient = new Client.Builder(APP_KEY, APP_SECRET, this.getApplicationContext()).build();
 //        if (!doesDatabaseExist(getApplicationContext(),LaptopsDatabaseManager.DB_NAME)) {
 //            this.mController = new LaptopsDatabaseManager(getApplicationContext());

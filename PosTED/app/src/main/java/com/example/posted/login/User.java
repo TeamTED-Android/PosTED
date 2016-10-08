@@ -3,37 +3,37 @@ package com.example.posted.login;
 
 public class User {
 
-    private long id;
-    private String username;
-    private String password;
+    private long mId;
+    private String mUsername;
+    private String mPassword;
 
     public User(long id, String username, String password) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
+        this.mId = id;
+        this.mUsername = username;
+        this.mPassword = password;
     }
 
     public long getId() {
-        return this.id;
+        return this.mId;
     }
 
     public String getUsername() {
-        return this.username;
+        return this.mUsername;
     }
 
     public String getPassword() {
-        return this.password;
+        return this.mPassword;
     }
 
     public void setId(long id) {
-        this.id = id;
+        this.mId = id;
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.mUsername = username;
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.mPassword = password;
     }
 }

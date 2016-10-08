@@ -28,5 +28,28 @@
     <string name="phones">Phones</string>
     <string name="add_product">Add product</string>
     <string name="sign_out">Sign out</string>
+    <string name="register_question">Do you want to register?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="profile">Profile</string>
+    <string name="cart">Cart</string>
+    <string name="laptop_model">Laptop Model: </string>
+    <string name="price">Price: </string>
+    <string name="ram">RAM: </string>
+    <string name="hdd">HDD: </string>
+    <string name="processor">Processor: </string>
+    <string name="video_card">Video card: </string>
+    <string name="display_size">Display size: </string>
+    <string name="currency">Currency: </string>
+    <string name="browse">browse</string>
+    <string name="camera">camera</string>
+    <string name="cancel">Cancel</string>
+    <string name="update">Update</string>
+    <string name="coming_soon">Coming soon</string>
+    <string name="old_password">Old pass</string>
+    <string name="new_password">New pass</string>
+    <string name="update_password">Update pass</string>
+    <string name="posted">PosTED</string>
+    <string name="posted_email">office.posted@gmail.com</string>
 
 </resources>

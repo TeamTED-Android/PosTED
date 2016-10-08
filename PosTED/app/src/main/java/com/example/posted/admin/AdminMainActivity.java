@@ -20,17 +20,18 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.posted.MainActivity;
 import com.example.posted.R;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.fragments.LaptopFragment;
 import com.example.posted.fragments.MainFragment;
 import com.example.posted.fragments.OverviewFragment;
+import com.example.posted.fragments.PhonesFragment;
+import com.example.posted.fragments.ProfileFragment;
 import com.example.posted.fragments.SpinnerFragment;
 import com.example.posted.interfaces.NetworkStateReceiverListener;
 import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
@@ -47,8 +48,8 @@ public class AdminMainActivity extends AppCompatActivity
 
     private Intent mServiceIntent;
     private MainFragment mMainFragment;
-    private LoginManager loginManager;
-    private NetworkStateReceiver networkStateReceiver;
+    private LoginManager mLoginManager;
+    private NetworkStateReceiver mNetworkStateReceiver;
     private long back_pressed;
 
     /////////////////////////////////////////////////////////
@@ -65,7 +66,7 @@ public class AdminMainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "office.posted@gmail.com", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, R.string.posted_email, Snackbar.LENGTH_LONG)
                         .setAction("send us email", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -91,18 +92,22 @@ public class AdminMainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) this.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        this.networkStateReceiver = new NetworkStateReceiver();
-        this.networkStateReceiver.addListener(this);
-        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager
+        this.mNetworkStateReceiver = new NetworkStateReceiver();
+        this.mNetworkStateReceiver.addListener(this);
+        this.registerReceiver(this.mNetworkStateReceiver, new IntentFilter(android.net.ConnectivityManager
                 .CONNECTIVITY_ACTION));
 
         if (!this.checkForInternetConnection()) {
             this.attemptToTurnOnWiFi();
         }
 
-        this.loginManager = new LoginManager(this);
+        this.mLoginManager = new LoginManager(this);
         this.mMainFragment = new MainFragment();
         this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, this.mMainFragment).commit();
+
+        TextView textView =(TextView) toolbar.findViewById(R.id.admin_current_user);
+        textView.setText(this.mLoginManager.getLoginUser().getUsername());
+        textView.setGravity(Gravity.CENTER | Gravity.RIGHT);
 
         //////////////////////////////////////////////////////////////////
         mBroadcastListener = new AdminMainActivity.BroadcastListener();
@@ -113,27 +118,7 @@ public class AdminMainActivity extends AppCompatActivity
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        this.getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -147,19 +132,23 @@ public class AdminMainActivity extends AppCompatActivity
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment)
                     .commit();
         } else if (id == R.id.admin_nav_phones) {
-            // show "coming soon'
+            PhonesFragment phonesFragment = new PhonesFragment();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,phonesFragment).commit();
         } else if (id == R.id.admin_nav_addProduct) {
             AddProductFragment fragment = new AddProductFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, fragment).commit();
 
         } else if (id == R.id.admin_nav_signOut) {
-            this.loginManager.logoutUser();
+            this.mLoginManager.logoutUser();
             Intent intent = new Intent(this, LoginActivity.class);
             this.finish();
             this.startActivity(intent);
-        } else if (id == R.id.home) {
+        } else if (id == R.id.admin_nav_home) {
             MainFragment mainFragment = new MainFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,mainFragment).commit();
+        }else if(id == R.id.admin_nav_profile){
+            ProfileFragment profileFragment = new ProfileFragment();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,profileFragment).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
@@ -194,7 +183,7 @@ public class AdminMainActivity extends AppCompatActivity
         } else {
             if (this.getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 MainFragment mainFragment = new MainFragment();
-               this.getSupportFragmentManager().beginTransaction().replace(R.id.container,mainFragment).commit();
+               this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,mainFragment).commit();
             } else {
                 this.getSupportFragmentManager().popBackStack();
             }
@@ -213,7 +202,7 @@ public class AdminMainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager
+        this.registerReceiver(this.mNetworkStateReceiver, new IntentFilter(android.net.ConnectivityManager
                 .CONNECTIVITY_ACTION));
         ////////////////////////////////////////////////////////
         IntentFilter filter = new IntentFilter();
@@ -228,7 +217,7 @@ public class AdminMainActivity extends AppCompatActivity
         if (this.mServiceIntent != null) {
             this.stopService(this.mServiceIntent);
         }
-        this.unregisterReceiver(this.networkStateReceiver);
+        this.unregisterReceiver(this.mNetworkStateReceiver);
         ////////////////////////////////////////////////
         this.unregisterReceiver(this.mBroadcastListener);
     }

@@ -17,25 +17,25 @@ import java.util.List;
 
 public class SectionsPagerAdapter extends FragmentStatePagerAdapter implements RemoveLaptopListener {
 
-    private List<LaptopSqlite> laptops;
-    private LaptopsDatabaseManager laptopsDatabaseManager;
+    private List<LaptopSqlite> mLaptops;
+    private LaptopsDatabaseManager mLaptopsDatabaseManager;
 
     public SectionsPagerAdapter(FragmentManager fm, Context context) {
         super(fm);
         DatabaseManager databaseManager = new DatabaseManager(context);
-        this.laptopsDatabaseManager = new LaptopsDatabaseManager(databaseManager);
-        this.laptops = this.laptopsDatabaseManager.getAllLaptops(ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+        this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(databaseManager);
+        this.mLaptops = this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
 
     }
 
     @Override
     public Fragment getItem(int position) {
-        return LaptopFragment.newInstance(this.laptops.get(position), this);
+        return LaptopFragment.newInstance(this.mLaptops.get(position), this);
     }
 
     @Override
     public int getCount() {
-        return this.laptops.size();
+        return this.mLaptops.size();
     }
 
     @Override
@@ -45,9 +45,9 @@ public class SectionsPagerAdapter extends FragmentStatePagerAdapter implements R
 
     @Override
     public void onRemoved() {
-        this.laptops = new ArrayList<>();
+        this.mLaptops = new ArrayList<>();
         this.notifyDataSetChanged();
-        this.laptops = this.laptopsDatabaseManager.getAllLaptops(ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+        this.mLaptops = this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
         this.notifyDataSetChanged();
     }
 }

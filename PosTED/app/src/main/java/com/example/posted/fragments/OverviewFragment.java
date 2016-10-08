@@ -28,8 +28,8 @@ public class OverviewFragment extends Fragment implements RecyclerViewAdapter.Re
 
     private OnLaptopSelectedDataExchange mLaptopSelectedDataExchange;
 
-    private DatabaseManager databaseManager;
-    private LaptopsDatabaseManager laptopsDatabaseManager;
+    private DatabaseManager mDatabaseManager;
+    private LaptopsDatabaseManager mLaptopsDatabaseManager;
     private Context mContext;
 
     public OverviewFragment() {
@@ -41,8 +41,8 @@ public class OverviewFragment extends Fragment implements RecyclerViewAdapter.Re
         super.onAttach(context);
         this.mContext = context;
         this.mLaptopSelectedDataExchange = (OnLaptopSelectedDataExchange) this.mContext;
-        this.databaseManager = new DatabaseManager(this.mContext);
-        this.laptopsDatabaseManager = new LaptopsDatabaseManager(this.databaseManager);
+        this.mDatabaseManager = new DatabaseManager(this.mContext);
+        this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(this.mDatabaseManager);
     }
 
     @Override
@@ -50,8 +50,8 @@ public class OverviewFragment extends Fragment implements RecyclerViewAdapter.Re
         super.onAttach(activity);
         this.mContext = activity;
         this.mLaptopSelectedDataExchange = (OnLaptopSelectedDataExchange) this.mContext;
-        this.databaseManager = new DatabaseManager(this.mContext);
-        this.laptopsDatabaseManager = new LaptopsDatabaseManager(this.databaseManager);
+        this.mDatabaseManager = new DatabaseManager(this.mContext);
+        this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(this.mDatabaseManager);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class OverviewFragment extends Fragment implements RecyclerViewAdapter.Re
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_overview, container, false);
 
-        ArrayList<LaptopSqlite> result = this.laptopsDatabaseManager.getAllLaptops(ConstantsHelper.LAPTOPS_TABLE_NAME);
+        ArrayList<LaptopSqlite> result = this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper.LAPTOPS_TABLE_NAME);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this.getContext(), LinearLayoutManager
                 .VERTICAL, false);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);

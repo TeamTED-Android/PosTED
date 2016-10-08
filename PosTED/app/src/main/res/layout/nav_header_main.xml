@@ -16,6 +16,7 @@
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="106dp"
+        android:layout_gravity="center_horizontal"
         android:adjustViewBounds="true"
         app:srcCompat="@drawable/logo" />
 
@@ -23,13 +24,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:text="PosTED"
+        android:text="@string/posted"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/mTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="office.posted@gmail.com" />
+        android:text="@string/posted_email" />
 
 </LinearLayout>

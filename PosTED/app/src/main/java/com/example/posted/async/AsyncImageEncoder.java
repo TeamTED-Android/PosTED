@@ -18,9 +18,9 @@ public class AsyncImageEncoder extends AsyncTask<Bitmap, Integer, String> {
     }
 
     private Listener mListener;
-    // TODO: implement progressBar
-    private ProgressBar progressBar;
-    private TextView textView;
+    // TODO: implement mProgressBar
+    private ProgressBar mProgressBar;
+    private TextView mTextView;
 
     public AsyncImageEncoder(Listener listener) {
         super();
@@ -28,29 +28,29 @@ public class AsyncImageEncoder extends AsyncTask<Bitmap, Integer, String> {
     }
 
     public void setProgressBar(ProgressBar progressBar) {
-        this.progressBar = progressBar;
+        this.mProgressBar = progressBar;
     }
 
     public void setTextView(TextView textView) {
-        this.textView = textView;
+        this.mTextView = textView;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if (this.progressBar != null) {
-            this.progressBar.setVisibility(View.VISIBLE);
+        if (this.mProgressBar != null) {
+            this.mProgressBar.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     protected void onProgressUpdate(Integer... values) {
         super.onProgressUpdate(values);
-        if (this.progressBar != null) {
-            this.progressBar.setProgress(values[0]);
+        if (this.mProgressBar != null) {
+            this.mProgressBar.setProgress(values[0]);
         }
-        if (this.textView != null) {
-            this.textView.setText(Integer.toString(values[0]));
+        if (this.mTextView != null) {
+            this.mTextView.setText(Integer.toString(values[0]));
         }
     }
 
@@ -80,8 +80,8 @@ public class AsyncImageEncoder extends AsyncTask<Bitmap, Integer, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        if (this.progressBar != null) {
-            this.progressBar.setVisibility(View.GONE);
+        if (this.mProgressBar != null) {
+            this.mProgressBar.setVisibility(View.GONE);
         }
         if (result != null) {
             this.mListener.onImageEncoded(result);

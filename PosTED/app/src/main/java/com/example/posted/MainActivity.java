@@ -20,16 +20,19 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
 import com.example.posted.adapters.SectionsPagerAdapter;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.fragments.LaptopFragment;
 import com.example.posted.fragments.MainFragment;
 import com.example.posted.fragments.OverviewFragment;
+import com.example.posted.fragments.PhonesFragment;
+import com.example.posted.fragments.ProfileFragment;
 import com.example.posted.fragments.SpinnerFragment;
 import com.example.posted.interfaces.NetworkStateReceiverListener;
 import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
@@ -45,13 +48,13 @@ public class MainActivity extends AppCompatActivity
         OnLaptopSelectedDataExchange,
         NetworkStateReceiverListener {
 
-    private Context ctx;
+    private Context mCtx;
     private Intent mServiceIntent;
     private MainFragment mMainFragment;
-    private LoginManager loginManager;
-    private FrameLayout containerFrameLayoyt;
-    private ViewPager conteinerViewPager;
-    private NetworkStateReceiver networkStateReceiver;
+    private LoginManager mLoginManager;
+    private FrameLayout mContainerFrameLayoyt;
+    private ViewPager mConteinerViewPager;
+    private NetworkStateReceiver mNetworkStateReceiver;
     private DrawerLayout mDrawer;
     private long back_pressed;
 
@@ -64,11 +67,13 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
         this.setSupportActionBar(toolbar);
 
+        // toolbar.setSubtitle(this.mLoginManager.getLoginUser().getUsername());
+
         FloatingActionButton fab = (FloatingActionButton) this.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "office.posted@gmail.com", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, R.string.posted_email, Snackbar.LENGTH_LONG)
                         .setAction("send us email", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -98,12 +103,12 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) this.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        this.networkStateReceiver = new NetworkStateReceiver();
-        this.networkStateReceiver.addListener(this);
-        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager
+        this.mNetworkStateReceiver = new NetworkStateReceiver();
+        this.mNetworkStateReceiver.addListener(this);
+        this.registerReceiver(this.mNetworkStateReceiver, new IntentFilter(android.net.ConnectivityManager
                 .CONNECTIVITY_ACTION));
 
-        this.ctx = this;
+        this.mCtx = this;
 
         if (!this.checkForInternetConnection()) {
             this.attemptToTurnOnWiFi();
@@ -113,10 +118,14 @@ public class MainActivity extends AppCompatActivity
         this.mMainFragment = new MainFragment();
         this.getSupportFragmentManager().beginTransaction().replace(R.id.container, this.mMainFragment).commit();
 
-        this.loginManager = new LoginManager(this);
+        this.mLoginManager = new LoginManager(this);
 
-        this.containerFrameLayoyt = (FrameLayout) this.findViewById(R.id.container);
-        this.conteinerViewPager = (ViewPager) this.findViewById(R.id.containerViewPager);
+        TextView textView = (TextView) toolbar.findViewById(R.id.current_user);
+        textView.setText(this.mLoginManager.getLoginUser().getUsername());
+        textView.setGravity(Gravity.CENTER | Gravity.RIGHT);
+
+        this.mContainerFrameLayoyt = (FrameLayout) this.findViewById(R.id.container);
+        this.mConteinerViewPager = (ViewPager) this.findViewById(R.id.containerViewPager);
 
         //////////////////////////////////////////////////////////////////
         mBroadcastListener = new MainActivity.BroadcastListener();
@@ -128,27 +137,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        this.getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -158,36 +146,40 @@ public class MainActivity extends AppCompatActivity
         this.getSupportFragmentManager().popBackStack();
 
         if (id == R.id.nav_laptops) {
-            if (this.conteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.conteinerViewPager.setVisibility(View.INVISIBLE);
-                this.containerFrameLayoyt.setVisibility(View.VISIBLE);
+            if (this.mConteinerViewPager.getVisibility() == View.VISIBLE) {
+                this.mConteinerViewPager.setVisibility(View.INVISIBLE);
+                this.mContainerFrameLayoyt.setVisibility(View.VISIBLE);
             }
             OverviewFragment overviewFragment = new OverviewFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment)
                     .commit();
         } else if (id == R.id.nav_phones) {
-            // show "coming soon'
+            PhonesFragment phonesFragment = new PhonesFragment();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.container, phonesFragment).commit();
         } else if (id == R.id.nav_sign_out) {
-            if (this.conteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.conteinerViewPager.setVisibility(View.INVISIBLE);
-                this.containerFrameLayoyt.setVisibility(View.VISIBLE);
+            if (this.mConteinerViewPager.getVisibility() == View.VISIBLE) {
+                this.mConteinerViewPager.setVisibility(View.INVISIBLE);
+                this.mContainerFrameLayoyt.setVisibility(View.VISIBLE);
             }
-            this.loginManager.logoutUser();
+            this.mLoginManager.logoutUser();
             Intent intent = new Intent(this, LoginActivity.class);
             this.finish();
             this.startActivity(intent);
-        } else if (id == R.id.home) {
+        } else if (id == R.id.nav_home) {
             MainFragment mainFragment = new MainFragment();
-            this.getSupportFragmentManager().beginTransaction().replace(R.id.container,mainFragment).commit();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
         } else if (id == R.id.nav_cart) {
-            if (this.containerFrameLayoyt.getVisibility() == View.VISIBLE) {
-                this.containerFrameLayoyt.setVisibility(View.INVISIBLE);
-                this.conteinerViewPager.setVisibility(View.VISIBLE);
+            if (this.mContainerFrameLayoyt.getVisibility() == View.VISIBLE) {
+                this.mContainerFrameLayoyt.setVisibility(View.INVISIBLE);
+                this.mConteinerViewPager.setVisibility(View.VISIBLE);
             }
 
             SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.containerViewPager);
             viewPager.setAdapter(adapter);
+        } else if(id == R.id.nav_profile){
+            ProfileFragment profileFragment = new ProfileFragment();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.container,profileFragment).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
@@ -199,7 +191,7 @@ public class MainActivity extends AppCompatActivity
     public void onLaptopSelected(LaptopSqlite laptop) {
         Bundle bundleLaptop = new Bundle();
         bundleLaptop.putParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY, laptop);
-        bundleLaptop.putCharSequence(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY,"user");
+        bundleLaptop.putCharSequence(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY, "user");
         LaptopFragment laptopFragment = new LaptopFragment();
         laptopFragment.setArguments(bundleLaptop);
         this.getSupportFragmentManager()
@@ -221,7 +213,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        this.registerReceiver(this.networkStateReceiver, new IntentFilter(android.net.ConnectivityManager
+        this.registerReceiver(this.mNetworkStateReceiver, new IntentFilter(android.net.ConnectivityManager
                 .CONNECTIVITY_ACTION));
         ////////////////////////////////////////////////////////
         IntentFilter filter = new IntentFilter();
@@ -236,7 +228,7 @@ public class MainActivity extends AppCompatActivity
         if (this.mServiceIntent != null) {
             this.stopService(this.mServiceIntent);
         }
-        this.unregisterReceiver(this.networkStateReceiver);
+        this.unregisterReceiver(this.mNetworkStateReceiver);
         ////////////////////////////////////////////////
         this.unregisterReceiver(this.mBroadcastListener);
     }
@@ -244,7 +236,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        if (this.back_pressed + 1500 > System.currentTimeMillis()){
+        if (this.back_pressed + 1500 > System.currentTimeMillis()) {
             super.onBackPressed();
         }
         this.back_pressed = System.currentTimeMillis();
@@ -255,8 +247,8 @@ public class MainActivity extends AppCompatActivity
         } else {
             if (this.getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 MainFragment mainFragment = new MainFragment();
-                this.getSupportFragmentManager().beginTransaction().replace(R.id.container,mainFragment).commit();
-            } else  {
+                this.getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
+            } else {
                 this.getSupportFragmentManager().popBackStack();
             }
         }
@@ -314,8 +306,8 @@ public class MainActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             SpinnerFragment spinnerFragment = new SpinnerFragment();
             if (intent.getAction().equals(LoadDataService.BROADCAST_START_LOADING)) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.container,spinnerFragment).addToBackStack(null).commit();
-            }else if (intent.getAction().equals(LoadDataService.BROADCAST_END_LOADING)){
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, spinnerFragment).addToBackStack(null).commit();
+            } else if (intent.getAction().equals(LoadDataService.BROADCAST_END_LOADING)) {
                 getSupportFragmentManager().popBackStack();
                 //mDrawer.openDrawer(Gravity.LEFT);
             }
