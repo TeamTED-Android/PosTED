@@ -15,7 +15,8 @@ public class LaptopSqlite implements Parcelable, Laptop {
     private String mDisplay_size;
     private String mCurrency;
     private String mPrice;
-    private String mImage;
+    private String mImagePath;
+    private String mImageName;
 
     public LaptopSqlite(String model,
                         String capacity_ram,
@@ -25,7 +26,8 @@ public class LaptopSqlite implements Parcelable, Laptop {
                         String display_size,
                         String currency,
                         String price,
-                        String image) {
+                        String imagePath,
+                        String imageName) {
         this.mModel = model;
         this.mCapacity_ram = capacity_ram;
         this.mCapacity_hdd = capacity_hdd;
@@ -34,7 +36,8 @@ public class LaptopSqlite implements Parcelable, Laptop {
         this.mDisplay_size = display_size;
         this.mCurrency = currency;
         this.mPrice = price;
-        this.mImage = image;
+        this.mImagePath = imagePath;
+        this.mImageName = imageName;
     }
 
     public LaptopSqlite() {
@@ -51,7 +54,8 @@ public class LaptopSqlite implements Parcelable, Laptop {
         this.mDisplay_size = in.readString();
         this.mCurrency = in.readString();
         this.mPrice = in.readString();
-        this.mImage = in.readString();
+        this.mImagePath = in.readString();
+        this.mImageName = in.readString();
     }
 
     public static final Creator<LaptopSqlite> CREATOR = new Creator<LaptopSqlite>() {
@@ -82,8 +86,8 @@ public class LaptopSqlite implements Parcelable, Laptop {
         dest.writeString(this.mDisplay_size);
         dest.writeString(this.mCurrency);
         dest.writeString(this.mPrice);
-        dest.writeString(this.mImage);
-
+        dest.writeString(this.mImagePath);
+        dest.writeString(this.mImageName);
     }
 
     public int getId() {
@@ -158,11 +162,19 @@ public class LaptopSqlite implements Parcelable, Laptop {
         this.mPrice = price;
     }
 
-    public String getImage() {
-        return this.mImage;
+    public String getImagePath() {
+        return this.mImagePath;
     }
 
-    public void setImage(String image) {
-        this.mImage = image;
+    public void setImagePath(String path) {
+        this.mImagePath = path;
+    }
+
+    public String getImageName() {
+        return this.mImageName;
+    }
+
+    public void setImageName(String mImageName) {
+        this.mImageName = mImageName;
     }
 }

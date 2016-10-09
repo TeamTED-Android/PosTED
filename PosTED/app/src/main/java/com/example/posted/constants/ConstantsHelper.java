@@ -23,7 +23,8 @@ public class ConstantsHelper {
     public static final String DISPLAY_COLUMN = "display_size";
     public static final String CURRENCY_COLUMN = "currency";
     public static final String PRICE_COLUMN = "price";
-    public static final String IMAGE_COLUMN = "image";
+    public static final String IMAGE_PATH_COLUMN = "image_path";
+    public static final String IMAGE_NAME_COLUMN = "image_name";
     //Temp table
     public static final String TEMP_LAPTOPS_TABLE_NAME = "temp";
     //Current order table
@@ -31,4 +32,7 @@ public class ConstantsHelper {
 
     public static final String LAPTOP_FRAGMENT_PARCELABLE_KEY="current_laptop";
     public static final String FROM_WHERE_IS_INVOKED_KEY="invocation";
+
+    public static final String IMAGE_DIRECTORY_PATH = "imageDir";
+    public static final String NO_IMAGE_TAG = "No image!";
 }

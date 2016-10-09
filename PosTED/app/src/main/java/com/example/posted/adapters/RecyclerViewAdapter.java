@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.posted.R;
-import com.example.posted.async.AsyncListImageDecoder;
+import com.example.posted.async.AsyncListImageLoader;
 import com.example.posted.models.LaptopSqlite;
 
 import java.util.ArrayList;
@@ -63,18 +63,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             holder.mPrice.setText(current.getPrice());
             holder.mCurrency.setText(current.getCurrency());
             int id = current.getId();
-            String base64Img = current.getImage();
-            if (base64Img == null) {
+//            String base64Img = current.getImagePath();
+            String imagePath = current.getImagePath();
+            String imageName = current.getImageName();
+            if (imagePath == null) {
                 return;
             }
-            if (base64Img.contains(",")) {
-                base64Img = base64Img.substring(current.getImage().indexOf(','));
-            }
+//            if (base64Img.contains(",")) {
+//                base64Img = base64Img.substring(current.getImagePath().indexOf(','));
+//            }
             Map<Integer, Bitmap> bitmapCache = this.getPreLoadedBitmaps();
             Bitmap bitmap = bitmapCache.get(id);
             if (bitmap == null) {
-                AsyncListImageDecoder imageLoader = new AsyncListImageDecoder(holder, position);
-                imageLoader.execute(base64Img);
+                AsyncListImageLoader imageLoader = new AsyncListImageLoader(holder, position);
+                imageLoader.execute(imagePath, imageName);
             } else {
                 bitmap = bitmapCache.get(id);
                 holder.setImageViewBitmap(bitmap);
@@ -88,7 +90,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return this.mLaptops.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AsyncListImageDecoder
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AsyncListImageLoader
             .Listener {
 
         private TextView mModel;
@@ -143,7 +145,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             itemView.setOnClickListener(this);
         }
 
-
         @Override
         public void onClick(View view) {
             LaptopSqlite clickedLaptop = RecyclerViewAdapter.this.mLaptops.get(this.getAdapterPosition());
@@ -151,7 +152,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
 
         @Override
-        public void onImageDecoded(Bitmap bitmap, long execTime, int position) {
+        public void onImageLoaded(Bitmap bitmap, long execTime, int position) {
             if (execTime < this.mCurrExecTime) {
                 return;
             }

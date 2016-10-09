@@ -34,7 +34,11 @@ public interface Laptop {
 
     void setPrice(String price);
 
-    String getImage();
+    String getImagePath();
 
-    void setImage(String image);
+    void setImagePath(String path);
+
+    String getImageName();
+
+    void setImageName(String imgName);
 }

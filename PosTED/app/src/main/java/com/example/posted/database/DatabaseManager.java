@@ -37,7 +37,9 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 ConstantsHelper.DISPLAY_COLUMN + " TEXT, " +
                 ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
                 ConstantsHelper.PRICE_COLUMN + " TEXT, " +
-                ConstantsHelper.IMAGE_COLUMN + " MEDIUMTEXT )";
+                ConstantsHelper.IMAGE_PATH_COLUMN + " TEXT, " +
+                ConstantsHelper.IMAGE_NAME_COLUMN + " TEXT)";
+
         db.execSQL(query);
 
         db.execSQL(usersTableQuery);
@@ -70,13 +72,13 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 ConstantsHelper.DISPLAY_COLUMN + " TEXT, " +
                 ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
                 ConstantsHelper.PRICE_COLUMN + " TEXT, " +
-                ConstantsHelper.IMAGE_COLUMN + " MEDIUMTEXT )";
+                ConstantsHelper.IMAGE_PATH_COLUMN + " TEXT, " +
+                ConstantsHelper.IMAGE_NAME_COLUMN + " TEXT)";
         Toast.makeText(this.mContext, "TEMP table created", Toast.LENGTH_SHORT).show();
         db.execSQL(query);
     }
 
     public void createCurrentOrderTable(SQLiteDatabase db) {
-
         String query = "CREATE TABLE IF NOT EXISTS " +
                 ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME +
                 "( " + ConstantsHelper.ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -88,7 +90,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 ConstantsHelper.DISPLAY_COLUMN + " TEXT, " +
                 ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
                 ConstantsHelper.PRICE_COLUMN + " TEXT, " +
-                ConstantsHelper.IMAGE_COLUMN + " MEDIUMTEXT )";
+                ConstantsHelper.IMAGE_PATH_COLUMN + " TEXT, " +
+                ConstantsHelper.IMAGE_NAME_COLUMN + " TEXT)";
         Toast.makeText(this.mContext, "Orders table created", Toast.LENGTH_SHORT).show();
         db.execSQL(query);
     }
@@ -97,5 +100,9 @@ public class DatabaseManager extends SQLiteOpenHelper {
         String query = "DROP TABLE IF EXISTS " + ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME;
         Toast.makeText(this.mContext, "Orders table dropped", Toast.LENGTH_SHORT).show();
         db.execSQL(query);
+    }
+
+    public Context getContext() {
+        return this.mContext;
     }
 }

@@ -2,10 +2,7 @@ package com.example.posted.admin;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.*;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,19 +18,20 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.example.posted.R;
-import com.example.posted.async.AsyncImageEncoder;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
 import com.example.posted.models.LaptopSqlite;
 import com.example.posted.services.LoadDataService;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class AddProductFragment extends Fragment implements View.OnClickListener, AsyncImageEncoder.Listener {
+public class AddProductFragment extends Fragment implements View.OnClickListener {
 
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final int CAMERA_REQUEST = 2;
@@ -52,6 +50,8 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     private Button mCancelButton;
     private Context mContext;
     private String mImageAsString;
+    private String mImagePath;
+    private String mImageName;
 
     private DatabaseManager mDatabaseManager;
     private LaptopsDatabaseManager mLaptopsDatabaseManager;
@@ -123,7 +123,6 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         return rootView;
     }
 
-
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.addProductButton) {
@@ -175,8 +174,10 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
                 this.mDisplaySize.getText().toString(),
                 this.mCurrency.getText().toString(),
                 this.mPrice.getText().toString(),
-                this.mImageAsString);
-        this.mLaptopsDatabaseManager.insertRecord(currentLaptop, ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+                this.mImagePath,
+                this.mImageName
+        );
+        this.mLaptopsDatabaseManager.insertLaptopIntoTable(currentLaptop, ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
         Toast.makeText(this.mContext, "Laptop added to temp database", Toast.LENGTH_SHORT).show();
     }
 
@@ -193,26 +194,58 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         }
     }
 
-    @Override
-    public void onImageEncoded(String base64str) {
-        Toast.makeText(this.mContext, "Image loaded", Toast.LENGTH_SHORT).show();
-        this.mImageAsString = base64str;
-    }
+//    @Override
+//    public void onImageEncoded(String base64str) {
+//        Toast.makeText(this.mContext, "Image loaded", Toast.LENGTH_SHORT).show();
+//        this.mImageAsString = base64str;
+//    }
 
     private void onCameraResult(Intent data) {
         Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-        AsyncImageEncoder encoder = new AsyncImageEncoder(this);
-        encoder.setProgressBar(this.mProgressBar);
-        encoder.execute(bitmap);
+        int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+        this.mImageName = "img" + count + ".png";
+        this.mImagePath = this.saveToInternalStorage(bitmap);
+
+//        AsyncImageEncoder encoder = new AsyncImageEncoder(this);
+//        encoder.setProgressBar(this.mProgressBar);
+//        encoder.execute(bitmap);
+    }
+
+    private String saveToInternalStorage(final Bitmap bitmapImage) {
+        ContextWrapper cw = new ContextWrapper(this.mContext);
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir(ConstantsHelper.IMAGE_DIRECTORY_PATH, Context.MODE_PRIVATE);
+        // Create imageDir
+        File mypath = new File(directory, this.mImageName);
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            // Use the compress method on the BitMap object to write image to the OutputStream
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return directory.getAbsolutePath();
     }
 
     private void onBrowseResult(Intent data) {
         Uri uri = data.getData();
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.mContext.getContentResolver(), uri);
-            AsyncImageEncoder encoder = new AsyncImageEncoder(this);
-            encoder.setProgressBar(this.mProgressBar);
-            encoder.execute(bitmap);
+            int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+            this.mImageName = "img" + count + ".png";
+            this.mImagePath = this.saveToInternalStorage(bitmap);
+//            AsyncImageEncoder encoder = new AsyncImageEncoder(this);
+//            encoder.setProgressBar(this.mProgressBar);
+//            encoder.execute(bitmap);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -257,7 +290,6 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
             this.mPrice.requestFocus();
             return false;
         }
-
         return true;
     }
 

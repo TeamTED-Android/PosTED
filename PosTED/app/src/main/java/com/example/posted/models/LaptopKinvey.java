@@ -43,6 +43,8 @@ public class LaptopKinvey extends GenericJson implements Laptop {
     @Key
     private String image;
 
+    private String imageName;
+
     public LaptopKinvey() {
 
     }
@@ -55,7 +57,7 @@ public class LaptopKinvey extends GenericJson implements Laptop {
                         String display_size,
                         String currency,
                         String price,
-                        String image) {
+                        String imagePath) {
         this.model = model;
         this.capacity_ram = capacity_ram;
         this.capacity_hdd = capacity_hdd;
@@ -64,9 +66,8 @@ public class LaptopKinvey extends GenericJson implements Laptop {
         this.display_size = display_size;
         this.currency = currency;
         this.price = price;
-        this.image = image;
+        this.image = imagePath;
     }
-
 
     public String getModel() {
         return this.model;
@@ -132,12 +133,27 @@ public class LaptopKinvey extends GenericJson implements Laptop {
         this.price = price;
     }
 
-    public String getImage() {
-        return this.image;
+    public String getImagePath() {
+        String base64Img = this.image;
+        if (base64Img == null) {
+            return null;
+        }
+        if (base64Img.contains(",")) {
+            base64Img = base64Img.substring(base64Img.indexOf(','));
+        }
+        return base64Img;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setImagePath(String path) {
+        this.image = path;
+    }
+
+    public String getImageName() {
+        return this.id + ".png";
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 
     @Override

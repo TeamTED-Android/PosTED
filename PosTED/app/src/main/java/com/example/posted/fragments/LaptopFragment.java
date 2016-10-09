@@ -19,7 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.posted.R;
-import com.example.posted.async.AsyncImageDecoder;
+import com.example.posted.async.AsyncImageLoader;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class LaptopFragment extends Fragment implements View.OnClickListener, AsyncImageDecoder.Listener {
+public class LaptopFragment extends Fragment implements View.OnClickListener, AsyncImageLoader.Listener {
 
     private TextView mCurrentLptModel;
     private TextView mCurrentLptRam;
@@ -93,15 +93,13 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
         if (currentLaptop == null) {
             return null;
         }
-        String base64Img = currentLaptop.getImage();
-        if (base64Img == null) {
+        String imagePath = currentLaptop.getImagePath();
+        String imageName = currentLaptop.getImageName();
+        if (imagePath == null || imageName == null) {
             return null;
         }
-        if (base64Img.contains(",")) {
-            base64Img = base64Img.substring(base64Img.indexOf(','));
-        }
-        AsyncImageDecoder decoder = new AsyncImageDecoder(this);
-        decoder.execute(base64Img);
+        AsyncImageLoader decoder = new AsyncImageLoader(this);
+        decoder.execute(imagePath, imageName);
 
         this.mCurrentLptModel = (TextView) view.findViewById(R.id.current_lpt_model);
         this.mCurrentLptModel.setText(currentLaptop.getModel());
@@ -137,7 +135,7 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
             this.mLaptopFragmentButton.setText("Remove from cart");
         } else {
             this.mCurrentUser = this.getArguments().getString(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY);
-            if (this.mCurrentUser.equals("admin")){
+            if (this.mCurrentUser.equals("admin")) {
                 this.mLaptopFragmentButton.setText("Remove from database");
                 //check if service running and bind
                 this.mServiceIntent = new Intent(this.mContext, LoadDataService.class);
@@ -166,10 +164,11 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
             //  Toast.makeText(getContext(),"Laptop deleted from cart",Toast.LENGTH_SHORT).show();
         } else {
             if (this.mCurrentUser.equals("user")) {
-                this.mLaptopsDatabaseManager.insertRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+                this.mLaptopsDatabaseManager.insertLaptopIntoTable(laptop, ConstantsHelper
+                        .CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
                 Toast.makeText(this.getContext(), "Laptop added to cart", Toast.LENGTH_SHORT).show();
             }
-            if (this.mCurrentUser.equals("admin")){
+            if (this.mCurrentUser.equals("admin")) {
                 this.mLoadDataService.removeLaptopFromKinvey(laptop);
                 this.mLoadDataService.transferDataFromKinvey();
                 this.getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
@@ -211,7 +210,7 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
     }
 
     @Override
-    public void onImageDecoded(Bitmap bitmap) {
+    public void onImageLoaded(Bitmap bitmap) {
         if (bitmap == null) {
             this.mCurrentLptImage.setImageResource(R.mipmap.no_image_black);
         } else {
