@@ -3,6 +3,8 @@ package com.example.posted.async;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.Base64;
+
 import com.example.posted.interfaces.Laptop;
 
 public class AsyncImageSaver extends AsyncTask<String, Void, Bitmap> {
@@ -32,8 +34,8 @@ public class AsyncImageSaver extends AsyncTask<String, Void, Bitmap> {
         if (base64ImgStr == null) {
             return null;
         }
-//        byte[] decodedString = Base64.decode(base64ImgStr, Base64.DEFAULT);
-        byte[] decodedString = CustomBase64.decode(base64ImgStr);
+        byte[] decodedString = Base64.decode(base64ImgStr, Base64.DEFAULT);
+        //byte[] decodedString = CustomBase64.decode(base64ImgStr);
         Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
         return bitmap;
     }
