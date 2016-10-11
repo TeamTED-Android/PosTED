@@ -148,7 +148,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
                 .TEMP_LAPTOPS_TABLE_NAME);
         this.mLoadDataService.uploadLaptops(tempLaptops);
         this.mDatabaseManager.deleteRecordsFromTable(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
-        this.mLoadDataService.transferDataFromKinvey();
+//        this.mLoadDataService.transferDataFromKinvey();
     }
 
     private void onBrowseButtonClicked() {
@@ -201,7 +201,18 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
 //    }
 
     private void onCameraResult(Intent data) {
-        Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+        Bitmap bitmap = null;
+        if (data.getData() == null) {
+            bitmap = (Bitmap) data.getExtras().get("data");
+        } else {
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(this.getActivity().getContentResolver(), data.getData());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        // TODO fix image dimentions
+        bitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, false);
         int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
         this.mImageName = "img" + count + ".png";
         this.mImagePath = this.saveToInternalStorage(bitmap);
@@ -240,6 +251,8 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         Uri uri = data.getData();
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.mContext.getContentResolver(), uri);
+            // TODO fix image dimentions
+            bitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, false);
             int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
             this.mImageName = "img" + count + ".png";
             this.mImagePath = this.saveToInternalStorage(bitmap);

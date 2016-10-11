@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -19,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.posted.R;
-import com.example.posted.async.AsyncImageLoader;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
@@ -28,12 +28,15 @@ import com.example.posted.interfaces.RemoveLaptopListener;
 import com.example.posted.models.LaptopSqlite;
 import com.example.posted.services.LoadDataService;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class LaptopFragment extends Fragment implements View.OnClickListener, AsyncImageLoader.Listener {
+public class LaptopFragment extends Fragment implements View.OnClickListener {
 
     private TextView mCurrentLptModel;
     private TextView mCurrentLptRam;
@@ -98,8 +101,6 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
         if (imagePath == null || imageName == null) {
             return null;
         }
-        AsyncImageLoader decoder = new AsyncImageLoader(this);
-        decoder.execute(imagePath, imageName);
 
         this.mCurrentLptModel = (TextView) view.findViewById(R.id.current_lpt_model);
         this.mCurrentLptModel.setText(currentLaptop.getModel());
@@ -126,7 +127,7 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
         this.mCurrentLptCurrency.setText(currentLaptop.getCurrency());
 
         this.mCurrentLptImage = (ImageView) view.findViewById(R.id.current_lpt_image);
-        //TODO set image
+        this.loadImageIntoImageView(imagePath, imageName);
 
         this.mLaptopFragmentButton = (Button) view.findViewById(R.id.laptop_fragment_button);
         this.mLaptopFragmentButton.setOnClickListener(this);
@@ -153,6 +154,21 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
         this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(this.mDatabaseManager);
 
         return view;
+    }
+
+    private void loadImageIntoImageView(String imgPath, String imgName) {
+        Bitmap bitmap = null;
+        try {
+            File file = new File(imgPath, imgName);
+            bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        if (bitmap == null) {
+            this.mCurrentLptImage.setImageResource(R.mipmap.no_image_black);
+        } else {
+            this.mCurrentLptImage.setImageBitmap(bitmap);
+        }
     }
 
     @Override
@@ -207,14 +223,5 @@ public class LaptopFragment extends Fragment implements View.OnClickListener, As
             }
         }
         return false;
-    }
-
-    @Override
-    public void onImageLoaded(Bitmap bitmap) {
-        if (bitmap == null) {
-            this.mCurrentLptImage.setImageResource(R.mipmap.no_image_black);
-        } else {
-            this.mCurrentLptImage.setImageBitmap(bitmap);
-        }
     }
 }

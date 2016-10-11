@@ -1,11 +1,7 @@
 package com.example.posted;
 
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -25,15 +21,9 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.posted.adapters.SectionsPagerAdapter;
 import com.example.posted.constants.ConstantsHelper;
-import com.example.posted.fragments.LaptopFragment;
-import com.example.posted.fragments.MainFragment;
-import com.example.posted.fragments.OverviewFragment;
-import com.example.posted.fragments.PhonesFragment;
-import com.example.posted.fragments.ProfileFragment;
-import com.example.posted.fragments.SpinnerFragment;
+import com.example.posted.fragments.*;
 import com.example.posted.interfaces.NetworkStateReceiverListener;
 import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
 import com.example.posted.login.LoginActivity;
@@ -185,13 +175,13 @@ public class MainActivity extends AppCompatActivity
             SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.containerViewPager);
             viewPager.setAdapter(adapter);
-        } else if(id == R.id.nav_profile){
+        } else if (id == R.id.nav_profile) {
             if (this.mConteinerViewPager.getVisibility() == View.VISIBLE) {
                 this.mConteinerViewPager.setVisibility(View.INVISIBLE);
                 this.mContainerFrameLayoyt.setVisibility(View.VISIBLE);
             }
             ProfileFragment profileFragment = new ProfileFragment();
-            this.getSupportFragmentManager().beginTransaction().replace(R.id.container,profileFragment).commit();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.container, profileFragment).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
@@ -219,7 +209,7 @@ public class MainActivity extends AppCompatActivity
         this.startService(this.mServiceIntent);
         ////////////////////////////////////////////////////////////////////
         Intent endLoading = new Intent(LoadDataService.BROADCAST_END_LOADING);
-        sendBroadcast(endLoading);
+        this.sendBroadcast(endLoading);
     }
 
     @Override
@@ -284,7 +274,7 @@ public class MainActivity extends AppCompatActivity
                 wifiManager.setWifiEnabled(true);
                 ////////////////////////////////////////////////////////////////////////
                 Intent startLoading = new Intent(LoadDataService.BROADCAST_START_LOADING);
-                sendBroadcast(startLoading);
+                MainActivity.this.sendBroadcast(startLoading);
                 //startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
             }
         });
@@ -318,9 +308,10 @@ public class MainActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             SpinnerFragment spinnerFragment = new SpinnerFragment();
             if (intent.getAction().equals(LoadDataService.BROADCAST_START_LOADING)) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.container, spinnerFragment).addToBackStack(null).commit();
+                MainActivity.this.getSupportFragmentManager()
+                        .beginTransaction().replace(R.id.container, spinnerFragment).addToBackStack(null).commit();
             } else if (intent.getAction().equals(LoadDataService.BROADCAST_END_LOADING)) {
-                getSupportFragmentManager().popBackStack();
+                MainActivity.this.getSupportFragmentManager().popBackStack();
                 //mDrawer.openDrawer(Gravity.LEFT);
             }
         }

@@ -1,20 +1,17 @@
 package com.example.posted.async;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.Base64;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.example.posted.interfaces.Laptop;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 
-public class AsyncImageEncoder extends AsyncTask<String, Integer, String> {
+public class AsyncImageEncoder extends AsyncTask<Bitmap, Integer, String> {
 
     public interface Listener {
 
@@ -61,29 +58,14 @@ public class AsyncImageEncoder extends AsyncTask<String, Integer, String> {
     }
 
     @Override
-    protected String doInBackground(String... params) {
+    protected String doInBackground(Bitmap... params) {
         if (params == null) {
             return null;
         }
-        if (params.length < 2) {
+        if (params.length < 1) {
             return null;
         }
-        String path = params[0];
-        if (path == null) {
-            return null;
-        }
-        String imgName = params[1];
-        if (imgName == null) {
-            return null;
-        }
-        Bitmap bitmap = null;
-        try {
-            File file = new File(path, imgName);
-            bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
-            boolean isDeleted = file.delete();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Bitmap bitmap = params[0];
         if (bitmap == null) {
             return null;
         }
@@ -94,13 +76,10 @@ public class AsyncImageEncoder extends AsyncTask<String, Integer, String> {
         this.publishProgress(6);
         byte[] byteArray = byteArrayOutputStream.toByteArray();
         this.publishProgress(8);
-//        String result = Base64.encodeToString(byteArray, Base64.DEFAULT);
-        String result = CustomBase64.encode(byteArray);
+        String result = Base64.encodeToString(byteArray, Base64.DEFAULT);
         this.publishProgress(10);
         return result;
     }
-
-
 
     @Override
     protected void onPostExecute(String result) {

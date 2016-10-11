@@ -35,8 +35,11 @@ public class AsyncImageSaver extends AsyncTask<String, Void, Bitmap> {
             return null;
         }
         byte[] decodedString = Base64.decode(base64ImgStr, Base64.DEFAULT);
-        //byte[] decodedString = CustomBase64.decode(base64ImgStr);
         Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        // TODO fix image dimentions
+        if (bitmap != null) {
+            bitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, false);
+        }
         return bitmap;
     }
 

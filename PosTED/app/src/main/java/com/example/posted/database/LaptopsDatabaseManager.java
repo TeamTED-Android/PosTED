@@ -103,7 +103,7 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
         String rawSQL = "SELECT * FROM " + tableName;
         Cursor allItemsCursor = database.rawQuery(rawSQL, null);
         int count = 0;
-        if(allItemsCursor == null) {
+        if (allItemsCursor == null) {
             database.close();
             return count;
         }
@@ -114,9 +114,19 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
     }
 
     public void insertIntoMainDatabase(Laptop kinveyLaptop) {
-        AsyncImageSaver decoder = new AsyncImageSaver(this, kinveyLaptop);
-        String base64Str = kinveyLaptop.getImagePath();
-        decoder.execute(base64Str);
+        ContextWrapper cw = new ContextWrapper(this.mContext);
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir(ConstantsHelper.IMAGE_DIRECTORY_PATH, Context.MODE_PRIVATE);
+        // Create imageDir
+        File file = new File(directory, kinveyLaptop.getImageName());
+        if (!file.exists()) {
+            AsyncImageSaver decoder = new AsyncImageSaver(this, kinveyLaptop);
+            String base64Str = kinveyLaptop.getImagePath();
+            decoder.execute(base64Str);
+        } else {
+            //check the else statement if the object is already in database or only the image exists
+            this.insertKinveyLaptop(kinveyLaptop, directory.getAbsolutePath());
+        }
     }
 
     @Override

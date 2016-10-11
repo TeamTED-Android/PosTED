@@ -4,6 +4,8 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -25,6 +27,8 @@ import com.kinvey.java.core.KinveyClientCallback;
 import com.kinvey.java.model.KinveyDeleteResponse;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 
@@ -120,7 +124,6 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
                 Toast.makeText(LoadDataService.this, "Successfully receive the info", Toast.LENGTH_SHORT).show();
                 for (LaptopKinvey laptop : laptops) {
                     LoadDataService.this.mLaptopsDatabaseManager.insertIntoMainDatabase(laptop);
-
                     ///////////////////////////////////////////////////////
                     Intent endLoading = new Intent(BROADCAST_END_LOADING);
                     LoadDataService.this.sendBroadcast(endLoading);
@@ -131,26 +134,39 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
             @Override
             public void onFailure(Throwable throwable) {
                 Toast.makeText(LoadDataService.this, "Fail to receive the info", Toast.LENGTH_SHORT).show();
-
                 ////////////////////////////////////////////////////////
                 Intent endLoading = new Intent(BROADCAST_END_LOADING);
                 LoadDataService.this.sendBroadcast(endLoading);
             }
 
         });
-
     }
 
     public void uploadLaptops(ArrayList<LaptopSqlite> tempLaptops) {
         this.loginToKinvey();
         for (LaptopSqlite tempLaptop : tempLaptops) {
+            Bitmap bitmap = this.loadImage(tempLaptop.getImagePath(), tempLaptop.getImageName());
             AsyncImageEncoder encoder = new AsyncImageEncoder(this, tempLaptop);
-            encoder.execute(tempLaptop.getImagePath(), tempLaptop.getImageName());
+            encoder.execute(bitmap);
         }
     }
 
+    private Bitmap loadImage(String imgPath, String imgName) {
+        Bitmap bitmap = null;
+        try {
+            File file = new File(imgPath, imgName);
+            bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return bitmap;
+    }
+
+    // TODO delete the file somewhere
+
     private void uploadKinveyLaptop(Laptop tempLaptop, String base64Str) {
-        LaptopKinvey laptopForUpload = new LaptopKinvey(
+        File imgToDelete = new File(tempLaptop.getImagePath(), tempLaptop.getImageName());
+        final LaptopKinvey laptopForUpload = new LaptopKinvey(
                 tempLaptop.getModel(),
                 tempLaptop.getCapacity_ram(),
                 tempLaptop.getCapacity_hdd(),
@@ -161,12 +177,12 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
                 tempLaptop.getPrice(),
                 base64Str);
         AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
-        // TODO:      V      <- this could be the problem for uploading big images
         laptopsInfo.save(laptopForUpload, new KinveyClientCallback<LaptopKinvey>() {
             @Override
             public void onSuccess(LaptopKinvey laptopKinvey) {
                 Toast.makeText(LoadDataService.this, "Laptop " + laptopKinvey.getModel() + " Successfully " +
                         "uploaded", Toast.LENGTH_SHORT).show();
+                LoadDataService.this.transferDataFromKinvey();
             }
 
             @Override
@@ -175,6 +191,7 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
                 Log.d("Service", throwable.getMessage());
             }
         });
+        boolean isDeleted = imgToDelete.delete();
     }
 
     @Override

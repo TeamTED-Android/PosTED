@@ -35,4 +35,6 @@ public class ConstantsHelper {
 
     public static final String IMAGE_DIRECTORY_PATH = "imageDir";
     public static final String NO_IMAGE_TAG = "No image!";
+
+    public static final int CAMERA_REQUESTS = 0;
 }
