@@ -37,4 +37,12 @@ public class ConstantsHelper {
     public static final String NO_IMAGE_TAG = "No image!";
 
     public static final int CAMERA_REQUESTS = 0;
+
+    //Broadcasts
+    public static final String BROADCAST_START_LOADING = "com.example.posted.start";
+    public static final String BROADCAST_END_LOADING = "com.example.posted.end";
+
+    //Send mail constants
+    public static final String MESSAGE_TYPE = "message/rfc822";
+
 }

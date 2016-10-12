@@ -159,6 +159,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     }
 
     private void onCancelButtonClicked() {
+
     }
 
     private void onAddProductButtonClicked() {
@@ -178,6 +179,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
                 this.mImageName
         );
         this.mLaptopsDatabaseManager.insertLaptopIntoTable(currentLaptop, ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+        this.makeFieldsEmpty();
         Toast.makeText(this.mContext, "Laptop added to temp database", Toast.LENGTH_SHORT).show();
     }
 
@@ -334,5 +336,16 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     private Button getCameraButton(View root) {
         Button cameraButton = (Button) root.findViewById(R.id.camera_button);
         return cameraButton;
+    }
+
+    private void makeFieldsEmpty(){
+        this.mModel.setText("");
+        this.mPrice.setText("");
+        this.mHdd.setText("");
+        this.mRam.setText("");
+        this.mDisplaySize.setText("");
+        this.mProcessor.setText("");
+        this.mVideoCard.setText("");
+        this.mCurrency.setText("");
     }
 }

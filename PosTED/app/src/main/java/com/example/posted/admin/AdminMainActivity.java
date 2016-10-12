@@ -56,8 +56,6 @@ public class AdminMainActivity extends AppCompatActivity
     private LoginManager mLoginManager;
     private NetworkStateReceiver mNetworkStateReceiver;
     private long back_pressed;
-
-    /////////////////////////////////////////////////////////
     private AdminMainActivity.BroadcastListener mBroadcastListener;
 
     @Override
@@ -114,11 +112,10 @@ public class AdminMainActivity extends AppCompatActivity
         textView.setText(this.mLoginManager.getLoginUser().getUsername());
         textView.setGravity(Gravity.CENTER | Gravity.RIGHT);
 
-        //////////////////////////////////////////////////////////////////
         mBroadcastListener = new AdminMainActivity.BroadcastListener();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(LoadDataService.BROADCAST_START_LOADING);
-        filter.addAction(LoadDataService.BROADCAST_END_LOADING);
+        filter.addAction(ConstantsHelper.BROADCAST_START_LOADING);
+        filter.addAction(ConstantsHelper.BROADCAST_END_LOADING);
         this.registerReceiver(mBroadcastListener, filter);
 
     }
@@ -199,8 +196,7 @@ public class AdminMainActivity extends AppCompatActivity
     public void networkAvailable() {
         this.mServiceIntent = new Intent(this, LoadDataService.class);
         this.startService(this.mServiceIntent);
-        ////////////////////////////////////////////////////////////////////
-        Intent endLoading = new Intent(LoadDataService.BROADCAST_END_LOADING);
+        Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
         sendBroadcast(endLoading);
     }
 
@@ -209,10 +205,9 @@ public class AdminMainActivity extends AppCompatActivity
         super.onResume();
         this.registerReceiver(this.mNetworkStateReceiver, new IntentFilter(android.net.ConnectivityManager
                 .CONNECTIVITY_ACTION));
-        ////////////////////////////////////////////////////////
         IntentFilter filter = new IntentFilter();
-        filter.addAction(LoadDataService.BROADCAST_START_LOADING);
-        filter.addAction(LoadDataService.BROADCAST_END_LOADING);
+        filter.addAction(ConstantsHelper.BROADCAST_START_LOADING);
+        filter.addAction(ConstantsHelper.BROADCAST_END_LOADING);
         this.registerReceiver(mBroadcastListener, filter);
     }
 
@@ -223,7 +218,6 @@ public class AdminMainActivity extends AppCompatActivity
             this.stopService(this.mServiceIntent);
         }
         this.unregisterReceiver(this.mNetworkStateReceiver);
-        ////////////////////////////////////////////////
         this.unregisterReceiver(this.mBroadcastListener);
     }
 
@@ -236,19 +230,19 @@ public class AdminMainActivity extends AppCompatActivity
 
     private void attemptToTurnOnWiFi() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("No internet connection!");
-        builder.setMessage("This App needs Internet connection to update the database!");
-        builder.setPositiveButton("Turn on WiFi", new DialogInterface.OnClickListener() {
+        builder.setTitle(getResources().getString(R.string.wifi_dialog_title));
+        builder.setMessage(getResources().getString(R.string.wifi_dialog_message));
+        builder.setPositiveButton(getResources().getString(R.string.wifi_dialog_positive_button), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 WifiManager wifiManager = (WifiManager) AdminMainActivity.this.getSystemService(Context.WIFI_SERVICE);
                 wifiManager.setWifiEnabled(true);
-                ////////////////////////////////////////////////////////////////////////
-                Intent startLoading = new Intent(LoadDataService.BROADCAST_START_LOADING);
+
+                Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
                 sendBroadcast(startLoading);
             }
         });
-        builder.setNeutralButton("Work Offline", new DialogInterface.OnClickListener() {
+        builder.setNeutralButton(getResources().getString(R.string.wifi_dialog_neutral_button), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
@@ -261,10 +255,10 @@ public class AdminMainActivity extends AppCompatActivity
 
     private void sendMail() {
         Intent i = new Intent(Intent.ACTION_SEND);
-        i.setType("message/rfc822");
-        i.putExtra(Intent.EXTRA_EMAIL, new String[]{"office.posted@gmail.com"});
-        i.putExtra(Intent.EXTRA_SUBJECT, "subject of email");
-        i.putExtra(Intent.EXTRA_TEXT, "body of email");
+        i.setType(ConstantsHelper.MESSAGE_TYPE);
+        i.putExtra(Intent.EXTRA_EMAIL, new String[]{getResources().getString(R.string.posted_email)});
+        i.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.email_subject));
+        i.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.email_body));
         try {
             this.startActivity(Intent.createChooser(i, "Send mail..."));
         } catch (android.content.ActivityNotFoundException ex) {
@@ -272,15 +266,14 @@ public class AdminMainActivity extends AppCompatActivity
         }
     }
 
-    //////////////////////////////////////////////////////////////////
     private class BroadcastListener extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             SpinnerFragment spinnerFragment = new SpinnerFragment();
-            if (intent.getAction().equals(LoadDataService.BROADCAST_START_LOADING)) {
+            if (intent.getAction().equals(ConstantsHelper.BROADCAST_START_LOADING)) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,spinnerFragment).addToBackStack(null).commit();
-            }else if (intent.getAction().equals(LoadDataService.BROADCAST_END_LOADING)){
+            }else if (intent.getAction().equals(ConstantsHelper.BROADCAST_END_LOADING)){
                 getSupportFragmentManager().popBackStack();
                 //mDrawer.openDrawer(Gravity.LEFT);
             }

@@ -51,5 +51,11 @@
     <string name="update_password">Update pass</string>
     <string name="posted">PosTED</string>
     <string name="posted_email">office.posted@gmail.com</string>
+    <string name="email_subject">subject of email</string>
+    <string name="email_body">body of email</string>
+    <string name="wifi_dialog_title">No internet connection!</string>
+    <string name="wifi_dialog_message">This App needs Internet connection to update the database!</string>
+    <string name="wifi_dialog_positive_button">Turn on WiFi</string>
+    <string name="wifi_dialog_neutral_button">Work Offline</string>
 
 </resources>
