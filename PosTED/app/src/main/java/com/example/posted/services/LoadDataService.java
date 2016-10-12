@@ -138,14 +138,14 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
         });
     }
 
-    public void uploadLaptops(ArrayList<LaptopSqlite> tempLaptops) {
+    public void uploadLaptops(ArrayList<LaptopSqlite> laptopsToAdd) {
         Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
         this.sendBroadcast(startLoading);
 
         this.loginToKinvey();
-        for (LaptopSqlite tempLaptop : tempLaptops) {
-            Bitmap bitmap = this.loadImage(tempLaptop.getImagePath(), tempLaptop.getImageName());
-            AsyncImageEncoder encoder = new AsyncImageEncoder(this, tempLaptop);
+        for (LaptopSqlite current : laptopsToAdd) {
+            Bitmap bitmap = this.loadImage(current.getImagePath(), current.getImageName());
+            AsyncImageEncoder encoder = new AsyncImageEncoder(this, current);
             encoder.execute(bitmap);
         }
     }
@@ -161,9 +161,7 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
         return bitmap;
     }
 
-    // TODO delete the file somewhere
-
-    private void uploadKinveyLaptop(Laptop tempLaptop, String base64Str) {
+    private void uploadKinveyLaptop(final Laptop tempLaptop, String base64Str) {
         File imgToDelete = new File(tempLaptop.getImagePath(), tempLaptop.getImageName());
         final LaptopKinvey laptopForUpload = new LaptopKinvey(
                 tempLaptop.getModel(),
@@ -181,7 +179,7 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
             public void onSuccess(LaptopKinvey laptopKinvey) {
                 Toast.makeText(LoadDataService.this, "Laptop " + laptopKinvey.getModel() + " Successfully " +
                         "uploaded", Toast.LENGTH_SHORT).show();
-
+                LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(tempLaptop.getId(),ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
                 Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                 LoadDataService.this.sendBroadcast(endLoading);
 
@@ -206,10 +204,20 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
         this.uploadKinveyLaptop(laptop, base64str);
     }
 
-    public void removeLaptopFromKinvey(final Laptop laptopToRemove){
+    public void removeLaptops(ArrayList<LaptopSqlite> laptopsToRemove) {
         Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
         this.sendBroadcast(startLoading);
+
         this.loginToKinvey();
+        for (LaptopSqlite current : laptopsToRemove) {
+            this.removeLaptopFromKinvey(current);
+        }
+    }
+
+    private void removeLaptopFromKinvey(final Laptop laptopToRemove){
+//        Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
+//        this.sendBroadcast(startLoading);
+        //this.loginToKinvey();
         Query query = new Query();
         query.equals("_id",laptopToRemove.getId());
         AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
@@ -220,7 +228,9 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
                 String imgPath = laptopToRemove.getImagePath();
                 File file = new File(imgPath, imgName);
                 boolean isDeleted = file.delete();
-                LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(laptopToRemove,ConstantsHelper.LAPTOPS_TABLE_NAME);
+                //LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(laptopToRemove,ConstantsHelper.LAPTOPS_TABLE_NAME);
+                LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(laptopToRemove.getId(),ConstantsHelper.LAPTOPS_TABLE_NAME);
+                LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(laptopToRemove.getId(),ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
                 Toast.makeText(LoadDataService.this, "File " + file.getName() + " isDeleted " + isDeleted, Toast.LENGTH_SHORT).show();
                 Toast.makeText(LoadDataService.this, "Laptop " + laptopToRemove.getModel() + " Successfully " +
                         "deleted", Toast.LENGTH_SHORT).show();

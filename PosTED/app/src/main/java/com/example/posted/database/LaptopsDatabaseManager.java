@@ -55,7 +55,6 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
         values.put(ConstantsHelper.IMAGE_PATH_COLUMN, sqliteLaptop.getImagePath());
         values.put(ConstantsHelper.IMAGE_NAME_COLUMN, sqliteLaptop.getImageName());
 
-        //database.insert(tableName, null, values);
         database.insertWithOnConflict(tableName,null,values,SQLiteDatabase.CONFLICT_IGNORE);
         database.close();
     }
@@ -87,17 +86,22 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
         return result;
     }
 
-    // Using temporary table for all records from Admin...
-    // After that upload all new records in Kinvey and drop the temporary table
-    public void createTempTable() {
-        SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
-        this.mDatabaseManager.createTempLaptopTable(database);
-    }
+//    // Using temporary table for all records from Admin...
+//    // After that upload all new records in Kinvey and drop the temporary table
+//    public void createTempTable() {
+//        SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
+//        this.mDatabaseManager.createTempLaptopTable(database);
+//    }
 
-    public void deleteRecord(Laptop currentLaptop, String tableName) {
+//    public void deleteRecord(Laptop currentLaptop, String tableName) {
+//        SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
+////        LaptopSqlite laptopSqlite = (LaptopSqlite) currentLaptop;
+//        database.delete(tableName, "id=?", new String[]{currentLaptop.getId()});
+//    }
+
+    public void deleteRecord(String id, String tableName) {
         SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
-//        LaptopSqlite laptopSqlite = (LaptopSqlite) currentLaptop;
-        database.delete(tableName, "id=?", new String[]{currentLaptop.getId()});
+        database.delete(tableName, "id=?", new String[]{id});
     }
 
     public int getRecordCount(String tableName) {

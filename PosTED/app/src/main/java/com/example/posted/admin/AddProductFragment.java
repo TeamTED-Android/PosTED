@@ -64,7 +64,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     private LoadDataService mLoadDataService;
     private Intent mServiceIntent;
     private boolean mIsBinded;
-    private Button mUploadButton;
+
 
     public AddProductFragment() {
     }
@@ -116,9 +116,8 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         this.mAddImageButton.setOnClickListener(this);
         this.mImageAsString = "";
 
-        this.mLaptopsDatabaseManager.createTempTable();
-        this.mUploadButton = (Button) rootView.findViewById(R.id.uploadButton);
-        this.mUploadButton.setOnClickListener(this);
+        //this.mLaptopsDatabaseManager.createTempTable();
+
         //check if service running and bind
         this.mServiceIntent = new Intent(this.mContext, LoadDataService.class);
         if (!this.isDataServiceRunning(LoadDataService.class)) {
@@ -137,8 +136,6 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
             this.onCancelButtonClicked();
         } else if (v.getId() == R.id.browse_button) {
             this.onBrowseButtonClicked();
-        } else if (v.getId() == R.id.uploadButton) {
-            this.onUploadButtonClicked();
         } else if (v.getId() == R.id.camera_button) {
             this.onCameraButtonClicked();
         }
@@ -157,7 +154,12 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     }
 
     private void onCancelButtonClicked() {
-
+        String id = this.mImageName.substring(0,this.mImageName.indexOf('.'));
+        this.mLaptopsDatabaseManager.deleteRecord(id, ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
+        File file = new File(this.mImagePath, this.mImageName);
+        boolean isDeleted = file.delete();
+        Toast.makeText(mContext, "File " + this.mImageName + " isDeleted " + isDeleted, Toast.LENGTH_SHORT).show();
+        this.makeFieldsEmpty();
     }
 
     private void onAddProductButtonClicked() {
@@ -178,9 +180,9 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
                 this.mImagePath,
                 this.mImageName
         );
-        this.mLaptopsDatabaseManager.insertLaptopIntoTable(currentLaptop, ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+        this.mLaptopsDatabaseManager.insertLaptopIntoTable(currentLaptop, ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
         this.makeFieldsEmpty();
-        Toast.makeText(this.mContext, "Laptop added to temp database", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this.mContext, "Laptop added to \"ADD\" list", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -215,7 +217,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         }
         // TODO fix image dimentions
         bitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, false);
-        int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+        int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
         this.mImageName = "img" + count + ".png";
         this.mImagePath = this.saveToInternalStorage(bitmap);
 
@@ -255,7 +257,7 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.mContext.getContentResolver(), uri);
             // TODO fix image dimentions
             bitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, false);
-            int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+            int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
             this.mImageName = "img" + count + ".png";
             this.mImagePath = this.saveToInternalStorage(bitmap);
 //            AsyncImageEncoder encoder = new AsyncImageEncoder(this);
@@ -349,12 +351,12 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         this.mCurrency.setText("");
     }
 
-    private void onUploadButtonClicked() {
-        ArrayList<LaptopSqlite> tempLaptops = this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper
-                .TEMP_LAPTOPS_TABLE_NAME);
-        this.mLoadDataService.uploadLaptops(tempLaptops);
-        this.mDatabaseManager.deleteRecordsFromTable(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
-
-    }
+//    private void onUploadButtonClicked() {
+//        ArrayList<LaptopSqlite> tempLaptops = this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper
+//                .ADMIN_ADDED_LAPTOPS_TABLE_NAME);
+//        this.mLoadDataService.uploadLaptops(tempLaptops);
+//        this.mDatabaseManager.deleteRecordsFromTable(ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
+//
+//    }
 
 }

@@ -57,5 +57,8 @@
     <string name="wifi_dialog_message">This App needs Internet connection to update the database!</string>
     <string name="wifi_dialog_positive_button">Turn on WiFi</string>
     <string name="wifi_dialog_neutral_button">Work Offline</string>
+    <string name="preview_added_products">Preview added products</string>
+    <string name="preview_removed_products">Preview removed products</string>
+    <string name="sync">Sync</string>
 
 </resources>

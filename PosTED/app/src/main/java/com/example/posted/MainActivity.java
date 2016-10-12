@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity
                 this.mConteinerViewPager.setVisibility(View.VISIBLE);
             }
 
-            SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this);
+            SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.containerViewPager);
             viewPager.setAdapter(adapter);
         } else if (id == R.id.nav_profile) {

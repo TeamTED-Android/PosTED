@@ -1,18 +1,22 @@
 package com.example.posted.admin;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -20,6 +24,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -27,17 +32,22 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.posted.R;
+import com.example.posted.adapters.SectionsPagerAdapter;
 import com.example.posted.constants.ConstantsHelper;
+import com.example.posted.database.DatabaseManager;
+import com.example.posted.database.LaptopsDatabaseManager;
 import com.example.posted.fragments.LaptopFragment;
 import com.example.posted.fragments.MainFragment;
 import com.example.posted.fragments.OverviewFragment;
 import com.example.posted.fragments.PhonesFragment;
 import com.example.posted.fragments.ProfileFragment;
 import com.example.posted.fragments.SpinnerFragment;
+import com.example.posted.interfaces.Laptop;
 import com.example.posted.interfaces.NetworkStateReceiverListener;
 import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
 import com.example.posted.login.LoginActivity;
@@ -45,6 +55,9 @@ import com.example.posted.login.LoginManager;
 import com.example.posted.models.LaptopSqlite;
 import com.example.posted.receivers.NetworkStateReceiver;
 import com.example.posted.services.LoadDataService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AdminMainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -57,6 +70,13 @@ public class AdminMainActivity extends AppCompatActivity
     private NetworkStateReceiver mNetworkStateReceiver;
     private long back_pressed;
     private AdminMainActivity.BroadcastListener mBroadcastListener;
+    private ViewPager mAdminConteinerViewPager;
+    private FrameLayout mAdminContainerFrameLayoyt;
+
+    private DatabaseManager mDatabaseManager;
+    private LaptopsDatabaseManager mLaptopsDatabaseManager;
+    private LoadDataService mLoadDataService;
+    private boolean mIsBinded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +138,12 @@ public class AdminMainActivity extends AppCompatActivity
         filter.addAction(ConstantsHelper.BROADCAST_END_LOADING);
         this.registerReceiver(mBroadcastListener, filter);
 
+        this.mAdminConteinerViewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
+        this.mAdminContainerFrameLayoyt = (FrameLayout) this.findViewById(R.id.adminContainer);
+
+        this.mDatabaseManager = new DatabaseManager(this);
+        this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(this.mDatabaseManager);
+
     }
 
 
@@ -130,27 +156,88 @@ public class AdminMainActivity extends AppCompatActivity
        this.getSupportFragmentManager().popBackStack();
 
         if (id == R.id.admin_nav_laptops) {
+            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
+                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
+                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
+            }
             OverviewFragment overviewFragment = new OverviewFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment)
                     .commit();
         } else if (id == R.id.admin_nav_phones) {
+            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
+                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
+                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
+            }
             PhonesFragment phonesFragment = new PhonesFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,phonesFragment).commit();
         } else if (id == R.id.admin_nav_addProduct) {
+            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
+                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
+                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
+            }
             AddProductFragment fragment = new AddProductFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, fragment).commit();
 
         } else if (id == R.id.admin_nav_signOut) {
+            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
+                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
+                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
+            }
             this.mLoginManager.logoutUser();
             Intent intent = new Intent(this, LoginActivity.class);
             this.finish();
             this.startActivity(intent);
         } else if (id == R.id.admin_nav_home) {
+            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
+                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
+                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
+            }
             MainFragment mainFragment = new MainFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,mainFragment).commit();
         }else if(id == R.id.admin_nav_profile){
+            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
+                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
+                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
+            }
             ProfileFragment profileFragment = new ProfileFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,profileFragment).commit();
+        }else if (id == R.id.admin_nav_previewAddedProducts){
+            if (this.mAdminContainerFrameLayoyt.getVisibility() == View.VISIBLE) {
+                this.mAdminContainerFrameLayoyt.setVisibility(View.INVISIBLE);
+                this.mAdminConteinerViewPager.setVisibility(View.VISIBLE);
+            }
+            //TODO give the collection
+            SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this, ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
+            ViewPager viewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
+            viewPager.setAdapter(adapter);
+
+        }else if (id == R.id.admin_nav_previewRemovedProducts){
+            if (this.mAdminContainerFrameLayoyt.getVisibility() == View.VISIBLE) {
+                this.mAdminContainerFrameLayoyt.setVisibility(View.INVISIBLE);
+                this.mAdminConteinerViewPager.setVisibility(View.VISIBLE);
+            }
+
+            //TODO give the collection
+            SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this, ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
+            ViewPager viewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
+            viewPager.setAdapter(adapter);
+
+        }else if (id == R.id.admin_nav_sync){
+            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
+                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
+                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
+            }
+            if (!this.isDataServiceRunning(LoadDataService.class)) {
+                this.startService(this.mServiceIntent);
+            }
+            this.bindService(this.mServiceIntent, this.connection, Context.BIND_AUTO_CREATE);
+
+            //check if service is running and bind
+
+            //get all laptops for remove... and remove them
+
+            //get all laptops for add... and add them
+
         }
 
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
@@ -214,6 +301,9 @@ public class AdminMainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
+        if (this.mIsBinded){
+            this.unbindService(connection);
+        }
         if (this.mServiceIntent != null) {
             this.stopService(this.mServiceIntent);
         }
@@ -302,5 +392,35 @@ public class AdminMainActivity extends AppCompatActivity
                 grantResults[0] == PackageManager.PERMISSION_GRANTED &&
                 grantResults[1] == PackageManager.PERMISSION_GRANTED) {
         }
+    }
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
+            AdminMainActivity.this.mLoadDataService = binder.getService();
+            AdminMainActivity.this.mIsBinded = true;
+
+            ArrayList<LaptopSqlite> laptopsForRemove = AdminMainActivity.this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
+            AdminMainActivity.this.mLoadDataService.removeLaptops(laptopsForRemove);
+            ArrayList<LaptopSqlite> laptopsForAdd = AdminMainActivity.this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
+            AdminMainActivity.this.mLoadDataService.uploadLaptops(laptopsForAdd);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            AdminMainActivity.this.mIsBinded = false;
+        }
+    };
+
+    private boolean isDataServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> services = manager.getRunningServices(Integer.MAX_VALUE);
+        for (ActivityManager.RunningServiceInfo service : services) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

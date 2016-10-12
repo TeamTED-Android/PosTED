@@ -175,7 +175,8 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         LaptopSqlite laptop = this.getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
         if (this.getArguments().getBoolean("is_cart")) {
-            this.mLaptopsDatabaseManager.deleteRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+            //this.mLaptopsDatabaseManager.deleteRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+            this.mLaptopsDatabaseManager.deleteRecord(laptop.getId(), ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
             mRemoveLaptopListener.onRemoved();
             //  Toast.makeText(getContext(),"Laptop deleted from cart",Toast.LENGTH_SHORT).show();
         } else {
@@ -185,9 +186,11 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
                 Toast.makeText(this.getContext(), "Laptop added to cart", Toast.LENGTH_SHORT).show();
             }
             if (this.mCurrentUser.equals("admin")) {
-                this.mLoadDataService.removeLaptopFromKinvey(laptop);
-                this.mLoadDataService.transferDataFromKinvey();
-                this.getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
+//                this.mLoadDataService.removeLaptopFromKinvey(laptop);
+//                this.mLoadDataService.transferDataFromKinvey();
+//                this.getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
+                this.mLaptopsDatabaseManager.insertLaptopIntoTable(laptop, ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
+                Toast.makeText(this.mContext, "Laptop added to \"REMOVE\" list", Toast.LENGTH_SHORT).show();
             }
         }
     }

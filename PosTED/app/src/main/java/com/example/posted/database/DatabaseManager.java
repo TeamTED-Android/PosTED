@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.widget.Toast;
+
 import com.example.posted.constants.ConstantsHelper;
 
 public class DatabaseManager extends SQLiteOpenHelper {
@@ -18,31 +19,11 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String usersTableQuery = "CREATE TABLE IF NOT EXISTS "
-                + ConstantsHelper.USERS_TABLE_NAME
-                + " ("
-                + ConstantsHelper.ID_COLUMN
-                + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                ConstantsHelper.USERNAME_COLUMN + " TEXT, "
-                + ConstantsHelper.PASSWORD_COLUMN + " TEXT)";
+        this.createUsersTable(db);
+        this.createLaptopsTable(db);
+        this.createAdminAddedLaptopsTable(db);
+        this.createAdminRemovedLaptopsTable(db);
 
-        String query = "CREATE TABLE IF NOT EXISTS " +
-                ConstantsHelper.LAPTOPS_TABLE_NAME +
-                "( " + ConstantsHelper.ID_COLUMN + " TEXT PRIMARY KEY, " +
-                ConstantsHelper.MODEL_COLUMN + " TEXT, " +
-                ConstantsHelper.RAM_COLUMN + " TEXT, " +
-                ConstantsHelper.HDD_COLUMN + " TEXT, " +
-                ConstantsHelper.PROCESSOR_COLUMN + " TEXT, " +
-                ConstantsHelper.VIDEO_CARD_COLUMN + " TEXT, " +
-                ConstantsHelper.DISPLAY_COLUMN + " TEXT, " +
-                ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
-                ConstantsHelper.PRICE_COLUMN + " TEXT, " +
-                ConstantsHelper.IMAGE_PATH_COLUMN + " TEXT, " +
-                ConstantsHelper.IMAGE_NAME_COLUMN + " TEXT)";
-
-        db.execSQL(query);
-
-        db.execSQL(usersTableQuery);
     }
 
     @Override
@@ -60,23 +41,23 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
     //Create Temporary table for all records from Admin panel
-    public void createTempLaptopTable(SQLiteDatabase db) {
-        String query = "CREATE TABLE IF NOT EXISTS " +
-                ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME +
-                "( " + ConstantsHelper.ID_COLUMN + " TEXT PRIMARY KEY, " +
-                ConstantsHelper.MODEL_COLUMN + " TEXT, " +
-                ConstantsHelper.RAM_COLUMN + " TEXT, " +
-                ConstantsHelper.HDD_COLUMN + " TEXT, " +
-                ConstantsHelper.PROCESSOR_COLUMN + " TEXT, " +
-                ConstantsHelper.VIDEO_CARD_COLUMN + " TEXT, " +
-                ConstantsHelper.DISPLAY_COLUMN + " TEXT, " +
-                ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
-                ConstantsHelper.PRICE_COLUMN + " TEXT, " +
-                ConstantsHelper.IMAGE_PATH_COLUMN + " TEXT, " +
-                ConstantsHelper.IMAGE_NAME_COLUMN + " TEXT)";
-        Toast.makeText(this.mContext, "TEMP table created", Toast.LENGTH_SHORT).show();
-        db.execSQL(query);
-    }
+//    public void createTempLaptopTable(SQLiteDatabase db) {
+//        String query = "CREATE TABLE IF NOT EXISTS " +
+//                ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME +
+//                "( " + ConstantsHelper.ID_COLUMN + " TEXT PRIMARY KEY, " +
+//                ConstantsHelper.MODEL_COLUMN + " TEXT, " +
+//                ConstantsHelper.RAM_COLUMN + " TEXT, " +
+//                ConstantsHelper.HDD_COLUMN + " TEXT, " +
+//                ConstantsHelper.PROCESSOR_COLUMN + " TEXT, " +
+//                ConstantsHelper.VIDEO_CARD_COLUMN + " TEXT, " +
+//                ConstantsHelper.DISPLAY_COLUMN + " TEXT, " +
+//                ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
+//                ConstantsHelper.PRICE_COLUMN + " TEXT, " +
+//                ConstantsHelper.IMAGE_PATH_COLUMN + " TEXT, " +
+//                ConstantsHelper.IMAGE_NAME_COLUMN + " TEXT)";
+//        Toast.makeText(this.mContext, "TEMP table created", Toast.LENGTH_SHORT).show();
+//        db.execSQL(query);
+//    }
 
     public void createCurrentOrderTable(SQLiteDatabase db) {
         String query = "CREATE TABLE IF NOT EXISTS " +
@@ -104,5 +85,74 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     public Context getContext() {
         return this.mContext;
+    }
+
+    private void createUsersTable(SQLiteDatabase db) {
+        String usersTableQuery = "CREATE TABLE IF NOT EXISTS "
+                + ConstantsHelper.USERS_TABLE_NAME
+                + " ("
+                + ConstantsHelper.ID_COLUMN
+                + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                ConstantsHelper.USERNAME_COLUMN + " TEXT, "
+                + ConstantsHelper.PASSWORD_COLUMN + " TEXT)";
+
+        db.execSQL(usersTableQuery);
+    }
+
+    private void createLaptopsTable(SQLiteDatabase db) {
+        String laptopsTableQuery = "CREATE TABLE IF NOT EXISTS " +
+                ConstantsHelper.LAPTOPS_TABLE_NAME +
+                "( " + ConstantsHelper.ID_COLUMN + " TEXT PRIMARY KEY, " +
+                ConstantsHelper.MODEL_COLUMN + " TEXT, " +
+                ConstantsHelper.RAM_COLUMN + " TEXT, " +
+                ConstantsHelper.HDD_COLUMN + " TEXT, " +
+                ConstantsHelper.PROCESSOR_COLUMN + " TEXT, " +
+                ConstantsHelper.VIDEO_CARD_COLUMN + " TEXT, " +
+                ConstantsHelper.DISPLAY_COLUMN + " TEXT, " +
+                ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
+                ConstantsHelper.PRICE_COLUMN + " TEXT, " +
+                ConstantsHelper.IMAGE_PATH_COLUMN + " TEXT, " +
+                ConstantsHelper.IMAGE_NAME_COLUMN + " TEXT)";
+
+        db.execSQL(laptopsTableQuery);
+    }
+
+    private void createAdminAddedLaptopsTable(SQLiteDatabase db){
+        String addedLaptopsTableQuery = "CREATE TABLE IF NOT EXISTS " +
+                ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME +
+                "( " + ConstantsHelper.ID_COLUMN + " TEXT PRIMARY KEY, " +
+                ConstantsHelper.MODEL_COLUMN + " TEXT, " +
+                ConstantsHelper.RAM_COLUMN + " TEXT, " +
+                ConstantsHelper.HDD_COLUMN + " TEXT, " +
+                ConstantsHelper.PROCESSOR_COLUMN + " TEXT, " +
+                ConstantsHelper.VIDEO_CARD_COLUMN + " TEXT, " +
+                ConstantsHelper.DISPLAY_COLUMN + " TEXT, " +
+                ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
+                ConstantsHelper.PRICE_COLUMN + " TEXT, " +
+                ConstantsHelper.IMAGE_PATH_COLUMN + " TEXT, " +
+                ConstantsHelper.IMAGE_NAME_COLUMN + " TEXT)";
+
+
+        db.execSQL(addedLaptopsTableQuery);
+    }
+
+    private void createAdminRemovedLaptopsTable(SQLiteDatabase db){
+        String removedLaptopsTableQuery = "CREATE TABLE IF NOT EXISTS " +
+                ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME +
+                "( " + ConstantsHelper.ID_COLUMN + " TEXT PRIMARY KEY, " +
+                ConstantsHelper.MODEL_COLUMN + " TEXT, " +
+                ConstantsHelper.RAM_COLUMN + " TEXT, " +
+                ConstantsHelper.HDD_COLUMN + " TEXT, " +
+                ConstantsHelper.PROCESSOR_COLUMN + " TEXT, " +
+                ConstantsHelper.VIDEO_CARD_COLUMN + " TEXT, " +
+                ConstantsHelper.DISPLAY_COLUMN + " TEXT, " +
+                ConstantsHelper.CURRENCY_COLUMN + " TEXT, " +
+                ConstantsHelper.PRICE_COLUMN + " TEXT, " +
+                ConstantsHelper.IMAGE_PATH_COLUMN + " TEXT, " +
+                ConstantsHelper.IMAGE_NAME_COLUMN + " TEXT)";
+
+
+        db.execSQL(removedLaptopsTableQuery);
+
     }
 }

@@ -25,8 +25,12 @@ public class ConstantsHelper {
     public static final String PRICE_COLUMN = "price";
     public static final String IMAGE_PATH_COLUMN = "image_path";
     public static final String IMAGE_NAME_COLUMN = "image_name";
-    //Temp table
-    public static final String TEMP_LAPTOPS_TABLE_NAME = "temp";
+    //Admin added laptops table
+    public static final String ADMIN_ADDED_LAPTOPS_TABLE_NAME = "added_laptops";
+
+    //Admin added laptops table
+    public static final String ADMIN_REMOVED_LAPTOPS_TABLE_NAME = "removed_laptops";
+
     //Current order table
     public static final String CURRENT_ORDERS_LAPTOPS_TABLE_NAME = "current_order";
 

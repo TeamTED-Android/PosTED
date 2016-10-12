@@ -234,13 +234,6 @@
                 android:id="@+id/cancelButton"
                 android:layout_margin="5dp" />
 
-            <Button
-                android:text="@string/update"
-                android:layout_width="match_parent"
-                android:background="@drawable/button_design"
-                android:layout_height="wrap_content"
-                android:id="@+id/uploadButton"
-                android:layout_margin="5dp" />
         </LinearLayout>
     </ScrollView>
 
