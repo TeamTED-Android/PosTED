@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.example.posted.R;
 import com.example.posted.adapters.SectionsPagerAdapter;
 import com.example.posted.constants.ConstantsHelper;
@@ -54,6 +55,7 @@ public class AdminActivity extends AppCompatActivity
     public interface PermissionListener {
 
         void onPermissionsDenied();
+
         void onPermissionsGranted();
     }
 
@@ -71,13 +73,14 @@ public class AdminActivity extends AppCompatActivity
     private LaptopsDatabaseManager mLaptopsDatabaseManager;
     private LoadDataService mLoadDataService;
     private boolean mIsBinded;
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.admin_activity_main);
-        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
-        this.setSupportActionBar(toolbar);
+        this.mToolbar = (Toolbar) this.findViewById(R.id.toolbar);
+        this.setSupportActionBar(this.mToolbar);
 
         FloatingActionButton fab = (FloatingActionButton) this.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -102,7 +105,7 @@ public class AdminActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         //drawer.openDrawer(Gravity.LEFT);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, this.mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
@@ -122,7 +125,7 @@ public class AdminActivity extends AppCompatActivity
         this.mMainFragment = new MainFragment();
         this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, this.mMainFragment).commit();
 
-        TextView textView = (TextView) toolbar.findViewById(R.id.admin_current_user);
+        TextView textView = (TextView) this.mToolbar.findViewById(R.id.admin_current_user);
         textView.setText(this.mLoginManager.getLoginUser().getUsername());
         textView.setGravity(Gravity.CENTER | Gravity.RIGHT);
 
@@ -148,25 +151,19 @@ public class AdminActivity extends AppCompatActivity
         this.getSupportFragmentManager().popBackStack();
 
         if (id == R.id.admin_nav_laptops) {
-            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
-                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
-            }
+            this.mToolbar.setTitle(R.string.laptops);
+            this.turnViewPagerVisibilityOff();
             OverviewFragment overviewFragment = new OverviewFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment)
                     .commit();
         } else if (id == R.id.admin_nav_phones) {
-            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
-                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
-            }
+            this.mToolbar.setTitle(R.string.phones);
+            this.turnViewPagerVisibilityOff();
             PhonesFragment phonesFragment = new PhonesFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, phonesFragment).commit();
         } else if (id == R.id.admin_nav_addProduct) {
-            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
-                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
-            }
+            this.mToolbar.setTitle(R.string.add_product);
+            this.turnViewPagerVisibilityOff();
             AddProductFragment fragment = new AddProductFragment();
             // TODO listener is NULL, we need to find a better place to instantiate it.
             this.mListener = fragment;
@@ -174,53 +171,39 @@ public class AdminActivity extends AppCompatActivity
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, fragment).commit();
 
         } else if (id == R.id.admin_nav_signOut) {
-            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
-                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
-            }
+            this.turnViewPagerVisibilityOff();
             this.mLoginManager.logoutUser();
             Intent intent = new Intent(this, LoginActivity.class);
             this.finish();
             this.startActivity(intent);
         } else if (id == R.id.admin_nav_home) {
-            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
-                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
-            }
+            this.mToolbar.setTitle(R.string.app_name);
+            this.turnViewPagerVisibilityOff();
             MainFragment mainFragment = new MainFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, mainFragment).commit();
         } else if (id == R.id.admin_nav_profile) {
-            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
-                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
-            }
+            this.mToolbar.setTitle(R.string.profile);
+            this.turnViewPagerVisibilityOff();
             ProfileFragment profileFragment = new ProfileFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, profileFragment).commit();
         } else if (id == R.id.admin_nav_previewAddedProducts) {
-            if (this.mAdminContainerFrameLayoyt.getVisibility() == View.VISIBLE) {
-                this.mAdminContainerFrameLayoyt.setVisibility(View.INVISIBLE);
-                this.mAdminConteinerViewPager.setVisibility(View.VISIBLE);
-            }
+            this.mToolbar.setTitle(R.string.preview_added_products);
+            this.turnFrameLayoutVisibilityOff();
             SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this,
                     ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
             viewPager.setAdapter(adapter);
 
         } else if (id == R.id.admin_nav_previewRemovedProducts) {
-            if (this.mAdminContainerFrameLayoyt.getVisibility() == View.VISIBLE) {
-                this.mAdminContainerFrameLayoyt.setVisibility(View.INVISIBLE);
-                this.mAdminConteinerViewPager.setVisibility(View.VISIBLE);
-            }
+            this.mToolbar.setTitle(R.string.preview_removed_products);
+            this.turnFrameLayoutVisibilityOff();
             SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this,
                     ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
             viewPager.setAdapter(adapter);
 
         } else if (id == R.id.admin_nav_sync) {
-            if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
-                this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
-            }
+            this.turnViewPagerVisibilityOff();
             if (!this.checkForInternetConnection()) {
                 this.attemptToTurnOnWiFi();
             }
@@ -262,6 +245,7 @@ public class AdminActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else {
             if (this.getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                this.mToolbar.setTitle(R.string.app_name);
                 MainFragment mainFragment = new MainFragment();
                 this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, mainFragment).commit();
             } else {
@@ -423,5 +407,19 @@ public class AdminActivity extends AppCompatActivity
             }
         }
         return false;
+    }
+
+    private void turnViewPagerVisibilityOff() {
+        if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
+            this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
+            this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void turnFrameLayoutVisibilityOff() {
+        if (this.mAdminContainerFrameLayoyt.getVisibility() == View.VISIBLE) {
+            this.mAdminContainerFrameLayoyt.setVisibility(View.INVISIBLE);
+            this.mAdminConteinerViewPager.setVisibility(View.VISIBLE);
+        }
     }
 }

@@ -21,15 +21,15 @@
             android:title="@string/add_product" />
         <item
             android:id="@+id/admin_nav_previewAddedProducts"
-            android:icon="@android:drawable/ic_menu_add"
+            android:icon="@drawable/view_add"
             android:title="@string/preview_added_products" />
         <item
             android:id="@+id/admin_nav_previewRemovedProducts"
-            android:icon="@android:drawable/ic_menu_add"
+            android:icon="@drawable/view_subtract"
             android:title="@string/preview_removed_products" />
         <item
             android:id="@+id/admin_nav_sync"
-            android:icon="@android:drawable/ic_menu_add"
+            android:icon="@drawable/sync"
             android:title="@string/sync" />
         <item
             android:id="@+id/admin_nav_profile"

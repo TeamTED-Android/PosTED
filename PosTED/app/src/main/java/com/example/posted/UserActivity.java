@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.example.posted.adapters.SectionsPagerAdapter;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.fragments.*;
@@ -48,13 +49,14 @@ public class UserActivity extends AppCompatActivity
     private DrawerLayout mDrawer;
     private long back_pressed;
     private UserActivity.BroadcastListener mBroadcastListener;
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
-        this.setSupportActionBar(toolbar);
+        this.mToolbar = (Toolbar) this.findViewById(R.id.toolbar);
+        this.setSupportActionBar( this.mToolbar);
 
         // toolbar.setSubtitle(this.mLoginManager.getLoginUser().getUsername());
 
@@ -85,7 +87,7 @@ public class UserActivity extends AppCompatActivity
         this.mDrawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         //drawer.openDrawer(Gravity.LEFT);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, this.mDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, this.mDrawer,  this.mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         this.mDrawer.setDrawerListener(toggle);
         toggle.syncState();
 
@@ -109,7 +111,7 @@ public class UserActivity extends AppCompatActivity
 
         this.mLoginManager = new LoginManager(this);
 
-        TextView textView = (TextView) toolbar.findViewById(R.id.current_user);
+        TextView textView = (TextView)  this.mToolbar.findViewById(R.id.current_user);
         textView.setText(this.mLoginManager.getLoginUser().getUsername());
         textView.setGravity(Gravity.CENTER | Gravity.RIGHT);
 
@@ -134,50 +136,36 @@ public class UserActivity extends AppCompatActivity
         this.getSupportFragmentManager().popBackStack();
 
         if (id == R.id.nav_laptops) {
-            if (this.mConteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.mConteinerViewPager.setVisibility(View.INVISIBLE);
-                this.mContainerFrameLayoyt.setVisibility(View.VISIBLE);
-            }
+            this.mToolbar.setTitle(R.string.laptops);
+            this.turnViewPagerVisibilityOff();
             OverviewFragment overviewFragment = new OverviewFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment)
                     .commit();
         } else if (id == R.id.nav_phones) {
-            if (this.mConteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.mConteinerViewPager.setVisibility(View.INVISIBLE);
-                this.mContainerFrameLayoyt.setVisibility(View.VISIBLE);
-            }
+            this.mToolbar.setTitle(R.string.phones);
+            this.turnViewPagerVisibilityOff();
             PhonesFragment phonesFragment = new PhonesFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, phonesFragment).commit();
         } else if (id == R.id.nav_sign_out) {
-            if (this.mConteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.mConteinerViewPager.setVisibility(View.INVISIBLE);
-                this.mContainerFrameLayoyt.setVisibility(View.VISIBLE);
-            }
+            this.turnViewPagerVisibilityOff();
             this.mLoginManager.logoutUser();
             Intent intent = new Intent(this, LoginActivity.class);
             this.finish();
             this.startActivity(intent);
         } else if (id == R.id.nav_home) {
-            if (this.mConteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.mConteinerViewPager.setVisibility(View.INVISIBLE);
-                this.mContainerFrameLayoyt.setVisibility(View.VISIBLE);
-            }
+            this.mToolbar.setTitle(R.string.app_name);
+            this.turnViewPagerVisibilityOff();
             MainFragment mainFragment = new MainFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
         } else if (id == R.id.nav_cart) {
-            if (this.mContainerFrameLayoyt.getVisibility() == View.VISIBLE) {
-                this.mContainerFrameLayoyt.setVisibility(View.INVISIBLE);
-                this.mConteinerViewPager.setVisibility(View.VISIBLE);
-            }
-
+            this.mToolbar.setTitle(R.string.cart);
+            this.turnFrameLayoutVisibilityOff();
             SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.containerViewPager);
             viewPager.setAdapter(adapter);
         } else if (id == R.id.nav_profile) {
-            if (this.mConteinerViewPager.getVisibility() == View.VISIBLE) {
-                this.mConteinerViewPager.setVisibility(View.INVISIBLE);
-                this.mContainerFrameLayoyt.setVisibility(View.VISIBLE);
-            }
+            this.mToolbar.setTitle(R.string.profile);
+            this.turnViewPagerVisibilityOff();
             ProfileFragment profileFragment = new ProfileFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, profileFragment).commit();
         }
@@ -243,6 +231,7 @@ public class UserActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else {
             if (this.getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                this.mToolbar.setTitle(R.string.app_name);
                 MainFragment mainFragment = new MainFragment();
                 this.getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
             } else {
@@ -307,6 +296,20 @@ public class UserActivity extends AppCompatActivity
                 UserActivity.this.getSupportFragmentManager().popBackStack();
                 //mDrawer.openDrawer(Gravity.LEFT);
             }
+        }
+    }
+
+    private void turnFrameLayoutVisibilityOff() {
+        if (this.mContainerFrameLayoyt.getVisibility() == View.VISIBLE) {
+            this.mContainerFrameLayoyt.setVisibility(View.INVISIBLE);
+            this.mConteinerViewPager.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void turnViewPagerVisibilityOff() {
+        if (this.mConteinerViewPager.getVisibility() == View.VISIBLE) {
+            this.mConteinerViewPager.setVisibility(View.INVISIBLE);
+            this.mContainerFrameLayoyt.setVisibility(View.VISIBLE);
         }
     }
 }

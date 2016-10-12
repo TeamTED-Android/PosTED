@@ -60,5 +60,8 @@
     <string name="preview_added_products">Preview added products</string>
     <string name="preview_removed_products">Preview removed products</string>
     <string name="sync">Sync</string>
+    <string name="no_items">No items</string>
+      <string name="about_us">Welcome to PosTED! Our place of sale app is the ideal place for you to satisfy your teck needs!\n\nRegards from our mobile development team: Todor, Elica and Dimana (hence the TED part).
+          \n\nHere is where you can find us:</string>
 
 </resources>

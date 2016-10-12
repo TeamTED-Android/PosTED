@@ -8,6 +8,7 @@ import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
 import com.example.posted.fragments.LaptopFragment;
+import com.example.posted.fragments.NoItemsFragment;
 import com.example.posted.interfaces.RemoveLaptopListener;
 import com.example.posted.models.LaptopSqlite;
 
@@ -20,18 +21,21 @@ public class SectionsPagerAdapter extends FragmentStatePagerAdapter implements R
     private List<LaptopSqlite> mLaptops;
     private LaptopsDatabaseManager mLaptopsDatabaseManager;
     private String mTableName;
+    private boolean isEmpty;
 
     public SectionsPagerAdapter(FragmentManager fm, Context context, String tableName) {
         super(fm);
         this.mTableName = tableName;
         DatabaseManager databaseManager = new DatabaseManager(context);
         this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(databaseManager);
-        this.mLaptops = this.mLaptopsDatabaseManager.getAllLaptops(this.mTableName);
-
+        this.loadData();
     }
 
     @Override
     public Fragment getItem(int position) {
+        if (this.isEmpty) {
+            return NoItemsFragment.newInstance();
+        }
         return LaptopFragment.newInstance(this.mLaptops.get(position), this);
     }
 
@@ -49,9 +53,21 @@ public class SectionsPagerAdapter extends FragmentStatePagerAdapter implements R
     public void onRemoved() {
         this.mLaptops = new ArrayList<>();
         this.notifyDataSetChanged();
-        this.mLaptops = this.mLaptopsDatabaseManager.getAllLaptops(this.mTableName);
+        this.loadData();
         this.notifyDataSetChanged();
     }
+
+    private void loadData() {
+        this.mLaptops = this.mLaptopsDatabaseManager.getAllLaptops(this.mTableName);
+        if (this.mLaptops.size() == 0) {
+            isEmpty = true;
+            this.mLaptops.add(null);
+        } else {
+            this.isEmpty = false;
+        }
+    }
+
+
 }
 
 
