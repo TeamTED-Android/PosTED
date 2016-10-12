@@ -26,7 +26,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private Context mContext;
     private ArrayList<LaptopSqlite> mLaptops;
     private RecyclerViewAdapter.RecyclerViewSelectedElement mOnItemSelectedListener;
-    private Map<Integer, Bitmap> mPreLoadedBitmaps;
+    private Map<String, Bitmap> mPreLoadedBitmaps;
 
     public RecyclerViewAdapter(Context context, ArrayList<LaptopSqlite> laptops, RecyclerViewAdapter
             .RecyclerViewSelectedElement onItemSelectedListener) {
@@ -35,7 +35,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.mOnItemSelectedListener = onItemSelectedListener;
     }
 
-    private Map<Integer, Bitmap> getPreLoadedBitmaps() {
+    private Map<String, Bitmap> getPreLoadedBitmaps() {
         if (this.mPreLoadedBitmaps == null) {
             this.mPreLoadedBitmaps = new WeakHashMap<>();
         }
@@ -62,7 +62,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //            holder.mDisplay.setText(current.getDisplay_size());
             holder.mPrice.setText(current.getPrice());
             holder.mCurrency.setText(current.getCurrency());
-            int id = current.getId();
+            String id = current.getId();
 //            String base64Img = current.getImagePath();
             String imagePath = current.getImagePath();
             String imageName = current.getImageName();
@@ -72,7 +72,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //            if (base64Img.contains(",")) {
 //                base64Img = base64Img.substring(current.getImagePath().indexOf(','));
 //            }
-            Map<Integer, Bitmap> bitmapCache = this.getPreLoadedBitmaps();
+            Map<String, Bitmap> bitmapCache = this.getPreLoadedBitmaps();
             Bitmap bitmap = bitmapCache.get(id);
             if (bitmap == null) {
                 AsyncListImageLoader imageLoader = new AsyncListImageLoader(holder, position);
@@ -166,8 +166,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 return;
             }
             LaptopSqlite item = RecyclerViewAdapter.this.mLaptops.get(position);
-            int id = item.getId();
-            Map<Integer, Bitmap> bitmapCache = RecyclerViewAdapter.this.getPreLoadedBitmaps();
+            String id = item.getId();
+            Map<String, Bitmap> bitmapCache = RecyclerViewAdapter.this.getPreLoadedBitmaps();
             bitmapCache.put(id, bitmap);
         }
     }

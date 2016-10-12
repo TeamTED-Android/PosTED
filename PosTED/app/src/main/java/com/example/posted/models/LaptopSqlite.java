@@ -6,7 +6,7 @@ import com.example.posted.interfaces.Laptop;
 
 public class LaptopSqlite implements Parcelable, Laptop {
 
-    private int mId;
+    private String mId;
     private String mModel;
     private String mCapacity_ram;
     private String mCapacity_hdd;
@@ -18,7 +18,8 @@ public class LaptopSqlite implements Parcelable, Laptop {
     private String mImagePath;
     private String mImageName;
 
-    public LaptopSqlite(String model,
+    public LaptopSqlite(String id,
+                        String model,
                         String capacity_ram,
                         String capacity_hdd,
                         String processor_type,
@@ -28,6 +29,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
                         String price,
                         String imagePath,
                         String imageName) {
+        this.mId = id;
         this.mModel = model;
         this.mCapacity_ram = capacity_ram;
         this.mCapacity_hdd = capacity_hdd;
@@ -45,7 +47,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
     }
 
     public LaptopSqlite(Parcel in) {
-        this.mId = in.readInt();
+        this.mId = in.readString();
         this.mModel = in.readString();
         this.mCapacity_ram = in.readString();
         this.mCapacity_hdd = in.readString();
@@ -77,7 +79,7 @@ public class LaptopSqlite implements Parcelable, Laptop {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.mId);
+        dest.writeString(this.mId);
         dest.writeString(this.mModel);
         dest.writeString(this.mCapacity_ram);
         dest.writeString(this.mCapacity_hdd);
@@ -90,11 +92,11 @@ public class LaptopSqlite implements Parcelable, Laptop {
         dest.writeString(this.mImageName);
     }
 
-    public int getId() {
+    public String getId() {
         return this.mId;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.mId = id;
     }
 

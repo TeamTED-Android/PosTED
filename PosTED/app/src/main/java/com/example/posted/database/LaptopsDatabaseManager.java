@@ -43,6 +43,7 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
     public void insertLaptopIntoTable(Laptop sqliteLaptop, String tableName) {
         SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(ConstantsHelper.ID_COLUMN,sqliteLaptop.getId());
         values.put(ConstantsHelper.MODEL_COLUMN, sqliteLaptop.getModel());
         values.put(ConstantsHelper.RAM_COLUMN, sqliteLaptop.getCapacity_ram());
         values.put(ConstantsHelper.HDD_COLUMN, sqliteLaptop.getCapacity_hdd());
@@ -54,7 +55,8 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
         values.put(ConstantsHelper.IMAGE_PATH_COLUMN, sqliteLaptop.getImagePath());
         values.put(ConstantsHelper.IMAGE_NAME_COLUMN, sqliteLaptop.getImageName());
 
-        database.insert(tableName, null, values);
+        //database.insert(tableName, null, values);
+        database.insertWithOnConflict(tableName,null,values,SQLiteDatabase.CONFLICT_IGNORE);
         database.close();
     }
 
@@ -65,7 +67,7 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
         Cursor cursor = database.rawQuery(selectQuery, null);
         while (cursor.moveToNext()) {
             LaptopSqlite current = new LaptopSqlite();
-            current.setId(cursor.getInt(0));
+            current.setId(cursor.getString(0));
             current.setModel(cursor.getString(1));
             current.setCapacity_ram(cursor.getString(2));
             current.setCapacity_hdd(cursor.getString(3));
@@ -94,8 +96,8 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
 
     public void deleteRecord(Laptop currentLaptop, String tableName) {
         SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
-        LaptopSqlite laptopSqlite = (LaptopSqlite) currentLaptop;
-        database.delete(tableName, "id=?", new String[]{Integer.toString(laptopSqlite.getId())});
+//        LaptopSqlite laptopSqlite = (LaptopSqlite) currentLaptop;
+        database.delete(tableName, "id=?", new String[]{currentLaptop.getId()});
     }
 
     public int getRecordCount(String tableName) {
@@ -138,6 +140,7 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
     private void insertKinveyLaptop(Laptop laptop, String imagePath) {
         SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(ConstantsHelper.ID_COLUMN,laptop.getId());
         values.put(ConstantsHelper.MODEL_COLUMN, laptop.getModel());
         values.put(ConstantsHelper.RAM_COLUMN, laptop.getCapacity_ram());
         values.put(ConstantsHelper.HDD_COLUMN, laptop.getCapacity_hdd());
@@ -149,7 +152,8 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
         values.put(ConstantsHelper.IMAGE_PATH_COLUMN, imagePath);
         values.put(ConstantsHelper.IMAGE_NAME_COLUMN, laptop.getImageName());
 
-        database.insert(ConstantsHelper.LAPTOPS_TABLE_NAME, null, values);
+        //database.insert(ConstantsHelper.LAPTOPS_TABLE_NAME, null, values);
+        database.insertWithOnConflict(ConstantsHelper.LAPTOPS_TABLE_NAME,null,values,SQLiteDatabase.CONFLICT_IGNORE);
         database.close();
     }
 

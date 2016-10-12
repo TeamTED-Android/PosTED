@@ -28,7 +28,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
         String query = "CREATE TABLE IF NOT EXISTS " +
                 ConstantsHelper.LAPTOPS_TABLE_NAME +
-                "( " + ConstantsHelper.ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "( " + ConstantsHelper.ID_COLUMN + " TEXT PRIMARY KEY, " +
                 ConstantsHelper.MODEL_COLUMN + " TEXT, " +
                 ConstantsHelper.RAM_COLUMN + " TEXT, " +
                 ConstantsHelper.HDD_COLUMN + " TEXT, " +
@@ -63,7 +63,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
     public void createTempLaptopTable(SQLiteDatabase db) {
         String query = "CREATE TABLE IF NOT EXISTS " +
                 ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME +
-                "( " + ConstantsHelper.ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "( " + ConstantsHelper.ID_COLUMN + " TEXT PRIMARY KEY, " +
                 ConstantsHelper.MODEL_COLUMN + " TEXT, " +
                 ConstantsHelper.RAM_COLUMN + " TEXT, " +
                 ConstantsHelper.HDD_COLUMN + " TEXT, " +
@@ -81,7 +81,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
     public void createCurrentOrderTable(SQLiteDatabase db) {
         String query = "CREATE TABLE IF NOT EXISTS " +
                 ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME +
-                "( " + ConstantsHelper.ID_COLUMN + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "( " + ConstantsHelper.ID_COLUMN + " TEXT PRIMARY KEY, " +
                 ConstantsHelper.MODEL_COLUMN + " TEXT, " +
                 ConstantsHelper.RAM_COLUMN + " TEXT, " +
                 ConstantsHelper.HDD_COLUMN + " TEXT, " +

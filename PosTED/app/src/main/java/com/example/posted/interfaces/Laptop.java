@@ -2,6 +2,8 @@ package com.example.posted.interfaces;
 
 public interface Laptop {
 
+    String getId();
+
     String getModel();
 
     void setModel(String model);

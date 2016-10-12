@@ -2,9 +2,13 @@ package com.example.posted.admin;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.*;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
@@ -17,6 +21,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.example.posted.MainActivity;
 import com.example.posted.R;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
@@ -143,14 +149,6 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         this.startActivityForResult(intent, CAMERA_REQUEST);
     }
 
-    private void onUploadButtonClicked() {
-        ArrayList<LaptopSqlite> tempLaptops = this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper
-                .TEMP_LAPTOPS_TABLE_NAME);
-        this.mLoadDataService.uploadLaptops(tempLaptops);
-        this.mDatabaseManager.deleteRecordsFromTable(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
-//        this.mLoadDataService.transferDataFromKinvey();
-    }
-
     private void onBrowseButtonClicked() {
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -166,7 +164,9 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         if (!this.checkInputInfo()) {
             return;
         }
+        String id = this.mImageName.substring(0,this.mImageName.indexOf('.'));
         LaptopSqlite currentLaptop = new LaptopSqlite(
+                id,
                 this.mModel.getText().toString(),
                 this.mRam.getText().toString(),
                 this.mHdd.getText().toString(),
@@ -348,4 +348,13 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         this.mVideoCard.setText("");
         this.mCurrency.setText("");
     }
+
+    private void onUploadButtonClicked() {
+        ArrayList<LaptopSqlite> tempLaptops = this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper
+                .TEMP_LAPTOPS_TABLE_NAME);
+        this.mLoadDataService.uploadLaptops(tempLaptops);
+        this.mDatabaseManager.deleteRecordsFromTable(ConstantsHelper.TEMP_LAPTOPS_TABLE_NAME);
+
+    }
+
 }

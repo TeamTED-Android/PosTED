@@ -69,6 +69,10 @@ public class LaptopKinvey extends GenericJson implements Laptop {
         this.image = imagePath;
     }
 
+    public String getId(){
+        return this.id;
+    }
+
     public String getModel() {
         return this.model;
     }

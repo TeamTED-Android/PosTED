@@ -25,7 +25,7 @@ public class SectionsPagerAdapter extends FragmentStatePagerAdapter implements R
         DatabaseManager databaseManager = new DatabaseManager(context);
         this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(databaseManager);
         this.mLaptops = this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
-
+        int a = 5;
     }
 
     @Override

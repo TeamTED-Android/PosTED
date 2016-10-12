@@ -114,7 +114,7 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
         Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
         this.sendBroadcast(startLoading);
 
-        this.mController.deleteRecordsFromTable(ConstantsHelper.LAPTOPS_TABLE_NAME);
+        //this.mController.deleteRecordsFromTable(ConstantsHelper.LAPTOPS_TABLE_NAME);
         AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
         laptopsInfo.get(new KinveyListCallback<LaptopKinvey>() {
             @Override
@@ -197,6 +197,7 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
             }
         });
         boolean isDeleted = imgToDelete.delete();
+        Toast.makeText(this, "File " + imgToDelete.getName() + " isDeleted " + isDeleted, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -210,7 +211,7 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
         this.sendBroadcast(startLoading);
         this.loginToKinvey();
         Query query = new Query();
-        query.equals("model",laptopToRemove.getModel());
+        query.equals("_id",laptopToRemove.getId());
         AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
         laptopsInfo.delete(query, new KinveyDeleteCallback() {
             @Override
@@ -219,6 +220,8 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
                 String imgPath = laptopToRemove.getImagePath();
                 File file = new File(imgPath, imgName);
                 boolean isDeleted = file.delete();
+                LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(laptopToRemove,ConstantsHelper.LAPTOPS_TABLE_NAME);
+                Toast.makeText(LoadDataService.this, "File " + file.getName() + " isDeleted " + isDeleted, Toast.LENGTH_SHORT).show();
                 Toast.makeText(LoadDataService.this, "Laptop " + laptopToRemove.getModel() + " Successfully " +
                         "deleted", Toast.LENGTH_SHORT).show();
                 Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
