@@ -3,13 +3,7 @@ package com.example.posted.admin;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -35,19 +29,12 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.posted.R;
 import com.example.posted.adapters.SectionsPagerAdapter;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
-import com.example.posted.fragments.LaptopFragment;
-import com.example.posted.fragments.MainFragment;
-import com.example.posted.fragments.OverviewFragment;
-import com.example.posted.fragments.PhonesFragment;
-import com.example.posted.fragments.ProfileFragment;
-import com.example.posted.fragments.SpinnerFragment;
-import com.example.posted.interfaces.Laptop;
+import com.example.posted.fragments.*;
 import com.example.posted.interfaces.NetworkStateReceiverListener;
 import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
 import com.example.posted.login.LoginActivity;
@@ -59,17 +46,24 @@ import com.example.posted.services.LoadDataService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdminMainActivity extends AppCompatActivity
+public class AdminActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         OnLaptopSelectedDataExchange,
         NetworkStateReceiverListener {
 
+    public interface PermissionListener {
+
+        void onPermissionsDenied();
+        void onPermissionsGranted();
+    }
+
+    private PermissionListener mListener;
     private Intent mServiceIntent;
     private MainFragment mMainFragment;
     private LoginManager mLoginManager;
     private NetworkStateReceiver mNetworkStateReceiver;
     private long back_pressed;
-    private AdminMainActivity.BroadcastListener mBroadcastListener;
+    private AdminActivity.BroadcastListener mBroadcastListener;
     private ViewPager mAdminConteinerViewPager;
     private FrameLayout mAdminContainerFrameLayoyt;
 
@@ -93,7 +87,7 @@ public class AdminMainActivity extends AppCompatActivity
                         .setAction("send us email", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                AdminMainActivity.this.sendMail();
+                                AdminActivity.this.sendMail();
                             }
                         }).show();
             }
@@ -101,7 +95,7 @@ public class AdminMainActivity extends AppCompatActivity
         fab.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                AdminMainActivity.this.sendMail();
+                AdminActivity.this.sendMail();
                 return true;
             }
         });
@@ -128,24 +122,22 @@ public class AdminMainActivity extends AppCompatActivity
         this.mMainFragment = new MainFragment();
         this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, this.mMainFragment).commit();
 
-        TextView textView =(TextView) toolbar.findViewById(R.id.admin_current_user);
+        TextView textView = (TextView) toolbar.findViewById(R.id.admin_current_user);
         textView.setText(this.mLoginManager.getLoginUser().getUsername());
         textView.setGravity(Gravity.CENTER | Gravity.RIGHT);
 
-        mBroadcastListener = new AdminMainActivity.BroadcastListener();
+        this.mBroadcastListener = new AdminActivity.BroadcastListener();
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConstantsHelper.BROADCAST_START_LOADING);
         filter.addAction(ConstantsHelper.BROADCAST_END_LOADING);
-        this.registerReceiver(mBroadcastListener, filter);
+        this.registerReceiver(this.mBroadcastListener, filter);
 
         this.mAdminConteinerViewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
         this.mAdminContainerFrameLayoyt = (FrameLayout) this.findViewById(R.id.adminContainer);
 
         this.mDatabaseManager = new DatabaseManager(this);
         this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(this.mDatabaseManager);
-
     }
-
 
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -153,7 +145,7 @@ public class AdminMainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-       this.getSupportFragmentManager().popBackStack();
+        this.getSupportFragmentManager().popBackStack();
 
         if (id == R.id.admin_nav_laptops) {
             if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
@@ -169,13 +161,16 @@ public class AdminMainActivity extends AppCompatActivity
                 this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
             }
             PhonesFragment phonesFragment = new PhonesFragment();
-            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,phonesFragment).commit();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, phonesFragment).commit();
         } else if (id == R.id.admin_nav_addProduct) {
             if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
                 this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
                 this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
             }
             AddProductFragment fragment = new AddProductFragment();
+            // TODO listener is NULL, we need to find a better place to instantiate it.
+            this.mListener = fragment;
+            this.requestPermissions();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, fragment).commit();
 
         } else if (id == R.id.admin_nav_signOut) {
@@ -193,51 +188,47 @@ public class AdminMainActivity extends AppCompatActivity
                 this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
             }
             MainFragment mainFragment = new MainFragment();
-            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,mainFragment).commit();
-        }else if(id == R.id.admin_nav_profile){
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, mainFragment).commit();
+        } else if (id == R.id.admin_nav_profile) {
             if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
                 this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
                 this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
             }
             ProfileFragment profileFragment = new ProfileFragment();
-            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,profileFragment).commit();
-        }else if (id == R.id.admin_nav_previewAddedProducts){
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, profileFragment).commit();
+        } else if (id == R.id.admin_nav_previewAddedProducts) {
             if (this.mAdminContainerFrameLayoyt.getVisibility() == View.VISIBLE) {
                 this.mAdminContainerFrameLayoyt.setVisibility(View.INVISIBLE);
                 this.mAdminConteinerViewPager.setVisibility(View.VISIBLE);
             }
-            //TODO give the collection
-            SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this, ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
+            SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this,
+                    ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
             viewPager.setAdapter(adapter);
 
-        }else if (id == R.id.admin_nav_previewRemovedProducts){
+        } else if (id == R.id.admin_nav_previewRemovedProducts) {
             if (this.mAdminContainerFrameLayoyt.getVisibility() == View.VISIBLE) {
                 this.mAdminContainerFrameLayoyt.setVisibility(View.INVISIBLE);
                 this.mAdminConteinerViewPager.setVisibility(View.VISIBLE);
             }
-
-            //TODO give the collection
-            SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this, ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
+            SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this,
+                    ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
             viewPager.setAdapter(adapter);
 
-        }else if (id == R.id.admin_nav_sync){
+        } else if (id == R.id.admin_nav_sync) {
             if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
                 this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
                 this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
             }
+            if (!this.checkForInternetConnection()) {
+                this.attemptToTurnOnWiFi();
+            }
             if (!this.isDataServiceRunning(LoadDataService.class)) {
+                this.mServiceIntent = new Intent(this, LoadDataService.class);
                 this.startService(this.mServiceIntent);
             }
             this.bindService(this.mServiceIntent, this.connection, Context.BIND_AUTO_CREATE);
-
-            //check if service is running and bind
-
-            //get all laptops for remove... and remove them
-
-            //get all laptops for add... and add them
-
         }
 
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
@@ -249,7 +240,7 @@ public class AdminMainActivity extends AppCompatActivity
     public void onLaptopSelected(LaptopSqlite laptop) {
         Bundle bundleLaptop = new Bundle();
         bundleLaptop.putParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY, laptop);
-        bundleLaptop.putCharSequence(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY,"admin");
+        bundleLaptop.putCharSequence(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY, "admin");
         LaptopFragment laptopFragment = new LaptopFragment();
         laptopFragment.setArguments(bundleLaptop);
         this.getSupportFragmentManager()
@@ -261,7 +252,7 @@ public class AdminMainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        if (this.back_pressed + 1500 > System.currentTimeMillis()){
+        if (this.back_pressed + 1500 > System.currentTimeMillis()) {
             super.onBackPressed();
         }
         this.back_pressed = System.currentTimeMillis();
@@ -272,7 +263,7 @@ public class AdminMainActivity extends AppCompatActivity
         } else {
             if (this.getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 MainFragment mainFragment = new MainFragment();
-               this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,mainFragment).commit();
+                this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, mainFragment).commit();
             } else {
                 this.getSupportFragmentManager().popBackStack();
             }
@@ -284,7 +275,7 @@ public class AdminMainActivity extends AppCompatActivity
         this.mServiceIntent = new Intent(this, LoadDataService.class);
         this.startService(this.mServiceIntent);
         Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
-        sendBroadcast(endLoading);
+        this.sendBroadcast(endLoading);
     }
 
     @Override
@@ -295,14 +286,14 @@ public class AdminMainActivity extends AppCompatActivity
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConstantsHelper.BROADCAST_START_LOADING);
         filter.addAction(ConstantsHelper.BROADCAST_END_LOADING);
-        this.registerReceiver(mBroadcastListener, filter);
+        this.registerReceiver(this.mBroadcastListener, filter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (this.mIsBinded){
-            this.unbindService(connection);
+        if (this.mIsBinded) {
+            this.unbindService(this.connection);
         }
         if (this.mServiceIntent != null) {
             this.stopService(this.mServiceIntent);
@@ -320,24 +311,27 @@ public class AdminMainActivity extends AppCompatActivity
 
     private void attemptToTurnOnWiFi() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getResources().getString(R.string.wifi_dialog_title));
-        builder.setMessage(getResources().getString(R.string.wifi_dialog_message));
-        builder.setPositiveButton(getResources().getString(R.string.wifi_dialog_positive_button), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                WifiManager wifiManager = (WifiManager) AdminMainActivity.this.getSystemService(Context.WIFI_SERVICE);
-                wifiManager.setWifiEnabled(true);
+        builder.setTitle(this.getResources().getString(R.string.wifi_dialog_title));
+        builder.setMessage(this.getResources().getString(R.string.wifi_dialog_message));
+        builder.setPositiveButton(this.getResources().getString(R.string.wifi_dialog_positive_button), new
+                DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        WifiManager wifiManager = (WifiManager) AdminActivity.this.getSystemService(Context
+                                .WIFI_SERVICE);
+                        wifiManager.setWifiEnabled(true);
 
-                Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
-                sendBroadcast(startLoading);
-            }
-        });
-        builder.setNeutralButton(getResources().getString(R.string.wifi_dialog_neutral_button), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+                        Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
+                        AdminActivity.this.sendBroadcast(startLoading);
+                    }
+                });
+        builder.setNeutralButton(this.getResources().getString(R.string.wifi_dialog_neutral_button), new
+                DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
-            }
-        });
+                    }
+                });
         AlertDialog dialog = builder.create();
         dialog.show();
 
@@ -346,13 +340,13 @@ public class AdminMainActivity extends AppCompatActivity
     private void sendMail() {
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType(ConstantsHelper.MESSAGE_TYPE);
-        i.putExtra(Intent.EXTRA_EMAIL, new String[]{getResources().getString(R.string.posted_email)});
-        i.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.email_subject));
-        i.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.email_body));
+        i.putExtra(Intent.EXTRA_EMAIL, new String[]{this.getResources().getString(R.string.posted_email)});
+        i.putExtra(Intent.EXTRA_SUBJECT, this.getResources().getString(R.string.email_subject));
+        i.putExtra(Intent.EXTRA_TEXT, this.getResources().getString(R.string.email_body));
         try {
             this.startActivity(Intent.createChooser(i, "Send mail..."));
         } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(AdminMainActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(AdminActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -362,9 +356,10 @@ public class AdminMainActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             SpinnerFragment spinnerFragment = new SpinnerFragment();
             if (intent.getAction().equals(ConstantsHelper.BROADCAST_START_LOADING)) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer,spinnerFragment).addToBackStack(null).commit();
-            }else if (intent.getAction().equals(ConstantsHelper.BROADCAST_END_LOADING)){
-                getSupportFragmentManager().popBackStack();
+                AdminActivity.this.getSupportFragmentManager()
+                        .beginTransaction().replace(R.id.adminContainer, spinnerFragment).addToBackStack(null).commit();
+            } else if (intent.getAction().equals(ConstantsHelper.BROADCAST_END_LOADING)) {
+                AdminActivity.this.getSupportFragmentManager().popBackStack();
                 //mDrawer.openDrawer(Gravity.LEFT);
             }
         }
@@ -374,15 +369,15 @@ public class AdminMainActivity extends AppCompatActivity
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return;
         }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                        PackageManager.PERMISSION_GRANTED) {
             return;
         }
         ActivityCompat.requestPermissions(this, new String[]{
                 Manifest.permission.CAMERA,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.ACCESS_WIFI_STATE,
-                Manifest.permission.CHANGE_WIFI_STATE}, ConstantsHelper.CAMERA_REQUESTS);
+                Manifest.permission.READ_EXTERNAL_STORAGE}, ConstantsHelper.CAMERA_REQUESTS);
     }
 
     @Override
@@ -391,6 +386,10 @@ public class AdminMainActivity extends AppCompatActivity
         if (grantResults.length > 0 &&
                 grantResults[0] == PackageManager.PERMISSION_GRANTED &&
                 grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+            this.mListener.onPermissionsGranted();
+        } else {
+            // TODO listener is NULL, we need to find a better place to instantiate it.
+            this.mListener.onPermissionsDenied();
         }
     }
 
@@ -398,18 +397,20 @@ public class AdminMainActivity extends AppCompatActivity
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
-            AdminMainActivity.this.mLoadDataService = binder.getService();
-            AdminMainActivity.this.mIsBinded = true;
+            AdminActivity.this.mLoadDataService = binder.getService();
+            AdminActivity.this.mIsBinded = true;
 
-            ArrayList<LaptopSqlite> laptopsForRemove = AdminMainActivity.this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
-            AdminMainActivity.this.mLoadDataService.removeLaptops(laptopsForRemove);
-            ArrayList<LaptopSqlite> laptopsForAdd = AdminMainActivity.this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
-            AdminMainActivity.this.mLoadDataService.uploadLaptops(laptopsForAdd);
+            ArrayList<LaptopSqlite> laptopsForRemove = AdminActivity.this.mLaptopsDatabaseManager.getAllLaptops
+                    (ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
+            AdminActivity.this.mLoadDataService.removeLaptops(laptopsForRemove);
+            ArrayList<LaptopSqlite> laptopsForAdd = AdminActivity.this.mLaptopsDatabaseManager.getAllLaptops
+                    (ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
+            AdminActivity.this.mLoadDataService.uploadLaptops(laptopsForAdd);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            AdminMainActivity.this.mIsBinded = false;
+            AdminActivity.this.mIsBinded = false;
         }
     };
 

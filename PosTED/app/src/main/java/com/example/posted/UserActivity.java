@@ -33,7 +33,7 @@ import com.example.posted.receivers.NetworkStateReceiver;
 import com.example.posted.services.LoadDataService;
 
 
-public class MainActivity extends AppCompatActivity
+public class UserActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         OnLaptopSelectedDataExchange,
         NetworkStateReceiverListener {
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity
     private NetworkStateReceiver mNetworkStateReceiver;
     private DrawerLayout mDrawer;
     private long back_pressed;
-    private MainActivity.BroadcastListener mBroadcastListener;
+    private UserActivity.BroadcastListener mBroadcastListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity
                         .setAction("send us email", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                MainActivity.this.sendMail();
+                                UserActivity.this.sendMail();
                             }
                         }).show();
             }
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                MainActivity.this.sendMail();
+                UserActivity.this.sendMail();
                 return true;
             }
 
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity
         this.mContainerFrameLayoyt = (FrameLayout) this.findViewById(R.id.container);
         this.mConteinerViewPager = (ViewPager) this.findViewById(R.id.containerViewPager);
 
-        mBroadcastListener = new MainActivity.BroadcastListener();
+        mBroadcastListener = new UserActivity.BroadcastListener();
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConstantsHelper.BROADCAST_START_LOADING);
         filter.addAction(ConstantsHelper.BROADCAST_END_LOADING);
@@ -265,10 +265,10 @@ public class MainActivity extends AppCompatActivity
         builder.setPositiveButton(getResources().getString(R.string.wifi_dialog_positive_button), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                WifiManager wifiManager = (WifiManager) MainActivity.this.getSystemService(Context.WIFI_SERVICE);
+                WifiManager wifiManager = (WifiManager) UserActivity.this.getSystemService(Context.WIFI_SERVICE);
                 wifiManager.setWifiEnabled(true);
                 Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
-                MainActivity.this.sendBroadcast(startLoading);
+                UserActivity.this.sendBroadcast(startLoading);
                 //startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
             }
         });
@@ -291,7 +291,7 @@ public class MainActivity extends AppCompatActivity
         try {
             this.startActivity(Intent.createChooser(i, "Send mail..."));
         } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(MainActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(UserActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -301,10 +301,10 @@ public class MainActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             SpinnerFragment spinnerFragment = new SpinnerFragment();
             if (intent.getAction().equals(ConstantsHelper.BROADCAST_START_LOADING)) {
-                MainActivity.this.getSupportFragmentManager()
+                UserActivity.this.getSupportFragmentManager()
                         .beginTransaction().replace(R.id.container, spinnerFragment).addToBackStack(null).commit();
             } else if (intent.getAction().equals(ConstantsHelper.BROADCAST_END_LOADING)) {
-                MainActivity.this.getSupportFragmentManager().popBackStack();
+                UserActivity.this.getSupportFragmentManager().popBackStack();
                 //mDrawer.openDrawer(Gravity.LEFT);
             }
         }

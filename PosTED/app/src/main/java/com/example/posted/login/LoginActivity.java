@@ -23,9 +23,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
-import com.example.posted.MainActivity;
+import com.example.posted.UserActivity;
 import com.example.posted.R;
-import com.example.posted.admin.AdminMainActivity;
+import com.example.posted.admin.AdminActivity;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.UsersDatabaseManager;
@@ -73,9 +73,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if (this.mLoginManager.isLoggedIn()) {
             User currentUser = this.mLoginManager.getLoginUser();
             if (currentUser.getUsername().equalsIgnoreCase(ConstantsHelper.ADMIN_USERNAME)) {
-                intent = new Intent(this, AdminMainActivity.class);
+                intent = new Intent(this, AdminActivity.class);
             } else {
-                intent = new Intent(this, MainActivity.class);
+                intent = new Intent(this, UserActivity.class);
             }
             this.startActivity(intent);
             this.finish();
@@ -214,12 +214,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 4;
     }
 
@@ -420,10 +418,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         public void succsesLogin() {
             LoginActivity.this.mLoginManager.loginUser(LoginActivity.this.mUser);
             if (LoginActivity.this.mLoginManager.getLoginUser().getUsername().equals(ConstantsHelper.ADMIN_USERNAME)) {
-                Intent myIntent = new Intent(LoginActivity.this, AdminMainActivity.class);
+                Intent myIntent = new Intent(LoginActivity.this, AdminActivity.class);
                 LoginActivity.this.startActivity(myIntent);
             } else {
-                Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
+                Intent myIntent = new Intent(LoginActivity.this, UserActivity.class);
                 LoginActivity.this.startActivity(myIntent);
             }
         }

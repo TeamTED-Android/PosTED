@@ -76,7 +76,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             Bitmap bitmap = bitmapCache.get(id);
             if (bitmap == null) {
                 AsyncListImageLoader imageLoader = new AsyncListImageLoader(holder, position);
-                imageLoader.execute(imagePath, imageName);
+                float density = this.mContext.getApplicationContext().getResources().getDisplayMetrics().density;
+                int bound = this.mContext.getApplicationContext().getResources().getDisplayMetrics().widthPixels / 5;
+                String desityAsStr = Float.toString(density);
+                String boundAsStr = Integer.toString(bound);
+                imageLoader.execute(imagePath, imageName, desityAsStr, boundAsStr);
             } else {
                 bitmap = bitmapCache.get(id);
                 holder.setImageViewBitmap(bitmap);

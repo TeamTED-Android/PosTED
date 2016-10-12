@@ -49,4 +49,7 @@ public class ConstantsHelper {
     //Send mail constants
     public static final String MESSAGE_TYPE = "message/rfc822";
 
+    // Images
+    public static final int DESIRED_IMAGE_BOUND = 192;
+
 }

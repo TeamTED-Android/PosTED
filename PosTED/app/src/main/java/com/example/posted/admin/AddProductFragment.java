@@ -2,13 +2,10 @@ package com.example.posted.admin;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.content.*;
 import android.graphics.Bitmap;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.graphics.Matrix;
 import android.net.Uri;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
@@ -17,12 +14,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.Toast;
+import android.widget.*;
 
-import com.example.posted.MainActivity;
 import com.example.posted.R;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
@@ -33,11 +26,12 @@ import com.example.posted.services.LoadDataService;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 
-public class AddProductFragment extends Fragment implements View.OnClickListener {
+public class AddProductFragment extends Fragment implements
+        View.OnClickListener,
+        AdminActivity.PermissionListener {
 
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final int CAMERA_REQUEST = 2;
@@ -50,8 +44,8 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     private EditText mProcessor;
     private EditText mVideoCard;
     private EditText mCurrency;
-    private ProgressBar mProgressBar;
-    private Button mAddImageButton;
+    private ImageView mImageView;
+    private Button mBrowseButton;
     private Button mAddProductButton;
     private Button mCancelButton;
     private Context mContext;
@@ -102,18 +96,16 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         this.mProcessor = (EditText) rootView.findViewById(R.id.processorEditText);
         this.mVideoCard = (EditText) rootView.findViewById(R.id.videoCardEditText);
         this.mCurrency = (EditText) rootView.findViewById(R.id.currencyEditText);
-        this.mAddImageButton = (Button) rootView.findViewById(R.id.browse_button);
+        this.mBrowseButton = (Button) rootView.findViewById(R.id.browse_button);
         this.mAddProductButton = (Button) rootView.findViewById(R.id.addProductButton);
         this.mCancelButton = (Button) rootView.findViewById(R.id.cancelButton);
-        this.mProgressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
+        this.mImageView = (ImageView) rootView.findViewById(R.id.image_view);
         Button cameraButton = this.getCameraButton(rootView);
 
-        this.mProgressBar.setMax(100);
-        this.mProgressBar.setVisibility(View.GONE);
         cameraButton.setOnClickListener(this);
         this.mAddProductButton.setOnClickListener(this);
         this.mCancelButton.setOnClickListener(this);
-        this.mAddImageButton.setOnClickListener(this);
+        this.mBrowseButton.setOnClickListener(this);
         this.mImageAsString = "";
 
         //this.mLaptopsDatabaseManager.createTempTable();
@@ -215,15 +207,40 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
                 e.printStackTrace();
             }
         }
-        // TODO fix image dimentions
-        bitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, false);
+        // TODO fix image dimentions DONE
+//        bitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, false);
+        bitmap = this.scaleBitmap(bitmap);
+        this.mImageView.setImageBitmap(bitmap);
+
         int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
         this.mImageName = "img" + count + ".png";
         this.mImagePath = this.saveToInternalStorage(bitmap);
 
 //        AsyncImageEncoder encoder = new AsyncImageEncoder(this);
-//        encoder.setProgressBar(this.mProgressBar);
+//        encoder.setProgressBar(this.mImageView);
 //        encoder.execute(bitmap);
+    }
+
+    private Bitmap scaleBitmap(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        float screenDensity = this.mContext.getResources().getDisplayMetrics().density;
+        int bounding = Math.round((float)ConstantsHelper.DESIRED_IMAGE_BOUND * screenDensity);
+
+        // Determine how much to scale: the dimension requiring less scaling is
+        // closer to the its side. This way the image always stays inside your
+        // bounding box AND either x/y axis touches it.
+        float xScale = ((float) bounding) / width;
+        float yScale = ((float) bounding) / height;
+        float scale = xScale <= yScale ? xScale : yScale;
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(scale, scale);
+
+        // Create a new bitmap and convert it to a format more attune to the ImageView
+        Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+
+        return scaledBitmap;
     }
 
     private String saveToInternalStorage(final Bitmap bitmapImage) {
@@ -255,13 +272,15 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         Uri uri = data.getData();
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.mContext.getContentResolver(), uri);
-            // TODO fix image dimentions
-            bitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, false);
+            // TODO fix image dimentions DONE
+//            bitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, false);
+            bitmap = this.scaleBitmap(bitmap);
+            this.mImageView.setImageBitmap(bitmap);
             int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
             this.mImageName = "img" + count + ".png";
             this.mImagePath = this.saveToInternalStorage(bitmap);
 //            AsyncImageEncoder encoder = new AsyncImageEncoder(this);
-//            encoder.setProgressBar(this.mProgressBar);
+//            encoder.setProgressBar(this.mImageView);
 //            encoder.execute(bitmap);
         } catch (IOException e) {
             e.printStackTrace();
@@ -277,7 +296,6 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
     }
 
     private boolean checkInputInfo() {
-
         if (this.mModel != null && this.mModel.getText().toString().equals("")) {
             this.mModel.setError("Laptop mModel cannot be empty");
             this.mModel.requestFocus();
@@ -351,6 +369,20 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
         this.mCurrency.setText("");
     }
 
+    @Override
+    public void onPermissionsDenied() {
+        Button cameraButton = this.getCameraButton(this.getView());
+        cameraButton.setEnabled(false);
+        this.mBrowseButton.setEnabled(false);
+    }
+
+    @Override
+    public void onPermissionsGranted() {
+        Button cameraButton = this.getCameraButton(this.getView());
+        cameraButton.setEnabled(true);
+        this.mBrowseButton.setEnabled(true);
+    }
+
 //    private void onUploadButtonClicked() {
 //        ArrayList<LaptopSqlite> tempLaptops = this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper
 //                .ADMIN_ADDED_LAPTOPS_TABLE_NAME);
@@ -358,5 +390,4 @@ public class AddProductFragment extends Fragment implements View.OnClickListener
 //        this.mDatabaseManager.deleteRecordsFromTable(ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
 //
 //    }
-
 }

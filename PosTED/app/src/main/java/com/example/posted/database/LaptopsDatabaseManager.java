@@ -128,7 +128,9 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
         if (!file.exists()) {
             AsyncImageSaver decoder = new AsyncImageSaver(this, kinveyLaptop);
             String base64Str = kinveyLaptop.getImagePath();
-            decoder.execute(base64Str);
+            float screenDensity = this.mContext.getResources().getDisplayMetrics().density;
+            String screenDensityAsStr = Float.toString(screenDensity);
+            decoder.execute(base64Str, screenDensityAsStr);
         } else {
             //check the else statement if the object is already in database or only the image exists
             this.insertKinveyLaptop(kinveyLaptop, directory.getAbsolutePath());
