@@ -23,13 +23,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
-import com.example.posted.UserActivity;
 import com.example.posted.R;
+import com.example.posted.UserActivity;
 import com.example.posted.admin.AdminActivity;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.UsersDatabaseManager;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -325,9 +327,28 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         UserLoginTask(String email, String password, Context context) {
             this.mEmail = email;
-            this.mPassword = password;
+            this.mPassword = this.encryptPassword(password);
             this.mContext = context;
             this.mDatabaseManager = new DatabaseManager(LoginActivity.this.getApplicationContext());
+        }
+
+        private String encryptPassword(String passwordToHash) {
+            String generatedPassword = null;
+            try {
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                md.update(passwordToHash.getBytes());
+                byte[] bytes = md.digest();
+                StringBuilder sb = new StringBuilder();
+                for (int i=0; i< bytes.length ;i++) {
+                    sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+                }
+                generatedPassword = sb.toString();
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                e.printStackTrace();
+            }
+            return generatedPassword;
         }
 
         @Override
