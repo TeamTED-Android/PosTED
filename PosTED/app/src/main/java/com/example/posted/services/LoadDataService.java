@@ -17,6 +17,7 @@ import com.example.posted.database.LaptopsDatabaseManager;
 import com.example.posted.interfaces.Laptop;
 import com.example.posted.models.LaptopKinvey;
 import com.example.posted.models.LaptopSqlite;
+import com.example.posted.models.Order;
 import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyDeleteCallback;
@@ -36,14 +37,11 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
 
     private static final String APP_KEY = "kid_Hkz4aiD3";
     private static final String APP_SECRET = "6e30f9fd9c0b4218a6db8d6282ce25a8";
-    private static final String COLLECTION_NAME = "laptops";
     private Client mKinveyClient;
     private IBinder mBinder;
     private DatabaseManager mController;
     private LaptopsDatabaseManager mLaptopsDatabaseManager;
-
-    //public static final String BROADCAST_START_LOADING = "com.example.posted.start";
-    //public static final String BROADCAST_END_LOADING = "com.example.posted.end";
+    //private DownloadCompleteListener mDownloadCompleteListener;
 
     public class LoadDataServiceBinder extends Binder {
 
@@ -114,17 +112,16 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
         Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
         this.sendBroadcast(startLoading);
 
-        //this.mController.deleteRecordsFromTable(ConstantsHelper.LAPTOPS_TABLE_NAME);
-        AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
+        AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(ConstantsHelper.KINVEY_LAPTOPS_TABLE_NAME, LaptopKinvey.class);
         laptopsInfo.get(new KinveyListCallback<LaptopKinvey>() {
             @Override
             public void onSuccess(LaptopKinvey[] laptops) {
                 Toast.makeText(LoadDataService.this, "Successfully receive the info", Toast.LENGTH_SHORT).show();
                 for (LaptopKinvey laptop : laptops) {
                     LoadDataService.this.mLaptopsDatabaseManager.insertIntoMainDatabase(laptop);
-                    Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
-                    LoadDataService.this.sendBroadcast(endLoading);
                 }
+                Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
+                LoadDataService.this.sendBroadcast(endLoading);
 
             }
 
@@ -173,7 +170,7 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
                 tempLaptop.getCurrency(),
                 tempLaptop.getPrice(),
                 base64Str);
-        AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
+        AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(ConstantsHelper.KINVEY_LAPTOPS_TABLE_NAME, LaptopKinvey.class);
         laptopsInfo.save(laptopForUpload, new KinveyClientCallback<LaptopKinvey>() {
             @Override
             public void onSuccess(LaptopKinvey laptopKinvey) {
@@ -215,12 +212,9 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
     }
 
     private void removeLaptopFromKinvey(final Laptop laptopToRemove){
-//        Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
-//        this.sendBroadcast(startLoading);
-        //this.loginToKinvey();
         Query query = new Query();
         query.equals("_id",laptopToRemove.getId());
-        AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(COLLECTION_NAME, LaptopKinvey.class);
+        AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(ConstantsHelper.KINVEY_LAPTOPS_TABLE_NAME, LaptopKinvey.class);
         laptopsInfo.delete(query, new KinveyDeleteCallback() {
             @Override
             public void onSuccess(KinveyDeleteResponse kinveyDeleteResponse) {
@@ -259,5 +253,63 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
     private static boolean doesDatabaseExist(Context context, String dbName) {
         File dbFile = context.getDatabasePath(dbName);
         return dbFile.exists();
+    }
+
+    public void uploadOrdersToKinvey(com.example.posted.login.User user){
+        Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
+        this.sendBroadcast(startLoading);
+        this.loginToKinvey();
+        ArrayList<Order> ordersToUpload = this.mLaptopsDatabaseManager.getAllOrders(ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+        for (Order order : ordersToUpload) {
+            order.setUser(user.getUsername());
+            AsyncAppData<Order> laptopsInfo = this.mKinveyClient.appData(ConstantsHelper.KINVEY_ORDERS_TABLE_NAME, Order.class);
+            laptopsInfo.save(order, new KinveyClientCallback<Order>() {
+                @Override
+                public void onSuccess(Order order) {
+                    Toast.makeText(LoadDataService.this, "Order " + " Successfully " +
+                            "uploaded", Toast.LENGTH_SHORT).show();
+                    LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(order.getId(),ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+                    Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
+                    LoadDataService.this.sendBroadcast(endLoading);
+
+
+                }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+                    Toast.makeText(LoadDataService.this, "Fail to upload order", Toast.LENGTH_SHORT).show();
+
+                    Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
+                    LoadDataService.this.sendBroadcast(endLoading);
+                }
+            });
+        }
+    }
+
+    public void downloadOrders(){
+        Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
+        this.sendBroadcast(startLoading);
+
+        //this.mController.deleteRecordsFromTable(ConstantsHelper.LAPTOPS_TABLE_NAME);
+        AsyncAppData<Order> ordersInfo = this.mKinveyClient.appData(ConstantsHelper.KINVEY_ORDERS_TABLE_NAME, Order.class);
+        ordersInfo.get(new KinveyListCallback<Order>() {
+            @Override
+            public void onSuccess(Order[] orders) {
+                Toast.makeText(LoadDataService.this, "Successfully download orders", Toast.LENGTH_SHORT).show();
+                for (Order order : orders) {
+                    LoadDataService.this.mLaptopsDatabaseManager.insertOrderIntoTable(order);
+                }
+                Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
+                LoadDataService.this.sendBroadcast(endLoading);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                Toast.makeText(LoadDataService.this, "Fail to download orders", Toast.LENGTH_SHORT).show();
+                Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
+                LoadDataService.this.sendBroadcast(endLoading);
+            }
+
+        });
     }
 }

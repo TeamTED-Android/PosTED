@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.example.posted.R;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
@@ -63,11 +64,22 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
         // Required empty public constructor
     }
 
-    public static LaptopFragment newInstance(LaptopSqlite laptop, RemoveLaptopListener listener) {
+    public static LaptopFragment newInstance(LaptopSqlite laptop, RemoveLaptopListener listener, String viewConstant) {
         LaptopFragment fragment = new LaptopFragment();
         Bundle bundleLaptop = new Bundle();
         bundleLaptop.putParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY, laptop);
-        bundleLaptop.putBoolean("is_cart", true);
+
+        if (viewConstant.equals(ConstantsHelper.IS_CARD_LIST)) {
+            bundleLaptop.putBoolean(ConstantsHelper.IS_CARD_LIST, true);
+            bundleLaptop.putCharSequence(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY, ConstantsHelper.USER);
+        } else if (viewConstant.equals(ConstantsHelper.IS_ADD_LIST)) {
+            bundleLaptop.putBoolean(ConstantsHelper.IS_ADD_LIST, true);
+            bundleLaptop.putCharSequence(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY, ConstantsHelper.ADMIN);
+        } else if (viewConstant.equals(ConstantsHelper.IS_REMOVE_LIST)) {
+            bundleLaptop.putBoolean(ConstantsHelper.IS_REMOVE_LIST, true);
+            bundleLaptop.putCharSequence(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY, ConstantsHelper.ADMIN);
+        }
+
         fragment.setArguments(bundleLaptop);
         mRemoveLaptopListener = listener;
         return fragment;
@@ -132,21 +144,40 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
         this.mLaptopFragmentButton = (Button) view.findViewById(R.id.laptop_fragment_button);
         this.mLaptopFragmentButton.setOnClickListener(this);
 
-        if (this.getArguments().getBoolean("is_cart")) {
-            this.mLaptopFragmentButton.setText("Remove from cart");
-        } else {
-            this.mCurrentUser = this.getArguments().getString(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY);
-            if (this.mCurrentUser.equals("admin")) {
-                this.mLaptopFragmentButton.setText("Remove from database");
-                //check if service running and bind
-                this.mServiceIntent = new Intent(this.mContext, LoadDataService.class);
-                if (!this.isDataServiceRunning(LoadDataService.class)) {
-                    this.mContext.startService(this.mServiceIntent);
-                }
-                this.mContext.bindService(this.mServiceIntent, this.connection, Context.BIND_AUTO_CREATE);
-            }
-            if (this.mCurrentUser.equals("user")) {
+//        if (this.getArguments().getBoolean("is_cart")) {
+//            this.mLaptopFragmentButton.setText("Remove from cart");
+//        } else {
+//            this.mCurrentUser = this.getArguments().getString(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY);
+//            if (this.mCurrentUser.equals("admin")) {
+//                this.mLaptopFragmentButton.setText("Remove from database");
+//                //check if service running and bind
+//                this.mServiceIntent = new Intent(this.mContext, LoadDataService.class);
+//                if (!this.isDataServiceRunning(LoadDataService.class)) {
+//                    this.mContext.startService(this.mServiceIntent);
+//                }
+//                this.mContext.bindService(this.mServiceIntent, this.connection, Context.BIND_AUTO_CREATE);
+//            }
+//            if (this.mCurrentUser.equals("user")) {
+//                this.mLaptopFragmentButton.setText("Add to cart");
+//            }
+//        }
+
+        this.mCurrentUser = this.getArguments().getString(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY);
+        if (this.mCurrentUser.equals(ConstantsHelper.USER)) {
+            if (this.getArguments().getBoolean(ConstantsHelper.IS_CARD_LIST)) {
+                this.mLaptopFragmentButton.setText("Remove from cart");
+            } else {
                 this.mLaptopFragmentButton.setText("Add to cart");
+            }
+        }
+
+        if (this.mCurrentUser.equals(ConstantsHelper.ADMIN)) {
+            if (this.getArguments().getBoolean(ConstantsHelper.IS_ADD_LIST)) {
+                this.mLaptopFragmentButton.setText("Remove from list");
+            } else if (this.getArguments().getBoolean(ConstantsHelper.IS_REMOVE_LIST)) {
+                this.mLaptopFragmentButton.setText("Remove from list");
+            } else {
+                this.mLaptopFragmentButton.setText("Remove from database");
             }
         }
 
@@ -174,21 +205,45 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         LaptopSqlite laptop = this.getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
-        if (this.getArguments().getBoolean("is_cart")) {
-            //this.mLaptopsDatabaseManager.deleteRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
-            this.mLaptopsDatabaseManager.deleteRecord(laptop.getId(), ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
-            mRemoveLaptopListener.onRemoved();
-            //  Toast.makeText(getContext(),"Laptop deleted from cart",Toast.LENGTH_SHORT).show();
-        } else {
-            if (this.mCurrentUser.equals("user")) {
+//        if (this.getArguments().getBoolean("is_cart")) {
+//            //this.mLaptopsDatabaseManager.deleteRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+//            this.mLaptopsDatabaseManager.deleteRecord(laptop.getId(), ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+//            mRemoveLaptopListener.onRemoved();
+//            //  Toast.makeText(getContext(),"Laptop deleted from cart",Toast.LENGTH_SHORT).show();
+//        } else {
+//            if (this.mCurrentUser.equals("user")) {
+//                this.mLaptopsDatabaseManager.insertLaptopIntoTable(laptop, ConstantsHelper
+//                        .CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+//                Toast.makeText(this.getContext(), "Laptop added to cart", Toast.LENGTH_SHORT).show();
+//            }
+//            if (this.mCurrentUser.equals("admin")) {
+////                this.mLoadDataService.removeLaptopFromKinvey(laptop);
+////                this.mLoadDataService.transferDataFromKinvey();
+////                this.getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
+//                this.mLaptopsDatabaseManager.insertLaptopIntoTable(laptop, ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
+//                Toast.makeText(this.mContext, "Laptop added to \"REMOVE\" list", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+
+        if (this.mCurrentUser.equals(ConstantsHelper.USER)) {
+            if (this.getArguments().getBoolean(ConstantsHelper.IS_CARD_LIST)) {
+                this.mLaptopsDatabaseManager.deleteRecord(laptop.getId(), ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+                mRemoveLaptopListener.onRemoved();
+            } else {
                 this.mLaptopsDatabaseManager.insertLaptopIntoTable(laptop, ConstantsHelper
                         .CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
                 Toast.makeText(this.getContext(), "Laptop added to cart", Toast.LENGTH_SHORT).show();
             }
-            if (this.mCurrentUser.equals("admin")) {
-//                this.mLoadDataService.removeLaptopFromKinvey(laptop);
-//                this.mLoadDataService.transferDataFromKinvey();
-//                this.getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
+        }
+
+        if (this.mCurrentUser.equals(ConstantsHelper.ADMIN)) {
+            if (this.getArguments().getBoolean(ConstantsHelper.IS_ADD_LIST)) {
+                this.mLaptopsDatabaseManager.deleteRecord(laptop.getId(), ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
+                mRemoveLaptopListener.onRemoved();
+            } else if (this.getArguments().getBoolean(ConstantsHelper.IS_REMOVE_LIST)) {
+                this.mLaptopsDatabaseManager.deleteRecord(laptop.getId(), ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
+                mRemoveLaptopListener.onRemoved();
+            } else {
                 this.mLaptopsDatabaseManager.insertLaptopIntoTable(laptop, ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
                 Toast.makeText(this.mContext, "Laptop added to \"REMOVE\" list", Toast.LENGTH_SHORT).show();
             }

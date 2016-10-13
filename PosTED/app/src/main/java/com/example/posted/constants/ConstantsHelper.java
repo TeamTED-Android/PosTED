@@ -1,7 +1,6 @@
 package com.example.posted.constants;
 
 
-
 public class ConstantsHelper {
 
     public static final String DB_NAME = "pos_ted.db";
@@ -34,8 +33,12 @@ public class ConstantsHelper {
     //Current order table
     public static final String CURRENT_ORDERS_LAPTOPS_TABLE_NAME = "current_order";
 
-    public static final String LAPTOP_FRAGMENT_PARCELABLE_KEY="current_laptop";
-    public static final String FROM_WHERE_IS_INVOKED_KEY="invocation";
+    //Admin orders table
+    public static final String ADMIN_ORDERS_LAPTOPS_TABLE_NAME = "admin_orders";
+    public static final String USER_COLUMN = "user";
+
+    public static final String LAPTOP_FRAGMENT_PARCELABLE_KEY = "current_laptop";
+    public static final String FROM_WHERE_IS_INVOKED_KEY = "invocation";
 
     public static final String IMAGE_DIRECTORY_PATH = "imageDir";
     public static final String NO_IMAGE_TAG = "No image!";
@@ -52,4 +55,19 @@ public class ConstantsHelper {
     // Images
     public static final int DESIRED_IMAGE_BOUND = 192;
 
+    //view pager constants
+    public static final String IS_ADD_LIST = "add_list";
+    public static final String IS_REMOVE_LIST = "remove_list";
+    public static final String IS_CARD_LIST = "card_list";
+
+    public static final String USER = "user";
+    public static final String ADMIN = "admin";
+
+    //Kinvey collections
+    public static final String KINVEY_LAPTOPS_TABLE_NAME = "laptops";
+    public static final String KINVEY_ORDERS_TABLE_NAME = "orders";
+
+    public static final String OVERVIEW_LAPTOPS_COLLECTION = "overview_laptops";
+    public static final String OVERVIEW_ORDERS_COLLECTION = "overview_orders";
+    public static final String COLLECTION_CONSTANT = "collection";
 }

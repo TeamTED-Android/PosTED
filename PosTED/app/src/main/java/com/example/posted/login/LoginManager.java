@@ -32,6 +32,7 @@ public class LoginManager {
             this.mEditor.putBoolean(LOGIN_KEY, true);
             this.mEditor.apply();
             this.mDatabaseManager.createCurrentOrderTable(this.mDatabaseManager.getWritableDatabase());
+            this.mDatabaseManager.createAdminOrderTable(this.mDatabaseManager.getWritableDatabase());
         }
     }
 

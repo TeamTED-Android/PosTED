@@ -10,6 +10,7 @@ import com.example.posted.async.AsyncImageSaver;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.interfaces.Laptop;
 import com.example.posted.models.LaptopSqlite;
+import com.example.posted.models.Order;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -59,6 +60,24 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
         database.close();
     }
 
+    public void insertOrderIntoTable(Order order) {
+        SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(ConstantsHelper.ID_COLUMN,order.getId());
+        values.put(ConstantsHelper.MODEL_COLUMN, order.getModel());
+        values.put(ConstantsHelper.RAM_COLUMN, order.getCapacity_ram());
+        values.put(ConstantsHelper.HDD_COLUMN, order.getCapacity_hdd());
+        values.put(ConstantsHelper.PROCESSOR_COLUMN, order.getProcessor_type());
+        values.put(ConstantsHelper.VIDEO_CARD_COLUMN, order.getVideo_card_type());
+        values.put(ConstantsHelper.DISPLAY_COLUMN, order.getDisplay_size());
+        values.put(ConstantsHelper.CURRENCY_COLUMN, order.getCurrency());
+        values.put(ConstantsHelper.PRICE_COLUMN, order.getPrice());
+        values.put(ConstantsHelper.USER_COLUMN, order.getUser());
+
+        database.insertWithOnConflict(ConstantsHelper.ADMIN_ORDERS_LAPTOPS_TABLE_NAME,null,values,SQLiteDatabase.CONFLICT_IGNORE);
+        database.close();
+    }
+
     public ArrayList<LaptopSqlite> getAllLaptops(String tableName) {
         ArrayList<LaptopSqlite> result = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + tableName;
@@ -78,6 +97,33 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
             current.setImagePath(cursor.getString(9));
             current.setImageName(cursor.getString(10));
             result.add(current);
+        }
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+        database.close();
+        return result;
+    }
+
+    public ArrayList<Order> getAllOrders(String tableName){
+        ArrayList<Order> result = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + tableName;
+        SQLiteDatabase database = this.mDatabaseManager.getReadableDatabase();
+        Cursor cursor = database.rawQuery(selectQuery, null);
+        while (cursor.moveToNext()) {
+            Order cuurentOrder = new Order();
+            cuurentOrder.setId(cursor.getString(0));
+            cuurentOrder.setModel(cursor.getString(1));
+            cuurentOrder.setCapacity_ram(cursor.getString(2));
+            cuurentOrder.setCapacity_hdd(cursor.getString(3));
+            cuurentOrder.setProcessor_type(cursor.getString(4));
+            cuurentOrder.setVideo_card_type(cursor.getString(5));
+            cuurentOrder.setDisplay_size(cursor.getString(6));
+            cuurentOrder.setCurrency(cursor.getString(7));
+            cuurentOrder.setPrice(cursor.getString(8));
+            cuurentOrder.setUser(cursor.getString(9));
+
+            result.add(cuurentOrder);
         }
         if (!cursor.isClosed()) {
             cursor.close();

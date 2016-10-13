@@ -32,6 +32,10 @@
             android:icon="@drawable/sync"
             android:title="@string/sync" />
         <item
+            android:id="@+id/admin_nav_orders"
+            android:icon="@drawable/sync"
+            android:title="@string/orders" />
+        <item
             android:id="@+id/admin_nav_profile"
             android:icon="@drawable/profile"
             android:title="@string/profile" />

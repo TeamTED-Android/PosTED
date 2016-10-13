@@ -22,13 +22,15 @@ public class SectionsPagerAdapter extends FragmentStatePagerAdapter implements R
     private LaptopsDatabaseManager mLaptopsDatabaseManager;
     private String mTableName;
     private boolean isEmpty;
+    private String mViewConstant;
 
-    public SectionsPagerAdapter(FragmentManager fm, Context context, String tableName) {
+    public SectionsPagerAdapter(FragmentManager fm, Context context, String tableName, String viewConstant) {
         super(fm);
         this.mTableName = tableName;
         DatabaseManager databaseManager = new DatabaseManager(context);
         this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(databaseManager);
         this.loadData();
+        this.mViewConstant = viewConstant;
     }
 
     @Override
@@ -36,7 +38,7 @@ public class SectionsPagerAdapter extends FragmentStatePagerAdapter implements R
         if (this.isEmpty) {
             return NoItemsFragment.newInstance();
         }
-        return LaptopFragment.newInstance(this.mLaptops.get(position), this);
+        return LaptopFragment.newInstance(this.mLaptops.get(position), this,this.mViewConstant);
     }
 
     @Override

@@ -41,6 +41,7 @@
     <string name="video_card">Video card: </string>
     <string name="display_size">Display size: </string>
     <string name="currency">Currency: </string>
+    <string name="user_order">User ordered the product: </string>
     <string name="browse">browse</string>
     <string name="camera">camera</string>
     <string name="cancel">Cancel</string>
@@ -63,5 +64,7 @@
     <string name="no_items">No items</string>
       <string name="about_us">Welcome to PosTED! Our place of sale app is the ideal place for you to satisfy your teck needs!\n\nRegards from our mobile development team: Todor, Elica and Dimana (hence the TED part).
           \n\nHere is where you can find us:</string>
+    <string name="checkout">Checkout</string>
+    <string name="orders">Orders</string>
 
 </resources>

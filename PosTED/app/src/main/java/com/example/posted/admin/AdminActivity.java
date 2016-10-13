@@ -72,7 +72,8 @@ public class AdminActivity extends AppCompatActivity
     private DatabaseManager mDatabaseManager;
     private LaptopsDatabaseManager mLaptopsDatabaseManager;
     private LoadDataService mLoadDataService;
-    private boolean mIsBinded;
+    private boolean mIsBindedSync;
+    private boolean mIsBindedOrders;
     private Toolbar mToolbar;
 
     @Override
@@ -154,6 +155,9 @@ public class AdminActivity extends AppCompatActivity
             this.mToolbar.setTitle(R.string.laptops);
             this.turnViewPagerVisibilityOff();
             OverviewFragment overviewFragment = new OverviewFragment();
+            Bundle bundle = new Bundle();
+            bundle.putCharSequence(ConstantsHelper.COLLECTION_CONSTANT,ConstantsHelper.OVERVIEW_LAPTOPS_COLLECTION);
+            overviewFragment.setArguments(bundle);
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment)
                     .commit();
         } else if (id == R.id.admin_nav_phones) {
@@ -189,16 +193,20 @@ public class AdminActivity extends AppCompatActivity
         } else if (id == R.id.admin_nav_previewAddedProducts) {
             this.mToolbar.setTitle(R.string.preview_added_products);
             this.turnFrameLayoutVisibilityOff();
-            SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this,
-                    ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
+            SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(),
+                                                                    this,
+                                                                    ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME,
+                                                                    ConstantsHelper.IS_ADD_LIST);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
             viewPager.setAdapter(adapter);
 
         } else if (id == R.id.admin_nav_previewRemovedProducts) {
             this.mToolbar.setTitle(R.string.preview_removed_products);
             this.turnFrameLayoutVisibilityOff();
-            SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(), this,
-                    ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
+            SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(),
+                                                                    this,
+                                                                    ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME,
+                                                                    ConstantsHelper.IS_REMOVE_LIST);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
             viewPager.setAdapter(adapter);
 
@@ -211,7 +219,24 @@ public class AdminActivity extends AppCompatActivity
                 this.mServiceIntent = new Intent(this, LoadDataService.class);
                 this.startService(this.mServiceIntent);
             }
-            this.bindService(this.mServiceIntent, this.connection, Context.BIND_AUTO_CREATE);
+            this.bindService(this.mServiceIntent, this.connectionSync, Context.BIND_AUTO_CREATE);
+        } else if (id == R.id.admin_nav_orders){
+            this.turnViewPagerVisibilityOff();
+            if (!this.checkForInternetConnection()) {
+                this.attemptToTurnOnWiFi();
+            }
+            if (!this.isDataServiceRunning(LoadDataService.class)) {
+                this.mServiceIntent = new Intent(this, LoadDataService.class);
+                this.startService(this.mServiceIntent);
+            }
+            this.bindService(this.mServiceIntent, this.connectionOrders, Context.BIND_AUTO_CREATE);
+
+            OverviewFragment overviewFragment = new OverviewFragment();
+            Bundle bundle = new Bundle();
+            bundle.putCharSequence(ConstantsHelper.COLLECTION_CONSTANT,ConstantsHelper.OVERVIEW_ORDERS_COLLECTION);
+            overviewFragment.setArguments(bundle);
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment)
+                    .commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
@@ -276,8 +301,11 @@ public class AdminActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        if (this.mIsBinded) {
-            this.unbindService(this.connection);
+        if (this.mIsBindedSync) {
+            this.unbindService(this.connectionSync);
+        }
+        if (this.mIsBindedOrders) {
+            this.unbindService(this.connectionOrders);
         }
         if (this.mServiceIntent != null) {
             this.stopService(this.mServiceIntent);
@@ -377,12 +405,12 @@ public class AdminActivity extends AppCompatActivity
         }
     }
 
-    private ServiceConnection connection = new ServiceConnection() {
+    private ServiceConnection connectionSync = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
             AdminActivity.this.mLoadDataService = binder.getService();
-            AdminActivity.this.mIsBinded = true;
+            AdminActivity.this.mIsBindedSync = true;
 
             ArrayList<LaptopSqlite> laptopsForRemove = AdminActivity.this.mLaptopsDatabaseManager.getAllLaptops
                     (ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
@@ -394,7 +422,23 @@ public class AdminActivity extends AppCompatActivity
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            AdminActivity.this.mIsBinded = false;
+            AdminActivity.this.mIsBindedSync = false;
+        }
+    };
+
+    private ServiceConnection connectionOrders = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
+            AdminActivity.this.mLoadDataService = binder.getService();
+            AdminActivity.this.mIsBindedOrders = true;
+            AdminActivity.this.mLoadDataService.downloadOrders();
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            AdminActivity.this.mIsBindedOrders = false;
         }
     };
 

@@ -56,7 +56,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="Model:"
+                        android:text="@string/laptop_model"
                         android:layout_margin="@dimen/cardView_text_margin"
                         android:textStyle="bold"/>
                     <TextView
@@ -73,7 +73,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Price:"
+                        android:text="@string/price"
                         android:layout_margin="@dimen/cardView_text_margin"
                         android:textStyle="bold"/>
                     <TextView
