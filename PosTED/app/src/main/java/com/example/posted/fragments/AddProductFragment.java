@@ -50,7 +50,6 @@ public class AddProductFragment extends Fragment implements
     private Button mAddProductButton;
     private Button mCancelButton;
     private Context mContext;
-    private String mImageAsString;
     private String mImagePath;
     private String mImageName;
 
@@ -107,7 +106,7 @@ public class AddProductFragment extends Fragment implements
         this.mAddProductButton.setOnClickListener(this);
         this.mCancelButton.setOnClickListener(this);
         this.mBrowseButton.setOnClickListener(this);
-        this.mImageAsString = "";
+        this.mImagePath = "";
 
         this.mServiceIntent = new Intent(this.mContext, LoadDataService.class);
         if (!this.isDataServiceRunning(LoadDataService.class)) {
@@ -155,6 +154,14 @@ public class AddProductFragment extends Fragment implements
         if (!this.checkInputInfo()) {
             return;
         }
+        if (this.mImageName == null) {
+            int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
+            this.mImageName = "img" + count + ".png";
+        }
+        if (this.mImagePath == null){
+            this.mImagePath = "";
+        }
+
         String id = this.mImageName.substring(0, this.mImageName.indexOf('.'));
         LaptopSqlite currentLaptop = new LaptopSqlite(
                 id,

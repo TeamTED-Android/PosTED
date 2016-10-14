@@ -78,4 +78,7 @@ public class ConstantsHelper {
 
     public static final int MIN_PASSWORD_LENGTH = 4;
 
+    public static final String POSTED_NAME = "PosTed";
+    public static final String POSTED_OFFICE = "PosTed office";
+
 }

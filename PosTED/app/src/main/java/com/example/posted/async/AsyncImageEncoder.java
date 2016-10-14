@@ -59,7 +59,7 @@ public class AsyncImageEncoder extends AsyncTask<Bitmap, Integer, String> {
         }
         Bitmap bitmap = params[0];
         if (bitmap == null) {
-            return null;
+            return "";
         }
         this.publishProgress(2);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

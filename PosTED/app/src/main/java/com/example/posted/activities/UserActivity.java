@@ -55,6 +55,7 @@ public class UserActivity extends AppCompatActivity
     private UserActivity.BroadcastListener mBroadcastListener;
     private Toolbar mToolbar;
     private boolean mIsBinded;
+    private boolean mIsReceiverReady;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,12 +151,16 @@ public class UserActivity extends AppCompatActivity
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, phonesFragment).commit();
 
         } else if (id == R.id.nav_sign_out) {
-            this.turnViewPagerVisibilityOff();
-            this.getSupportFragmentManager().beginTransaction().remove(this.mMainFragment).commit();
-            this.mLoginManager.logoutUser();
-            Intent intent = new Intent(this, LoginActivity.class);
-            this.finish();
-            this.startActivity(intent);
+            if (this.mIsReceiverReady) {
+                this.turnViewPagerVisibilityOff();
+                this.mLoginManager.logoutUser();
+                this.getSupportFragmentManager().beginTransaction().remove(this.mMainFragment).commit();
+                Intent intent = new Intent(this.getApplicationContext(), LoginActivity.class);
+                this.finish();
+                this.startActivity(intent);
+            } else {
+                Toast.makeText(this, this.getResources().getString(R.string.please_wait), Toast.LENGTH_SHORT).show();
+            }
 
         } else if (id == R.id.nav_home) {
             this.mToolbar.setTitle(R.string.app_name);
@@ -312,8 +317,10 @@ public class UserActivity extends AppCompatActivity
             if (intent.getAction().equals(ConstantsHelper.BROADCAST_START_LOADING)) {
                 UserActivity.this.getSupportFragmentManager()
                         .beginTransaction().replace(R.id.container, spinnerFragment).addToBackStack(null).commit();
+                UserActivity.this.mIsReceiverReady = false;
             } else if (intent.getAction().equals(ConstantsHelper.BROADCAST_END_LOADING)) {
                 UserActivity.this.getSupportFragmentManager().popBackStack();
+                UserActivity.this.mIsReceiverReady = true;
             }
         }
     }

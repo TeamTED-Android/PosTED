@@ -164,10 +164,13 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
     }
 
     private void loadImageIntoImageView(String imgPath, String imgName) {
+
         Bitmap bitmap = null;
         try {
-            File file = new File(imgPath, imgName);
-            bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+            if (!imgPath.equals("")) {
+                File file = new File(imgPath, imgName);
+                bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

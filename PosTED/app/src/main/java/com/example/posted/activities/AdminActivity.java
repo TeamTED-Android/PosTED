@@ -120,6 +120,13 @@ public class AdminActivity extends AppCompatActivity
             this.attemptToTurnOnWiFi();
         }
 
+        if (!this.isDataServiceRunning(LoadDataService.class)) {
+            this.mServiceIntent = new Intent(this, LoadDataService.class);
+            this.startService(this.mServiceIntent);
+        }
+
+        this.bindService(this.mServiceIntent, this.connectionSync, Context.BIND_AUTO_CREATE);
+
         this.mLoginManager = new LoginManager(this);
         this.mMainFragment = new MainFragment();
         this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, this.mMainFragment).commit();
@@ -221,22 +228,19 @@ public class AdminActivity extends AppCompatActivity
             if (!this.checkForInternetConnection()) {
                 this.attemptToTurnOnWiFi();
             }
-            if (!this.isDataServiceRunning(LoadDataService.class)) {
-                this.mServiceIntent = new Intent(this, LoadDataService.class);
-                this.startService(this.mServiceIntent);
-            }
-            this.bindService(this.mServiceIntent, this.connectionSync, Context.BIND_AUTO_CREATE);
+            ArrayList<LaptopSqlite> laptopsForRemove = AdminActivity.this.mLaptopsDatabaseManager.getAllLaptops
+                    (ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
+            this.mLoadDataService.removeLaptops(laptopsForRemove);
+            ArrayList<LaptopSqlite> laptopsForAdd = AdminActivity.this.mLaptopsDatabaseManager.getAllLaptops
+                    (ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
+            this.mLoadDataService.uploadLaptops(laptopsForAdd);
 
         } else if (id == R.id.admin_nav_orders) {
             this.turnViewPagerVisibilityOff();
             if (!this.checkForInternetConnection()) {
                 this.attemptToTurnOnWiFi();
             }
-            if (!this.isDataServiceRunning(LoadDataService.class)) {
-                this.mServiceIntent = new Intent(this, LoadDataService.class);
-                this.startService(this.mServiceIntent);
-            }
-            this.bindService(this.mServiceIntent, this.connectionOrders, Context.BIND_AUTO_CREATE);
+            this.mLoadDataService.downloadOrders();
 
             OverviewFragment overviewFragment = new OverviewFragment();
             Bundle bundle = new Bundle();
@@ -274,7 +278,7 @@ public class AdminActivity extends AppCompatActivity
         }
 
         this.back_pressed = System.currentTimeMillis();
-        Toast.makeText(this,this.getResources().getString(R.string.back_press),Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, this.getResources().getString(R.string.back_press), Toast.LENGTH_SHORT).show();
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -313,9 +317,6 @@ public class AdminActivity extends AppCompatActivity
         super.onPause();
         if (this.mIsBindedSync) {
             this.unbindService(this.connectionSync);
-        }
-        if (this.mIsBindedOrders) {
-            this.unbindService(this.connectionOrders);
         }
         if (this.isDataServiceRunning(LoadDataService.class)) {
             this.stopService(this.mServiceIntent);
@@ -421,33 +422,11 @@ public class AdminActivity extends AppCompatActivity
             LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
             AdminActivity.this.mLoadDataService = binder.getService();
             AdminActivity.this.mIsBindedSync = true;
-
-            ArrayList<LaptopSqlite> laptopsForRemove = AdminActivity.this.mLaptopsDatabaseManager.getAllLaptops
-                    (ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
-            AdminActivity.this.mLoadDataService.removeLaptops(laptopsForRemove);
-            ArrayList<LaptopSqlite> laptopsForAdd = AdminActivity.this.mLaptopsDatabaseManager.getAllLaptops
-                    (ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
-            AdminActivity.this.mLoadDataService.uploadLaptops(laptopsForAdd);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             AdminActivity.this.mIsBindedSync = false;
-        }
-    };
-
-    private ServiceConnection connectionOrders = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
-            AdminActivity.this.mLoadDataService = binder.getService();
-            AdminActivity.this.mIsBindedOrders = true;
-            AdminActivity.this.mLoadDataService.downloadOrders();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            AdminActivity.this.mIsBindedOrders = false;
         }
     };
 

@@ -78,8 +78,8 @@ public class MainFragment extends Fragment {
                 LatLng softUniLocation = new LatLng(ConstantsHelper.LATITUDE, ConstantsHelper.LONGITUDE);
                 MainFragment.this.mGoogleMap.addMarker(new MarkerOptions()
                         .position(softUniLocation)
-                        .title("PosTED")
-                        .snippet(MainFragment.this.getResources().getString(R.string.posted_office)));
+                        .title(ConstantsHelper.POSTED_NAME)
+                        .snippet(ConstantsHelper.POSTED_OFFICE));
 
                 // For zooming automatically to the location of the marker
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(softUniLocation).zoom(15).build();

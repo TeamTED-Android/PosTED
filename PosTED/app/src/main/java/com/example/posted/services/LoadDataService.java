@@ -1,14 +1,12 @@
 package com.example.posted.services;
 
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.example.posted.R;
@@ -94,16 +92,16 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
             this.mKinveyClient.user().login(KINVEY_USERNAME, KINVEY_PASSWORD, new KinveyClientCallback<User>() {
                 @Override
                 public void onSuccess(User user) {
-                    //Toast.makeText(LoadDataService.this, "Successfully logged in", Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(LoadDataService.this, "Successfully logged in", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onFailure(Throwable throwable) {
-                    //Toast.makeText(LoadDataService.this, "Fail to logged in", Toast.LENGTH_SHORT).show();
+                    //  Toast.makeText(LoadDataService.this, "Fail to logged in", Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            //Toast.makeText(LoadDataService.this, "User already logged in", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(LoadDataService.this, "User already logged in", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -115,18 +113,18 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
         laptopsInfo.get(new KinveyListCallback<LaptopKinvey>() {
             @Override
             public void onSuccess(LaptopKinvey[] laptops) {
-                //Toast.makeText(LoadDataService.this, "Successfully receive the info", Toast.LENGTH_SHORT).show();
+
                 for (LaptopKinvey laptop : laptops) {
                     LoadDataService.this.mLaptopsDatabaseManager.insertIntoMainDatabase(laptop);
+                    Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
+                    LoadDataService.this.sendBroadcast(endLoading);
                 }
-                Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
-                LoadDataService.this.sendBroadcast(endLoading);
-
+                Toast.makeText(LoadDataService.this, "Successfully receive the info", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                //Toast.makeText(LoadDataService.this, "Fail to receive the info", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoadDataService.this, "Fail to receive the info", Toast.LENGTH_SHORT).show();
                 Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                 LoadDataService.this.sendBroadcast(endLoading);
             }
@@ -135,18 +133,24 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
     }
 
     public void uploadLaptops(ArrayList<LaptopSqlite> laptopsToAdd) {
-        Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
-        this.sendBroadcast(startLoading);
+        if (laptopsToAdd.size() > 0) {
+            Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
+            this.sendBroadcast(startLoading);
 
-        this.loginToKinvey();
-        for (LaptopSqlite current : laptopsToAdd) {
-            Bitmap bitmap = this.loadImage(current.getImagePath(), current.getImageName());
-            AsyncImageEncoder encoder = new AsyncImageEncoder(this, current);
-            encoder.execute(bitmap);
+            this.loginToKinvey();
+            for (LaptopSqlite current : laptopsToAdd) {
+                Bitmap bitmap = this.loadImage(current.getImagePath(), current.getImageName());
+                AsyncImageEncoder encoder = new AsyncImageEncoder(this, current);
+                encoder.execute(bitmap);
+            }
         }
     }
 
     private Bitmap loadImage(String imgPath, String imgName) {
+        if (imgPath == null || imgPath.equals("")) {
+            return null;
+        }
+
         Bitmap bitmap = null;
         try {
             File file = new File(imgPath, imgName);
@@ -184,12 +188,15 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
 
             @Override
             public void onFailure(Throwable throwable) {
-//                Toast.makeText(LoadDataService.this, "Fail to upload laptop", Toast.LENGTH_SHORT).show();
+                //  Toast.makeText(LoadDataService.this, "Fail to upload laptop", Toast.LENGTH_SHORT).show();
                 Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                 LoadDataService.this.sendBroadcast(endLoading);
             }
         });
-        boolean isDeleted = imgToDelete.delete();
+        if (!tempLaptop.getImagePath().equals("")) {
+            boolean isDeleted = imgToDelete.delete();
+        }
+
         // Toast.makeText(this, "File " + imgToDelete.getName() + " isDeleted " + isDeleted, Toast.LENGTH_SHORT).show();
     }
 
@@ -200,12 +207,14 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
     }
 
     public void removeLaptops(ArrayList<LaptopSqlite> laptopsToRemove) {
-        Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
-        this.sendBroadcast(startLoading);
+        if (laptopsToRemove.size() > 0) {
+            Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
+            this.sendBroadcast(startLoading);
 
-        this.loginToKinvey();
-        for (LaptopSqlite current : laptopsToRemove) {
-            this.removeLaptopFromKinvey(current);
+            this.loginToKinvey();
+            for (LaptopSqlite current : laptopsToRemove) {
+                this.removeLaptopFromKinvey(current);
+            }
         }
     }
 
@@ -218,20 +227,22 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
             public void onSuccess(KinveyDeleteResponse kinveyDeleteResponse) {
                 String imgName = laptopToRemove.getImageName();
                 String imgPath = laptopToRemove.getImagePath();
-                File file = new File(imgPath, imgName);
-                boolean isDeleted = file.delete();
+                if (!imgPath.equals("")) {
+                    File file = new File(imgPath, imgName);
+                    boolean isDeleted = file.delete();
+                }
                 LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(laptopToRemove.getId(), ConstantsHelper.LAPTOPS_TABLE_NAME);
                 LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(laptopToRemove.getId(), ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
                 //Toast.makeText(LoadDataService.this, "File " + file.getName() + " isDeleted " + isDeleted, Toast.LENGTH_SHORT).show();
-                //Toast.makeText(LoadDataService.this, "Laptop " + laptopToRemove.getModel() + " Successfully " +
-                //       "deleted", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(LoadDataService.this, "Laptop " + laptopToRemove.getModel() + " Successfully " +
+//                        "deleted", Toast.LENGTH_SHORT).show();
                 Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                 LoadDataService.this.sendBroadcast(endLoading);
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                //Toast.makeText(LoadDataService.this, "Fail to delete laptop", Toast.LENGTH_SHORT).show();
+                //   Toast.makeText(LoadDataService.this, "Fail to delete laptop", Toast.LENGTH_SHORT).show();
                 Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                 LoadDataService.this.sendBroadcast(endLoading);
             }
