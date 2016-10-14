@@ -1,4 +1,4 @@
-package com.example.posted;
+package com.example.posted.activities;
 
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -24,20 +24,17 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.posted.R;
 import com.example.posted.adapters.SectionsPagerAdapter;
-import com.example.posted.admin.AdminActivity;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.fragments.*;
 import com.example.posted.interfaces.NetworkStateReceiverListener;
 import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
-import com.example.posted.login.LoginActivity;
 import com.example.posted.login.LoginManager;
 import com.example.posted.models.LaptopSqlite;
-import com.example.posted.models.Order;
 import com.example.posted.receivers.NetworkStateReceiver;
 import com.example.posted.services.LoadDataService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -64,16 +61,14 @@ public class UserActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_main);
         this.mToolbar = (Toolbar) this.findViewById(R.id.toolbar);
-        this.setSupportActionBar( this.mToolbar);
-
-        // toolbar.setSubtitle(this.mLoginManager.getLoginUser().getUsername());
+        this.setSupportActionBar(this.mToolbar);
 
         FloatingActionButton fab = (FloatingActionButton) this.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, R.string.posted_email, Snackbar.LENGTH_LONG)
-                        .setAction("send us email", new View.OnClickListener() {
+                        .setAction(UserActivity.this.getResources().getString(R.string.send_us_email), new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 UserActivity.this.sendMail();
@@ -93,10 +88,9 @@ public class UserActivity extends AppCompatActivity
         });
 
         this.mDrawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
-        //drawer.openDrawer(Gravity.LEFT);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, this.mDrawer,  this.mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        this.mDrawer.setDrawerListener(toggle);
+                this, this.mDrawer, this.mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        this.mDrawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) this.findViewById(R.id.nav_view);
@@ -113,33 +107,29 @@ public class UserActivity extends AppCompatActivity
             this.attemptToTurnOnWiFi();
         }
 
-//        bindService(this.mServiceIntent, connection, Context.BIND_AUTO_CREATE);
         this.mMainFragment = new MainFragment();
         this.getSupportFragmentManager().beginTransaction().replace(R.id.container, this.mMainFragment).commit();
 
         this.mLoginManager = new LoginManager(this);
 
-        TextView textView = (TextView)  this.mToolbar.findViewById(R.id.current_user);
+        TextView textView = (TextView) this.mToolbar.findViewById(R.id.current_user);
         textView.setText(this.mLoginManager.getLoginUser().getUsername());
         textView.setGravity(Gravity.CENTER | Gravity.RIGHT);
 
         this.mContainerFrameLayoyt = (FrameLayout) this.findViewById(R.id.container);
         this.mConteinerViewPager = (ViewPager) this.findViewById(R.id.containerViewPager);
 
-        mBroadcastListener = new UserActivity.BroadcastListener();
+        this.mBroadcastListener = new UserActivity.BroadcastListener();
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConstantsHelper.BROADCAST_START_LOADING);
         filter.addAction(ConstantsHelper.BROADCAST_END_LOADING);
-        this.registerReceiver(mBroadcastListener, filter);
-
-
+        this.registerReceiver(this.mBroadcastListener, filter);
     }
 
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
         this.getSupportFragmentManager().popBackStack();
 
@@ -152,43 +142,48 @@ public class UserActivity extends AppCompatActivity
             overviewFragment.setArguments(bundle);
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, overviewFragment)
                     .commit();
+
         } else if (id == R.id.nav_phones) {
             this.mToolbar.setTitle(R.string.phones);
             this.turnViewPagerVisibilityOff();
             PhonesFragment phonesFragment = new PhonesFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, phonesFragment).commit();
+
         } else if (id == R.id.nav_sign_out) {
             this.turnViewPagerVisibilityOff();
+            this.getSupportFragmentManager().beginTransaction().remove(this.mMainFragment).commit();
             this.mLoginManager.logoutUser();
             Intent intent = new Intent(this, LoginActivity.class);
             this.finish();
             this.startActivity(intent);
+
         } else if (id == R.id.nav_home) {
             this.mToolbar.setTitle(R.string.app_name);
             this.turnViewPagerVisibilityOff();
-            MainFragment mainFragment = new MainFragment();
-            this.getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.container, this.mMainFragment).commit();
+
         } else if (id == R.id.nav_cart) {
             this.mToolbar.setTitle(R.string.cart);
             this.turnFrameLayoutVisibilityOff();
             SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(),
-                                                                    this,
-                                                                    ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME,
-                                                                    ConstantsHelper.IS_CARD_LIST);
+                    this,
+                    ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME,
+                    ConstantsHelper.IS_CARD_LIST);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.containerViewPager);
             viewPager.setAdapter(adapter);
+
         } else if (id == R.id.nav_profile) {
             this.mToolbar.setTitle(R.string.profile);
             this.turnViewPagerVisibilityOff();
             ProfileFragment profileFragment = new ProfileFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.container, profileFragment).commit();
-        } else if (id == R.id.nav_checkout){
+
+        } else if (id == R.id.nav_checkout) {
             if (!this.isDataServiceRunning(LoadDataService.class)) {
                 this.mServiceIntent = new Intent(this, LoadDataService.class);
                 this.startService(this.mServiceIntent);
             }
             this.bindService(this.mServiceIntent, this.connection, Context.BIND_AUTO_CREATE);
-
         }
 
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
@@ -232,10 +227,10 @@ public class UserActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        if (this.mIsBinded){
+        if (this.mIsBinded) {
             this.unbindService(connection);
         }
-        if (this.mServiceIntent != null) {
+        if (this.isDataServiceRunning(LoadDataService.class)) {
             this.stopService(this.mServiceIntent);
         }
         this.unregisterReceiver(this.mNetworkStateReceiver);
@@ -245,19 +240,20 @@ public class UserActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        if (this.back_pressed + 1500 > System.currentTimeMillis()) {
+        if (this.back_pressed + ConstantsHelper.MILLISECONDS_FOR_DOUBLE_BACK  > System.currentTimeMillis()) {
+            this.getSupportFragmentManager().beginTransaction().remove(this.mMainFragment).commit();
             super.onBackPressed();
+            return;
         }
         this.back_pressed = System.currentTimeMillis();
-
+        Toast.makeText(this,this.getResources().getString(R.string.back_press),Toast.LENGTH_SHORT).show();
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             if (this.getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 this.mToolbar.setTitle(R.string.app_name);
-                MainFragment mainFragment = new MainFragment();
-                this.getSupportFragmentManager().beginTransaction().replace(R.id.container, mainFragment).commit();
+                this.getSupportFragmentManager().beginTransaction().replace(R.id.container, this.mMainFragment).commit();
             } else {
                 this.getSupportFragmentManager().popBackStack();
             }
@@ -273,19 +269,18 @@ public class UserActivity extends AppCompatActivity
 
     private void attemptToTurnOnWiFi() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getResources().getString(R.string.wifi_dialog_title));
-        builder.setMessage(getResources().getString(R.string.wifi_dialog_message));
-        builder.setPositiveButton(getResources().getString(R.string.wifi_dialog_positive_button), new DialogInterface.OnClickListener() {
+        builder.setTitle(this.getResources().getString(R.string.wifi_dialog_title));
+        builder.setMessage(this.getResources().getString(R.string.wifi_dialog_message));
+        builder.setPositiveButton(this.getResources().getString(R.string.wifi_dialog_positive_button), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 WifiManager wifiManager = (WifiManager) UserActivity.this.getSystemService(Context.WIFI_SERVICE);
                 wifiManager.setWifiEnabled(true);
                 Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
                 UserActivity.this.sendBroadcast(startLoading);
-                //startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
             }
         });
-        builder.setNeutralButton(getResources().getString(R.string.wifi_dialog_neutral_button), new DialogInterface.OnClickListener() {
+        builder.setNeutralButton(this.getResources().getString(R.string.wifi_dialog_neutral_button), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
@@ -298,13 +293,13 @@ public class UserActivity extends AppCompatActivity
     private void sendMail() {
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType(ConstantsHelper.MESSAGE_TYPE);
-        i.putExtra(Intent.EXTRA_EMAIL, new String[]{getResources().getString(R.string.posted_email)});
-        i.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.email_subject));
-        i.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.email_body));
+        i.putExtra(Intent.EXTRA_EMAIL, new String[]{this.getResources().getString(R.string.posted_email)});
+        i.putExtra(Intent.EXTRA_SUBJECT, this.getResources().getString(R.string.email_subject));
+        i.putExtra(Intent.EXTRA_TEXT, this.getResources().getString(R.string.email_body));
         try {
-            this.startActivity(Intent.createChooser(i, "Send mail..."));
+            this.startActivity(Intent.createChooser(i, this.getResources().getString(R.string.send_us_email)));
         } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(UserActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(UserActivity.this, this.getResources().getString(R.string.no_email_client), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -312,14 +307,13 @@ public class UserActivity extends AppCompatActivity
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            turnViewPagerVisibilityOff();
+            UserActivity.this.turnViewPagerVisibilityOff();
             SpinnerFragment spinnerFragment = new SpinnerFragment();
             if (intent.getAction().equals(ConstantsHelper.BROADCAST_START_LOADING)) {
                 UserActivity.this.getSupportFragmentManager()
                         .beginTransaction().replace(R.id.container, spinnerFragment).addToBackStack(null).commit();
             } else if (intent.getAction().equals(ConstantsHelper.BROADCAST_END_LOADING)) {
                 UserActivity.this.getSupportFragmentManager().popBackStack();
-                //mDrawer.openDrawer(Gravity.LEFT);
             }
         }
     }
@@ -345,7 +339,6 @@ public class UserActivity extends AppCompatActivity
             LoadDataService mLoadDataService = binder.getService();
             UserActivity.this.mIsBinded = true;
             mLoadDataService.uploadOrdersToKinvey(UserActivity.this.mLoginManager.getLoginUser());
-
         }
 
         @Override

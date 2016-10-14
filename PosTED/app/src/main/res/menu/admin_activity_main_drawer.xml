@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
@@ -33,7 +33,7 @@
             android:title="@string/sync" />
         <item
             android:id="@+id/admin_nav_orders"
-            android:icon="@drawable/sync"
+            android:icon="@drawable/orders"
             android:title="@string/orders" />
         <item
             android:id="@+id/admin_nav_profile"
@@ -44,7 +44,6 @@
             android:icon="@drawable/sign_out"
             android:title="@string/sign_out" />
     </group>
-
 
 
 </menu>

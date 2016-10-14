@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import com.example.posted.constants.ConstantsHelper;
-import com.example.posted.login.User;
+import com.example.posted.models.User;
 
 
 public class UsersDatabaseManager {
@@ -28,8 +28,8 @@ public class UsersDatabaseManager {
     public void updateUserPassword(User queryValues) {
         SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("username", queryValues.getUsername());
-        values.put("password", queryValues.getPassword());
+        values.put(ConstantsHelper.USERNAME_COLUMN, queryValues.getUsername());
+        values.put(ConstantsHelper.PASSWORD_COLUMN, queryValues.getPassword());
         queryValues.setId(database.insert(ConstantsHelper.USERS_TABLE_NAME, null, values));
 
         database.update(ConstantsHelper.USERS_TABLE_NAME, values, ConstantsHelper.ID_COLUMN + " = ?", new

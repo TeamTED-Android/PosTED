@@ -59,7 +59,6 @@ public class OverviewFragment extends Fragment implements RecyclerViewAdapter.Re
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_overview, container, false);
         String currentOverview = getArguments().getString(ConstantsHelper.COLLECTION_CONSTANT);
         if (currentOverview.equals(ConstantsHelper.OVERVIEW_LAPTOPS_COLLECTION)){
@@ -72,6 +71,7 @@ public class OverviewFragment extends Fragment implements RecyclerViewAdapter.Re
             RecyclerViewAdapter adapterLaptops = new RecyclerViewAdapter(this.getContext(), resultLaptops, this);
             recyclerView.setAdapter(adapterLaptops);
         }
+
         if (currentOverview.equals(ConstantsHelper.OVERVIEW_ORDERS_COLLECTION)){
             ArrayList<Order> resultOrders = this.mLaptopsDatabaseManager.getAllOrders(ConstantsHelper.ADMIN_ORDERS_LAPTOPS_TABLE_NAME);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this.getContext(), LinearLayoutManager

@@ -54,8 +54,6 @@ public class NetworkStateReceiver extends BroadcastReceiver {
         if(this.mConnected == true) {
             networkListener.networkAvailable();
         }
-//        else
-//            listener.networkUnavailable();
     }
 
     private void notifyStateToAll() {

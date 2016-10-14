@@ -71,15 +71,6 @@ public class RecyclerViewOrdersAdapter extends RecyclerView.Adapter<RecyclerView
             this.mPrice = (TextView) itemView.findViewById(R.id.price_order);
             this.mCurrency = (TextView) itemView.findViewById(R.id.currency_order);
             this.mUser = (TextView) itemView.findViewById(R.id.user_order);
-            //itemView.setOnClickListener(this);
         }
-
-//        @Override
-//        public void onClick(View view) {
-//            LaptopSqlite clickedLaptop = RecyclerViewAdapter.this.mLaptops.get(this.getAdapterPosition());
-//            RecyclerViewAdapter.this.mOnItemSelectedListener.onItemSelected(clickedLaptop);
-//        }
-
-
     }
 }

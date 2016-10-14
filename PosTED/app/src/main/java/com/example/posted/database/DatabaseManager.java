@@ -23,7 +23,6 @@ public class DatabaseManager extends SQLiteOpenHelper {
         this.createLaptopsTable(db);
         this.createAdminAddedLaptopsTable(db);
         this.createAdminRemovedLaptopsTable(db);
-
     }
 
     @Override
@@ -31,13 +30,6 @@ public class DatabaseManager extends SQLiteOpenHelper {
         String query = "DROP TABLE IF EXISTS " + ConstantsHelper.LAPTOPS_TABLE_NAME;
         db.execSQL(query);
         this.onCreate(db);
-    }
-
-    public void deleteRecordsFromTable(String tableName) {
-        SQLiteDatabase database = this.getWritableDatabase();
-        Toast.makeText(this.mContext, tableName + " deleted", Toast.LENGTH_SHORT).show();
-        String query = "DELETE FROM " + tableName;
-        database.execSQL(query);
     }
 
     public void createCurrentOrderTable(SQLiteDatabase db) {
@@ -54,13 +46,13 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 ConstantsHelper.PRICE_COLUMN + " TEXT, " +
                 ConstantsHelper.IMAGE_PATH_COLUMN + " TEXT, " +
                 ConstantsHelper.IMAGE_NAME_COLUMN + " TEXT)";
-        Toast.makeText(this.mContext, "Orders table created", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this.mContext, "Orders table created", Toast.LENGTH_SHORT).show();
         db.execSQL(query);
     }
 
     public void dropCurrentOrderTable(SQLiteDatabase db) {
         String query = "DROP TABLE IF EXISTS " + ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME;
-        Toast.makeText(this.mContext, "Orders table dropped", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this.mContext, "Orders table dropped", Toast.LENGTH_SHORT).show();
         db.execSQL(query);
     }
 
@@ -130,7 +122,6 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 ConstantsHelper.IMAGE_PATH_COLUMN + " TEXT, " +
                 ConstantsHelper.IMAGE_NAME_COLUMN + " TEXT)";
 
-
         db.execSQL(addedLaptopsTableQuery);
     }
 
@@ -149,8 +140,6 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 ConstantsHelper.IMAGE_PATH_COLUMN + " TEXT, " +
                 ConstantsHelper.IMAGE_NAME_COLUMN + " TEXT)";
 
-
         db.execSQL(removedLaptopsTableQuery);
-
     }
 }

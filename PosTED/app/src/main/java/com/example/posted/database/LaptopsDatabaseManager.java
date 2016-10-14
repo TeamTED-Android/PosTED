@@ -21,25 +21,11 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
 
     private DatabaseManager mDatabaseManager;
     private Context mContext;
-//    private String mFullPathToImage;
-//    private Laptop mKinveyCurrentLaptop;
 
     public LaptopsDatabaseManager(DatabaseManager databaseManager) {
         this.mDatabaseManager = databaseManager;
         this.mContext = this.mDatabaseManager.getContext();
     }
-
-//    public void insertRecord(Laptop currentLaptop, String tableName) {
-//        this.mCurrentLaptop = currentLaptop;
-//        if (currentLaptop instanceof LaptopKinvey) {
-//            AsyncImageDecoder decoder = new AsyncImageDecoder(this);
-//            decoder.execute(currentLaptop.getImagePath());
-//        } else {
-//            this.mFullPathToImage = currentLaptop.getImagePath() + "/" + currentLaptop.getImageName();
-//        }
-//        AsyncImageSaver saver = new AsyncImageSaver(this, this.mContext);
-//        saver.execute(currentLaptop.getImagePath(), currentLaptop.getImageName());
-//    }
 
     public void insertLaptopIntoTable(Laptop sqliteLaptop, String tableName) {
         SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
@@ -132,19 +118,6 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
         return result;
     }
 
-//    // Using temporary table for all records from Admin...
-//    // After that upload all new records in Kinvey and drop the temporary table
-//    public void createTempTable() {
-//        SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
-//        this.mDatabaseManager.createTempLaptopTable(database);
-//    }
-
-//    public void deleteRecord(Laptop currentLaptop, String tableName) {
-//        SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
-////        LaptopSqlite laptopSqlite = (LaptopSqlite) currentLaptop;
-//        database.delete(tableName, "id=?", new String[]{currentLaptop.getId()});
-//    }
-
     public void deleteRecord(String id, String tableName) {
         SQLiteDatabase database = this.mDatabaseManager.getWritableDatabase();
         database.delete(tableName, "id=?", new String[]{id});
@@ -169,7 +142,6 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
         ContextWrapper cw = new ContextWrapper(this.mContext);
         // path to /data/data/yourapp/app_data/imageDir
         File directory = cw.getDir(ConstantsHelper.IMAGE_DIRECTORY_PATH, Context.MODE_PRIVATE);
-        // Create imageDir
         File file = new File(directory, kinveyLaptop.getImageName());
         if (!file.exists()) {
             AsyncImageSaver decoder = new AsyncImageSaver(this, kinveyLaptop);
@@ -204,7 +176,6 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
         values.put(ConstantsHelper.IMAGE_PATH_COLUMN, imagePath);
         values.put(ConstantsHelper.IMAGE_NAME_COLUMN, laptop.getImageName());
 
-        //database.insert(ConstantsHelper.LAPTOPS_TABLE_NAME, null, values);
         database.insertWithOnConflict(ConstantsHelper.LAPTOPS_TABLE_NAME,null,values,SQLiteDatabase.CONFLICT_IGNORE);
         database.close();
     }
@@ -216,7 +187,6 @@ public class LaptopsDatabaseManager implements AsyncImageSaver.Listener {
         ContextWrapper cw = new ContextWrapper(this.mContext);
         // path to /data/data/yourapp/app_data/imageDir
         File directory = cw.getDir(ConstantsHelper.IMAGE_DIRECTORY_PATH, Context.MODE_PRIVATE);
-        // Create imageDir
         File mypath = new File(directory, imageName);
         FileOutputStream fos = null;
         try {

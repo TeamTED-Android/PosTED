@@ -10,6 +10,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.example.posted.R;
 import com.example.posted.async.AsyncImageEncoder;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
@@ -37,11 +39,12 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
 
     private static final String APP_KEY = "kid_Hkz4aiD3";
     private static final String APP_SECRET = "6e30f9fd9c0b4218a6db8d6282ce25a8";
+    private static final String KINVEY_USERNAME = "test@abv.bg";
+    private static final String KINVEY_PASSWORD = "test123";
     private Client mKinveyClient;
     private IBinder mBinder;
     private DatabaseManager mController;
     private LaptopsDatabaseManager mLaptopsDatabaseManager;
-    //private DownloadCompleteListener mDownloadCompleteListener;
 
     public class LoadDataServiceBinder extends Binder {
 
@@ -49,7 +52,6 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
             return LoadDataService.this;
         }
     }
-
 
     public LoadDataService() {
         super("Download service");
@@ -68,12 +70,9 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
 
     @Override
     public void onCreate() {
-        Toast.makeText(this, "Service created", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(this, "Service created", Toast.LENGTH_SHORT).show();
         this.mBinder = new LoadDataServiceBinder();
         this.mKinveyClient = new Client.Builder(APP_KEY, APP_SECRET, this.getApplicationContext()).build();
-//        if (!doesDatabaseExist(getApplicationContext(),LaptopsDatabaseManager.DB_NAME)) {
-//            this.mController = new LaptopsDatabaseManager(getApplicationContext());
-//        }
 
         this.mController = new DatabaseManager(this.getApplicationContext());
         this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(this.mController);
@@ -84,7 +83,7 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "Service started", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(this, "Service started", Toast.LENGTH_SHORT).show();
         SQLiteDatabase mDatabase = this.mController.getWritableDatabase();
         this.mController.onCreate(mDatabase);
         return START_STICKY;
@@ -92,19 +91,19 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
 
     private void loginToKinvey() {
         if (!this.mKinveyClient.user().isUserLoggedIn()) {
-            this.mKinveyClient.user().login("test@abv.bg", "test123", new KinveyClientCallback<User>() {
+            this.mKinveyClient.user().login(KINVEY_USERNAME, KINVEY_PASSWORD, new KinveyClientCallback<User>() {
                 @Override
                 public void onSuccess(User user) {
-                    Toast.makeText(LoadDataService.this, "Successfully logged in", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(LoadDataService.this, "Successfully logged in", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onFailure(Throwable throwable) {
-                    Toast.makeText(LoadDataService.this, "Fail to logged in", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(LoadDataService.this, "Fail to logged in", Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Toast.makeText(LoadDataService.this, "User already logged in", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(LoadDataService.this, "User already logged in", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -116,7 +115,7 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
         laptopsInfo.get(new KinveyListCallback<LaptopKinvey>() {
             @Override
             public void onSuccess(LaptopKinvey[] laptops) {
-                Toast.makeText(LoadDataService.this, "Successfully receive the info", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(LoadDataService.this, "Successfully receive the info", Toast.LENGTH_SHORT).show();
                 for (LaptopKinvey laptop : laptops) {
                     LoadDataService.this.mLaptopsDatabaseManager.insertIntoMainDatabase(laptop);
                 }
@@ -127,7 +126,7 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
 
             @Override
             public void onFailure(Throwable throwable) {
-                Toast.makeText(LoadDataService.this, "Fail to receive the info", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(LoadDataService.this, "Fail to receive the info", Toast.LENGTH_SHORT).show();
                 Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                 LoadDataService.this.sendBroadcast(endLoading);
             }
@@ -174,9 +173,9 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
         laptopsInfo.save(laptopForUpload, new KinveyClientCallback<LaptopKinvey>() {
             @Override
             public void onSuccess(LaptopKinvey laptopKinvey) {
-                Toast.makeText(LoadDataService.this, "Laptop " + laptopKinvey.getModel() + " Successfully " +
-                        "uploaded", Toast.LENGTH_SHORT).show();
-                LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(tempLaptop.getId(),ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
+//                Toast.makeText(LoadDataService.this, "Laptop " + laptopKinvey.getModel() + " Successfully " +
+//                        "uploaded", Toast.LENGTH_SHORT).show();
+                LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(tempLaptop.getId(), ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
                 Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                 LoadDataService.this.sendBroadcast(endLoading);
 
@@ -185,19 +184,18 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
 
             @Override
             public void onFailure(Throwable throwable) {
-                Toast.makeText(LoadDataService.this, "Fail to upload laptop", Toast.LENGTH_SHORT).show();
-                Log.d("Service", throwable.getMessage());
+//                Toast.makeText(LoadDataService.this, "Fail to upload laptop", Toast.LENGTH_SHORT).show();
                 Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                 LoadDataService.this.sendBroadcast(endLoading);
             }
         });
         boolean isDeleted = imgToDelete.delete();
-        Toast.makeText(this, "File " + imgToDelete.getName() + " isDeleted " + isDeleted, Toast.LENGTH_SHORT).show();
+        // Toast.makeText(this, "File " + imgToDelete.getName() + " isDeleted " + isDeleted, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onImageEncoded(String base64str, Laptop laptop) {
-        Toast.makeText(LoadDataService.this, "Image encoded!", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(LoadDataService.this, "Image encoded!", Toast.LENGTH_SHORT).show();
         this.uploadKinveyLaptop(laptop, base64str);
     }
 
@@ -211,9 +209,9 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
         }
     }
 
-    private void removeLaptopFromKinvey(final Laptop laptopToRemove){
+    private void removeLaptopFromKinvey(final Laptop laptopToRemove) {
         Query query = new Query();
-        query.equals("_id",laptopToRemove.getId());
+        query.equals("_id", laptopToRemove.getId());
         AsyncAppData<LaptopKinvey> laptopsInfo = this.mKinveyClient.appData(ConstantsHelper.KINVEY_LAPTOPS_TABLE_NAME, LaptopKinvey.class);
         laptopsInfo.delete(query, new KinveyDeleteCallback() {
             @Override
@@ -222,19 +220,18 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
                 String imgPath = laptopToRemove.getImagePath();
                 File file = new File(imgPath, imgName);
                 boolean isDeleted = file.delete();
-                //LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(laptopToRemove,ConstantsHelper.LAPTOPS_TABLE_NAME);
-                LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(laptopToRemove.getId(),ConstantsHelper.LAPTOPS_TABLE_NAME);
-                LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(laptopToRemove.getId(),ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
-                Toast.makeText(LoadDataService.this, "File " + file.getName() + " isDeleted " + isDeleted, Toast.LENGTH_SHORT).show();
-                Toast.makeText(LoadDataService.this, "Laptop " + laptopToRemove.getModel() + " Successfully " +
-                        "deleted", Toast.LENGTH_SHORT).show();
+                LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(laptopToRemove.getId(), ConstantsHelper.LAPTOPS_TABLE_NAME);
+                LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(laptopToRemove.getId(), ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
+                //Toast.makeText(LoadDataService.this, "File " + file.getName() + " isDeleted " + isDeleted, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(LoadDataService.this, "Laptop " + laptopToRemove.getModel() + " Successfully " +
+                //       "deleted", Toast.LENGTH_SHORT).show();
                 Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                 LoadDataService.this.sendBroadcast(endLoading);
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                Toast.makeText(LoadDataService.this, "Fail to delete laptop", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(LoadDataService.this, "Fail to delete laptop", Toast.LENGTH_SHORT).show();
                 Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                 LoadDataService.this.sendBroadcast(endLoading);
             }
@@ -243,19 +240,14 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
 
     @Override
     public void onDestroy() {
-        Toast.makeText(this, "Service destroyed", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(this, "Service destroyed", Toast.LENGTH_SHORT).show();
         if (this.mKinveyClient != null) {
             this.mKinveyClient.user().logout().execute();
         }
         super.onDestroy();
     }
 
-    private static boolean doesDatabaseExist(Context context, String dbName) {
-        File dbFile = context.getDatabasePath(dbName);
-        return dbFile.exists();
-    }
-
-    public void uploadOrdersToKinvey(com.example.posted.login.User user){
+    public void uploadOrdersToKinvey(com.example.posted.models.User user) {
         Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
         this.sendBroadcast(startLoading);
         this.loginToKinvey();
@@ -266,19 +258,15 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
             laptopsInfo.save(order, new KinveyClientCallback<Order>() {
                 @Override
                 public void onSuccess(Order order) {
-                    Toast.makeText(LoadDataService.this, "Order " + " Successfully " +
-                            "uploaded", Toast.LENGTH_SHORT).show();
-                    LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(order.getId(),ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+                    Toast.makeText(LoadDataService.this, LoadDataService.this.getResources().getString(R.string.order_successfully_sent), Toast.LENGTH_SHORT).show();
+                    LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(order.getId(), ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
                     Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                     LoadDataService.this.sendBroadcast(endLoading);
-
-
                 }
 
                 @Override
                 public void onFailure(Throwable throwable) {
-                    Toast.makeText(LoadDataService.this, "Fail to upload order", Toast.LENGTH_SHORT).show();
-
+                    // Toast.makeText(LoadDataService.this, "Fail to upload order", Toast.LENGTH_SHORT).show();
                     Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                     LoadDataService.this.sendBroadcast(endLoading);
                 }
@@ -286,16 +274,15 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
         }
     }
 
-    public void downloadOrders(){
+    public void downloadOrders() {
         Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
         this.sendBroadcast(startLoading);
 
-        //this.mController.deleteRecordsFromTable(ConstantsHelper.LAPTOPS_TABLE_NAME);
         AsyncAppData<Order> ordersInfo = this.mKinveyClient.appData(ConstantsHelper.KINVEY_ORDERS_TABLE_NAME, Order.class);
         ordersInfo.get(new KinveyListCallback<Order>() {
             @Override
             public void onSuccess(Order[] orders) {
-                Toast.makeText(LoadDataService.this, "Successfully download orders", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(LoadDataService.this, "Successfully download orders", Toast.LENGTH_SHORT).show();
                 for (Order order : orders) {
                     LoadDataService.this.mLaptopsDatabaseManager.insertOrderIntoTable(order);
                 }
@@ -305,11 +292,10 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
 
             @Override
             public void onFailure(Throwable throwable) {
-                Toast.makeText(LoadDataService.this, "Fail to download orders", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(LoadDataService.this, "Fail to download orders", Toast.LENGTH_SHORT).show();
                 Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
                 LoadDataService.this.sendBroadcast(endLoading);
             }
-
         });
     }
 }

@@ -1,4 +1,4 @@
-package com.example.posted.login;
+package com.example.posted.models;
 
 
 public class User {
@@ -27,10 +27,6 @@ public class User {
 
     public void setId(long id) {
         this.mId = id;
-    }
-
-    public void setUsername(String username) {
-        this.mUsername = username;
     }
 
     public void setPassword(String password) {

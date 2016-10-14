@@ -1,4 +1,4 @@
-package com.example.posted.admin;
+package com.example.posted.activities;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -38,7 +38,6 @@ import com.example.posted.database.LaptopsDatabaseManager;
 import com.example.posted.fragments.*;
 import com.example.posted.interfaces.NetworkStateReceiverListener;
 import com.example.posted.interfaces.OnLaptopSelectedDataExchange;
-import com.example.posted.login.LoginActivity;
 import com.example.posted.login.LoginManager;
 import com.example.posted.models.LaptopSqlite;
 import com.example.posted.receivers.NetworkStateReceiver;
@@ -53,7 +52,6 @@ public class AdminActivity extends AppCompatActivity
         NetworkStateReceiverListener {
 
     public interface PermissionListener {
-
         void onPermissionsDenied();
 
         void onPermissionsGranted();
@@ -61,13 +59,12 @@ public class AdminActivity extends AppCompatActivity
 
     private PermissionListener mListener;
     private Intent mServiceIntent;
-    private MainFragment mMainFragment;
     private LoginManager mLoginManager;
     private NetworkStateReceiver mNetworkStateReceiver;
     private long back_pressed;
     private AdminActivity.BroadcastListener mBroadcastListener;
-    private ViewPager mAdminConteinerViewPager;
-    private FrameLayout mAdminContainerFrameLayoyt;
+    private ViewPager mAdminContainerViewPager;
+    private FrameLayout mAdminContainerFrameLayout;
 
     private DatabaseManager mDatabaseManager;
     private LaptopsDatabaseManager mLaptopsDatabaseManager;
@@ -75,6 +72,8 @@ public class AdminActivity extends AppCompatActivity
     private boolean mIsBindedSync;
     private boolean mIsBindedOrders;
     private Toolbar mToolbar;
+    private MainFragment mMainFragment;
+    private boolean mIsReceiverReady;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +87,7 @@ public class AdminActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, R.string.posted_email, Snackbar.LENGTH_LONG)
-                        .setAction("send us email", new View.OnClickListener() {
+                        .setAction(AdminActivity.this.getResources().getString(R.string.send_us_email), new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 AdminActivity.this.sendMail();
@@ -104,10 +103,9 @@ public class AdminActivity extends AppCompatActivity
             }
         });
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
-        //drawer.openDrawer(Gravity.LEFT);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, this.mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) this.findViewById(R.id.nav_view);
@@ -136,8 +134,8 @@ public class AdminActivity extends AppCompatActivity
         filter.addAction(ConstantsHelper.BROADCAST_END_LOADING);
         this.registerReceiver(this.mBroadcastListener, filter);
 
-        this.mAdminConteinerViewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
-        this.mAdminContainerFrameLayoyt = (FrameLayout) this.findViewById(R.id.adminContainer);
+        this.mAdminContainerViewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
+        this.mAdminContainerFrameLayout = (FrameLayout) this.findViewById(R.id.adminContainer);
 
         this.mDatabaseManager = new DatabaseManager(this);
         this.mLaptopsDatabaseManager = new LaptopsDatabaseManager(this.mDatabaseManager);
@@ -156,47 +154,55 @@ public class AdminActivity extends AppCompatActivity
             this.turnViewPagerVisibilityOff();
             OverviewFragment overviewFragment = new OverviewFragment();
             Bundle bundle = new Bundle();
-            bundle.putCharSequence(ConstantsHelper.COLLECTION_CONSTANT,ConstantsHelper.OVERVIEW_LAPTOPS_COLLECTION);
+            bundle.putCharSequence(ConstantsHelper.COLLECTION_CONSTANT, ConstantsHelper.OVERVIEW_LAPTOPS_COLLECTION);
             overviewFragment.setArguments(bundle);
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment)
                     .commit();
+
         } else if (id == R.id.admin_nav_phones) {
             this.mToolbar.setTitle(R.string.phones);
             this.turnViewPagerVisibilityOff();
             PhonesFragment phonesFragment = new PhonesFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, phonesFragment).commit();
+
         } else if (id == R.id.admin_nav_addProduct) {
             this.mToolbar.setTitle(R.string.add_product);
             this.turnViewPagerVisibilityOff();
             AddProductFragment fragment = new AddProductFragment();
-            // TODO listener is NULL, we need to find a better place to instantiate it.
             this.mListener = fragment;
             this.requestPermissions();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, fragment).commit();
 
         } else if (id == R.id.admin_nav_signOut) {
-            this.turnViewPagerVisibilityOff();
-            this.mLoginManager.logoutUser();
-            Intent intent = new Intent(this, LoginActivity.class);
-            this.finish();
-            this.startActivity(intent);
+            if (this.mIsReceiverReady) {
+                this.turnViewPagerVisibilityOff();
+                this.mLoginManager.logoutUser();
+                this.getSupportFragmentManager().beginTransaction().remove(this.mMainFragment).commit();
+                Intent intent = new Intent(this.getApplicationContext(), LoginActivity.class);
+                this.finish();
+                this.startActivity(intent);
+            } else {
+                Toast.makeText(this, this.getResources().getString(R.string.please_wait), Toast.LENGTH_SHORT).show();
+            }
+
         } else if (id == R.id.admin_nav_home) {
             this.mToolbar.setTitle(R.string.app_name);
             this.turnViewPagerVisibilityOff();
-            MainFragment mainFragment = new MainFragment();
-            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, mainFragment).commit();
+            this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, this.mMainFragment).commit();
+
         } else if (id == R.id.admin_nav_profile) {
             this.mToolbar.setTitle(R.string.profile);
             this.turnViewPagerVisibilityOff();
             ProfileFragment profileFragment = new ProfileFragment();
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, profileFragment).commit();
+
         } else if (id == R.id.admin_nav_previewAddedProducts) {
             this.mToolbar.setTitle(R.string.preview_added_products);
             this.turnFrameLayoutVisibilityOff();
             SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(),
-                                                                    this,
-                                                                    ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME,
-                                                                    ConstantsHelper.IS_ADD_LIST);
+                    this,
+                    ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME,
+                    ConstantsHelper.IS_ADD_LIST);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
             viewPager.setAdapter(adapter);
 
@@ -204,9 +210,9 @@ public class AdminActivity extends AppCompatActivity
             this.mToolbar.setTitle(R.string.preview_removed_products);
             this.turnFrameLayoutVisibilityOff();
             SectionsPagerAdapter adapter = new SectionsPagerAdapter(this.getSupportFragmentManager(),
-                                                                    this,
-                                                                    ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME,
-                                                                    ConstantsHelper.IS_REMOVE_LIST);
+                    this,
+                    ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME,
+                    ConstantsHelper.IS_REMOVE_LIST);
             ViewPager viewPager = (ViewPager) this.findViewById(R.id.admin_containerViewPager);
             viewPager.setAdapter(adapter);
 
@@ -220,7 +226,8 @@ public class AdminActivity extends AppCompatActivity
                 this.startService(this.mServiceIntent);
             }
             this.bindService(this.mServiceIntent, this.connectionSync, Context.BIND_AUTO_CREATE);
-        } else if (id == R.id.admin_nav_orders){
+
+        } else if (id == R.id.admin_nav_orders) {
             this.turnViewPagerVisibilityOff();
             if (!this.checkForInternetConnection()) {
                 this.attemptToTurnOnWiFi();
@@ -233,7 +240,7 @@ public class AdminActivity extends AppCompatActivity
 
             OverviewFragment overviewFragment = new OverviewFragment();
             Bundle bundle = new Bundle();
-            bundle.putCharSequence(ConstantsHelper.COLLECTION_CONSTANT,ConstantsHelper.OVERVIEW_ORDERS_COLLECTION);
+            bundle.putCharSequence(ConstantsHelper.COLLECTION_CONSTANT, ConstantsHelper.OVERVIEW_ORDERS_COLLECTION);
             overviewFragment.setArguments(bundle);
             this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, overviewFragment)
                     .commit();
@@ -248,7 +255,7 @@ public class AdminActivity extends AppCompatActivity
     public void onLaptopSelected(LaptopSqlite laptop) {
         Bundle bundleLaptop = new Bundle();
         bundleLaptop.putParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY, laptop);
-        bundleLaptop.putCharSequence(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY, "admin");
+        bundleLaptop.putCharSequence(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY, ConstantsHelper.ADMIN);
         LaptopFragment laptopFragment = new LaptopFragment();
         laptopFragment.setArguments(bundleLaptop);
         this.getSupportFragmentManager()
@@ -260,24 +267,27 @@ public class AdminActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        if (this.back_pressed + 1500 > System.currentTimeMillis()) {
+        if (this.back_pressed + ConstantsHelper.MILLISECONDS_FOR_DOUBLE_BACK > System.currentTimeMillis()) {
+            this.getSupportFragmentManager().beginTransaction().remove(this.mMainFragment).commit();
             super.onBackPressed();
+            return;
         }
-        this.back_pressed = System.currentTimeMillis();
 
+        this.back_pressed = System.currentTimeMillis();
+        Toast.makeText(this,this.getResources().getString(R.string.back_press),Toast.LENGTH_SHORT).show();
         DrawerLayout drawer = (DrawerLayout) this.findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             if (this.getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 this.mToolbar.setTitle(R.string.app_name);
-                MainFragment mainFragment = new MainFragment();
-                this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, mainFragment).commit();
+                this.getSupportFragmentManager().beginTransaction().replace(R.id.adminContainer, this.mMainFragment).commit();
             } else {
                 this.getSupportFragmentManager().popBackStack();
             }
         }
     }
+
 
     @Override
     public void networkAvailable() {
@@ -307,7 +317,7 @@ public class AdminActivity extends AppCompatActivity
         if (this.mIsBindedOrders) {
             this.unbindService(this.connectionOrders);
         }
-        if (this.mServiceIntent != null) {
+        if (this.isDataServiceRunning(LoadDataService.class)) {
             this.stopService(this.mServiceIntent);
         }
         this.unregisterReceiver(this.mNetworkStateReceiver);
@@ -356,9 +366,9 @@ public class AdminActivity extends AppCompatActivity
         i.putExtra(Intent.EXTRA_SUBJECT, this.getResources().getString(R.string.email_subject));
         i.putExtra(Intent.EXTRA_TEXT, this.getResources().getString(R.string.email_body));
         try {
-            this.startActivity(Intent.createChooser(i, "Send mail..."));
+            this.startActivity(Intent.createChooser(i, this.getResources().getString(R.string.send_us_email)));
         } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(AdminActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(AdminActivity.this, this.getResources().getString(R.string.no_email_client), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -370,9 +380,10 @@ public class AdminActivity extends AppCompatActivity
             if (intent.getAction().equals(ConstantsHelper.BROADCAST_START_LOADING)) {
                 AdminActivity.this.getSupportFragmentManager()
                         .beginTransaction().replace(R.id.adminContainer, spinnerFragment).addToBackStack(null).commit();
+                AdminActivity.this.mIsReceiverReady = false;
             } else if (intent.getAction().equals(ConstantsHelper.BROADCAST_END_LOADING)) {
                 AdminActivity.this.getSupportFragmentManager().popBackStack();
-                //mDrawer.openDrawer(Gravity.LEFT);
+                AdminActivity.this.mIsReceiverReady = true;
             }
         }
     }
@@ -400,7 +411,6 @@ public class AdminActivity extends AppCompatActivity
                 grantResults[1] == PackageManager.PERMISSION_GRANTED) {
             this.mListener.onPermissionsGranted();
         } else {
-            // TODO listener is NULL, we need to find a better place to instantiate it.
             this.mListener.onPermissionsDenied();
         }
     }
@@ -433,7 +443,6 @@ public class AdminActivity extends AppCompatActivity
             AdminActivity.this.mLoadDataService = binder.getService();
             AdminActivity.this.mIsBindedOrders = true;
             AdminActivity.this.mLoadDataService.downloadOrders();
-
         }
 
         @Override
@@ -454,16 +463,16 @@ public class AdminActivity extends AppCompatActivity
     }
 
     private void turnViewPagerVisibilityOff() {
-        if (this.mAdminConteinerViewPager.getVisibility() == View.VISIBLE) {
-            this.mAdminConteinerViewPager.setVisibility(View.INVISIBLE);
-            this.mAdminContainerFrameLayoyt.setVisibility(View.VISIBLE);
+        if (this.mAdminContainerViewPager.getVisibility() == View.VISIBLE) {
+            this.mAdminContainerViewPager.setVisibility(View.INVISIBLE);
+            this.mAdminContainerFrameLayout.setVisibility(View.VISIBLE);
         }
     }
 
     private void turnFrameLayoutVisibilityOff() {
-        if (this.mAdminContainerFrameLayoyt.getVisibility() == View.VISIBLE) {
-            this.mAdminContainerFrameLayoyt.setVisibility(View.INVISIBLE);
-            this.mAdminConteinerViewPager.setVisibility(View.VISIBLE);
+        if (this.mAdminContainerFrameLayout.getVisibility() == View.VISIBLE) {
+            this.mAdminContainerFrameLayout.setVisibility(View.INVISIBLE);
+            this.mAdminContainerViewPager.setVisibility(View.VISIBLE);
         }
     }
 }

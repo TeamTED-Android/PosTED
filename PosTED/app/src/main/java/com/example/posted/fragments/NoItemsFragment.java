@@ -23,5 +23,4 @@ public class NoItemsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_no_items, container, false);
         return view;
     }
-
 }

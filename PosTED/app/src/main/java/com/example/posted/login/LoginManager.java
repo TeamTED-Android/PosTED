@@ -3,6 +3,7 @@ package com.example.posted.login;
 import android.content.Context;
 import android.content.SharedPreferences;
 import com.example.posted.database.DatabaseManager;
+import com.example.posted.models.User;
 
 
 public class LoginManager {
@@ -48,7 +49,6 @@ public class LoginManager {
     }
 
     public boolean isLoggedIn() {
-
         if (this.mPreferences == null) {
             return false;
         }

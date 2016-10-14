@@ -22,7 +22,7 @@
             android:title="@string/cart" />
         <item
             android:id="@+id/nav_checkout"
-            android:icon="@drawable/cart"
+            android:icon="@drawable/checkout"
             android:title="@string/checkout" />
         <item
             android:id="@+id/nav_profile"

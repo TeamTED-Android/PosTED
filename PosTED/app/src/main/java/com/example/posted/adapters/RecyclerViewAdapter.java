@@ -67,11 +67,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             Bitmap bitmap = bitmapCache.get(id);
             if (bitmap == null) {
                 AsyncListImageLoader imageLoader = new AsyncListImageLoader(holder, position);
-                float density = this.mContext.getApplicationContext().getResources().getDisplayMetrics().density;
-                int bound = this.mContext.getApplicationContext().getResources().getDisplayMetrics().widthPixels / 5;
-                String desityAsStr = Float.toString(density);
-                String boundAsStr = Integer.toString(bound);
-                imageLoader.execute(imagePath, imageName, desityAsStr, boundAsStr);
+                imageLoader.execute(imagePath, imageName);
             } else {
                 bitmap = bitmapCache.get(id);
                 holder.setImageViewBitmap(bitmap);
@@ -81,7 +77,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public int getItemCount() {
-
         return this.mLaptops.size();
     }
 
@@ -92,7 +87,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private TextView mPrice;
         private TextView mCurrency;
         private long mCurrExecTime;
-
 
         private ImageView getImageView() {
             if (this.itemView == null) {

@@ -66,5 +66,27 @@
           \n\nHere is where you can find us:</string>
     <string name="checkout">Checkout</string>
     <string name="orders">Orders</string>
-
+    <string name="added_laptop">Laptop added to ADD list</string>
+    <string name="error_empty_laptop">Laptop model cannot be empty</string>
+    <string name="error_empty_hdd">HDD cannot be empty</string>
+    <string name="error_empty_display">Display size cannot be empty</string>
+    <string name="error_empty_processor">Processor cannot be empty</string>
+    <string name="error_empty_video_card">Video card cannot be empty</string>
+    <string name="error_empty_currency">Currency cannot be empty</string>
+    <string name="error_empty_price">Price cannot be empty</string>
+    <string name="send_us_email">Send us email</string>
+    <string name="no_email_client">There are no email clients installed.</string>
+    <string name="please_wait">Please wait…</string>
+    <string name="remove_from_cart">Remove from cart</string>
+    <string name="add_to_cart">Add to cart</string>
+    <string name="remove_from_list">Remove from list</string>
+    <string name="remove_from_db">Remove from database</string>
+    <string name="laptop_added_to_cart">Laptop added to cart</string>
+    <string name="laptop_added_to_remove_list">Laptop added to REMOVE list</string>
+    <string name="posted_office">PosTED office</string>
+    <string name="password_updated">Password updated</string>
+    <string name="password_short">Password too short</string>
+    <string name="password_mismatch">Password mismatch</string>
+    <string name="order_successfully_sent">Orders successfully sent</string>
+    <string name="back_press">Press again to exit</string>
 </resources>

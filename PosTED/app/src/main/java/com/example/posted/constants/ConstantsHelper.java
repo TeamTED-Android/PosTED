@@ -70,4 +70,12 @@ public class ConstantsHelper {
     public static final String OVERVIEW_LAPTOPS_COLLECTION = "overview_laptops";
     public static final String OVERVIEW_ORDERS_COLLECTION = "overview_orders";
     public static final String COLLECTION_CONSTANT = "collection";
+
+    public static final int MILLISECONDS_FOR_DOUBLE_BACK = 1500;
+
+    public static final double LATITUDE = 42.666838;
+    public static final double LONGITUDE = 23.352341;
+
+    public static final int MIN_PASSWORD_LENGTH = 4;
+
 }

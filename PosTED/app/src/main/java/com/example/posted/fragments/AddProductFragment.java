@@ -1,4 +1,4 @@
-package com.example.posted.admin;
+package com.example.posted.fragments;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.*;
 
 import com.example.posted.R;
+import com.example.posted.activities.AdminActivity;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
@@ -108,9 +109,6 @@ public class AddProductFragment extends Fragment implements
         this.mBrowseButton.setOnClickListener(this);
         this.mImageAsString = "";
 
-        //this.mLaptopsDatabaseManager.createTempTable();
-
-        //check if service running and bind
         this.mServiceIntent = new Intent(this.mContext, LoadDataService.class);
         if (!this.isDataServiceRunning(LoadDataService.class)) {
             this.mContext.startService(this.mServiceIntent);
@@ -146,11 +144,10 @@ public class AddProductFragment extends Fragment implements
     }
 
     private void onCancelButtonClicked() {
-        String id = this.mImageName.substring(0,this.mImageName.indexOf('.'));
+        String id = this.mImageName.substring(0, this.mImageName.indexOf('.'));
         this.mLaptopsDatabaseManager.deleteRecord(id, ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
         File file = new File(this.mImagePath, this.mImageName);
         boolean isDeleted = file.delete();
-        Toast.makeText(mContext, "File " + this.mImageName + " isDeleted " + isDeleted, Toast.LENGTH_SHORT).show();
         this.makeFieldsEmpty();
     }
 
@@ -158,7 +155,7 @@ public class AddProductFragment extends Fragment implements
         if (!this.checkInputInfo()) {
             return;
         }
-        String id = this.mImageName.substring(0,this.mImageName.indexOf('.'));
+        String id = this.mImageName.substring(0, this.mImageName.indexOf('.'));
         LaptopSqlite currentLaptop = new LaptopSqlite(
                 id,
                 this.mModel.getText().toString(),
@@ -174,7 +171,7 @@ public class AddProductFragment extends Fragment implements
         );
         this.mLaptopsDatabaseManager.insertLaptopIntoTable(currentLaptop, ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
         this.makeFieldsEmpty();
-        Toast.makeText(this.mContext, "Laptop added to \"ADD\" list", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this.mContext, this.getResources().getString(R.string.added_laptop), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -190,12 +187,6 @@ public class AddProductFragment extends Fragment implements
         }
     }
 
-//    @Override
-//    public void onImageEncoded(String base64str) {
-//        Toast.makeText(this.mContext, "Image loaded", Toast.LENGTH_SHORT).show();
-//        this.mImageAsString = base64str;
-//    }
-
     private void onCameraResult(Intent data) {
         Bitmap bitmap = null;
         if (data.getData() == null) {
@@ -207,25 +198,20 @@ public class AddProductFragment extends Fragment implements
                 e.printStackTrace();
             }
         }
-        // TODO fix image dimentions DONE
-//        bitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, false);
+
         bitmap = this.scaleBitmap(bitmap);
         this.mImageView.setImageBitmap(bitmap);
 
         int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
         this.mImageName = "img" + count + ".png";
         this.mImagePath = this.saveToInternalStorage(bitmap);
-
-//        AsyncImageEncoder encoder = new AsyncImageEncoder(this);
-//        encoder.setProgressBar(this.mImageView);
-//        encoder.execute(bitmap);
     }
 
     private Bitmap scaleBitmap(Bitmap bitmap) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         float screenDensity = this.mContext.getResources().getDisplayMetrics().density;
-        int bounding = Math.round((float)ConstantsHelper.DESIRED_IMAGE_BOUND * screenDensity);
+        int bounding = Math.round((float) ConstantsHelper.DESIRED_IMAGE_BOUND * screenDensity);
 
         // Determine how much to scale: the dimension requiring less scaling is
         // closer to the its side. This way the image always stays inside your
@@ -247,7 +233,6 @@ public class AddProductFragment extends Fragment implements
         ContextWrapper cw = new ContextWrapper(this.mContext);
         // path to /data/data/yourapp/app_data/imageDir
         File directory = cw.getDir(ConstantsHelper.IMAGE_DIRECTORY_PATH, Context.MODE_PRIVATE);
-        // Create imageDir
         File mypath = new File(directory, this.mImageName);
         FileOutputStream fos = null;
         try {
@@ -272,16 +257,11 @@ public class AddProductFragment extends Fragment implements
         Uri uri = data.getData();
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.mContext.getContentResolver(), uri);
-            // TODO fix image dimentions DONE
-//            bitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, false);
             bitmap = this.scaleBitmap(bitmap);
             this.mImageView.setImageBitmap(bitmap);
             int count = this.mLaptopsDatabaseManager.getRecordCount(ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
             this.mImageName = "img" + count + ".png";
             this.mImagePath = this.saveToInternalStorage(bitmap);
-//            AsyncImageEncoder encoder = new AsyncImageEncoder(this);
-//            encoder.setProgressBar(this.mImageView);
-//            encoder.execute(bitmap);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -297,31 +277,31 @@ public class AddProductFragment extends Fragment implements
 
     private boolean checkInputInfo() {
         if (this.mModel != null && this.mModel.getText().toString().equals("")) {
-            this.mModel.setError("Laptop mModel cannot be empty");
+            this.mModel.setError(this.getResources().getString(R.string.error_empty_laptop));
             this.mModel.requestFocus();
             return false;
         } else if (this.mHdd != null && this.mHdd.getText().toString().equals("")) {
-            this.mHdd.setError("HDD cannot be empty");
+            this.mHdd.setError(this.getResources().getString(R.string.error_empty_hdd));
             this.mHdd.requestFocus();
             return false;
         } else if (this.mDisplaySize != null && this.mDisplaySize.getText().toString().equals("")) {
-            this.mDisplaySize.setError("Display size cannot be empty");
+            this.mDisplaySize.setError(this.getResources().getString(R.string.error_empty_display));
             this.mDisplaySize.requestFocus();
             return false;
         } else if (this.mProcessor != null && this.mProcessor.getText().toString().equals("")) {
-            this.mProcessor.setError("Processor cannot be empty");
+            this.mProcessor.setError(this.getResources().getString(R.string.error_empty_processor));
             this.mProcessor.requestFocus();
             return false;
         } else if (this.mVideoCard != null && this.mVideoCard.getText().toString().equals("")) {
-            this.mVideoCard.setError("Video card cannot be empty");
+            this.mVideoCard.setError(this.getResources().getString(R.string.error_empty_video_card));
             this.mVideoCard.requestFocus();
             return false;
         } else if (this.mCurrency != null && this.mCurrency.getText().toString().equals("")) {
-            this.mCurrency.setError("Currency cannot be empty");
+            this.mCurrency.setError(this.getResources().getString(R.string.error_empty_currency));
             this.mCurrency.requestFocus();
             return false;
         } else if (this.mPrice != null && this.mPrice.getText().toString().equals("")) {
-            this.mPrice.setError("Price cannot be empty");
+            this.mPrice.setError(this.getResources().getString(R.string.error_empty_price));
             this.mPrice.requestFocus();
             return false;
         }
@@ -358,7 +338,7 @@ public class AddProductFragment extends Fragment implements
         return cameraButton;
     }
 
-    private void makeFieldsEmpty(){
+    private void makeFieldsEmpty() {
         this.mModel.setText("");
         this.mPrice.setText("");
         this.mHdd.setText("");
@@ -382,12 +362,4 @@ public class AddProductFragment extends Fragment implements
         cameraButton.setEnabled(true);
         this.mBrowseButton.setEnabled(true);
     }
-
-//    private void onUploadButtonClicked() {
-//        ArrayList<LaptopSqlite> tempLaptops = this.mLaptopsDatabaseManager.getAllLaptops(ConstantsHelper
-//                .ADMIN_ADDED_LAPTOPS_TABLE_NAME);
-//        this.mLoadDataService.uploadLaptops(tempLaptops);
-//        this.mDatabaseManager.deleteRecordsFromTable(ConstantsHelper.ADMIN_ADDED_LAPTOPS_TABLE_NAME);
-//
-//    }
 }

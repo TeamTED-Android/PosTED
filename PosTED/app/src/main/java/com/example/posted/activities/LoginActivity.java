@@ -1,4 +1,4 @@
-package com.example.posted.login;
+package com.example.posted.activities;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -24,11 +24,11 @@ import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
 import com.example.posted.R;
-import com.example.posted.UserActivity;
-import com.example.posted.admin.AdminActivity;
 import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.UsersDatabaseManager;
+import com.example.posted.login.LoginManager;
+import com.example.posted.models.User;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -65,11 +65,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_login);
         this.mLoginManager = new LoginManager(this);
-
-//        if (this.mLoginManager.isLoggedIn()){
-//
-//            finish();
-//        }
 
         Intent intent = null;
         if (this.mLoginManager.isLoggedIn()) {
@@ -220,7 +215,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private boolean isPasswordValid(String password) {
-        return password.length() > 4;
+        return password.length() > ConstantsHelper.MIN_PASSWORD_LENGTH;
     }
 
     /**
@@ -290,7 +285,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        int a = 5;
     }
 
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {

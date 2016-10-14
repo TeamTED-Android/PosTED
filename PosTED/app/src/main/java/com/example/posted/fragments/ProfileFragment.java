@@ -14,10 +14,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.posted.R;
+import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.UsersDatabaseManager;
 import com.example.posted.login.LoginManager;
-import com.example.posted.login.User;
+import com.example.posted.models.User;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class ProfileFragment  extends Fragment implements View.OnClickListener{
     private DatabaseManager mDatabaseManager;
@@ -57,21 +61,42 @@ public class ProfileFragment  extends Fragment implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
-        if (this.mOldPass.getText().toString().equals(this.mCurrentUser.getPassword())){
-            if (this.mNewPass.getText().toString().length() > 4){
-                this.mCurrentUser.setPassword(this.mNewPass.getText().toString());
+        String password = this.encryptPassword(this.mOldPass.getText().toString());
+        if (password.equals(this.mCurrentUser.getPassword())){
+            if (this.mNewPass.getText().toString().length() > ConstantsHelper.MIN_PASSWORD_LENGTH){
+                String newPass = this.encryptPassword(this.mNewPass.getText().toString());
+                this.mCurrentUser.setPassword(newPass);
                 this.mUserDatabaseManager.updateUserPassword(this.mCurrentUser);
-                Toast.makeText(this.mContext,"Password updated",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.mContext,this.getResources().getString(R.string.password_updated),Toast.LENGTH_SHORT).show();
                 this.mLoginManeger.logoutUser();
                 this.mLoginManeger.loginUser(this.mCurrentUser);
             } else {
-                this.mOldPass.setError("Password too short");
-                this.mOldPass.requestFocus();
+                this.mNewPass.setError(this.getResources().getString(R.string.password_short));
+                this.mNewPass.requestFocus();
             }
 
         } else {
-            this.mOldPass.setError("Password mismatch");
+            this.mOldPass.setError(this.getResources().getString(R.string.password_mismatch));
             this.mOldPass.requestFocus();
         }
+    }
+
+    private String encryptPassword(String passwordToHash) {
+        String generatedPassword = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(passwordToHash.getBytes());
+            byte[] bytes = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (int i=0; i< bytes.length ;i++) {
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+            generatedPassword = sb.toString();
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+        }
+        return generatedPassword;
     }
 }

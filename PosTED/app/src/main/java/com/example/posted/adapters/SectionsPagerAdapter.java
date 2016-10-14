@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import com.example.posted.constants.ConstantsHelper;
 import com.example.posted.database.DatabaseManager;
 import com.example.posted.database.LaptopsDatabaseManager;
 import com.example.posted.fragments.LaptopFragment;
@@ -21,7 +20,7 @@ public class SectionsPagerAdapter extends FragmentStatePagerAdapter implements R
     private List<LaptopSqlite> mLaptops;
     private LaptopsDatabaseManager mLaptopsDatabaseManager;
     private String mTableName;
-    private boolean isEmpty;
+    private boolean mIsEmpty;
     private String mViewConstant;
 
     public SectionsPagerAdapter(FragmentManager fm, Context context, String tableName, String viewConstant) {
@@ -35,7 +34,7 @@ public class SectionsPagerAdapter extends FragmentStatePagerAdapter implements R
 
     @Override
     public Fragment getItem(int position) {
-        if (this.isEmpty) {
+        if (this.mIsEmpty) {
             return NoItemsFragment.newInstance();
         }
         return LaptopFragment.newInstance(this.mLaptops.get(position), this,this.mViewConstant);
@@ -62,14 +61,12 @@ public class SectionsPagerAdapter extends FragmentStatePagerAdapter implements R
     private void loadData() {
         this.mLaptops = this.mLaptopsDatabaseManager.getAllLaptops(this.mTableName);
         if (this.mLaptops.size() == 0) {
-            isEmpty = true;
+            mIsEmpty = true;
             this.mLaptops.add(null);
         } else {
-            this.isEmpty = false;
+            this.mIsEmpty = false;
         }
     }
-
-
 }
 
 

@@ -19,7 +19,6 @@ public class AsyncImageEncoder extends AsyncTask<Bitmap, Integer, String> {
     }
 
     private Listener mListener;
-    // TODO: implement mProgressBar
     private ProgressBar mProgressBar;
     private TextView mTextView;
     private Laptop mLaptop;
@@ -30,13 +29,6 @@ public class AsyncImageEncoder extends AsyncTask<Bitmap, Integer, String> {
         this.mLaptop = laptop;
     }
 
-    public void setProgressBar(ProgressBar progressBar) {
-        this.mProgressBar = progressBar;
-    }
-
-    public void setTextView(TextView textView) {
-        this.mTextView = textView;
-    }
 
     @Override
     protected void onPreExecute() {

@@ -2,15 +2,11 @@ package com.example.posted.fragments;
 
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,7 +28,6 @@ import com.example.posted.services.LoadDataService;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -102,7 +97,6 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_laptop, container, false);
         LaptopSqlite currentLaptop = this.getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
         if (currentLaptop == null) {
@@ -144,40 +138,22 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
         this.mLaptopFragmentButton = (Button) view.findViewById(R.id.laptop_fragment_button);
         this.mLaptopFragmentButton.setOnClickListener(this);
 
-//        if (this.getArguments().getBoolean("is_cart")) {
-//            this.mLaptopFragmentButton.setText("Remove from cart");
-//        } else {
-//            this.mCurrentUser = this.getArguments().getString(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY);
-//            if (this.mCurrentUser.equals("admin")) {
-//                this.mLaptopFragmentButton.setText("Remove from database");
-//                //check if service running and bind
-//                this.mServiceIntent = new Intent(this.mContext, LoadDataService.class);
-//                if (!this.isDataServiceRunning(LoadDataService.class)) {
-//                    this.mContext.startService(this.mServiceIntent);
-//                }
-//                this.mContext.bindService(this.mServiceIntent, this.connection, Context.BIND_AUTO_CREATE);
-//            }
-//            if (this.mCurrentUser.equals("user")) {
-//                this.mLaptopFragmentButton.setText("Add to cart");
-//            }
-//        }
-
         this.mCurrentUser = this.getArguments().getString(ConstantsHelper.FROM_WHERE_IS_INVOKED_KEY);
         if (this.mCurrentUser.equals(ConstantsHelper.USER)) {
             if (this.getArguments().getBoolean(ConstantsHelper.IS_CARD_LIST)) {
-                this.mLaptopFragmentButton.setText("Remove from cart");
+                this.mLaptopFragmentButton.setText(this.getResources().getString(R.string.remove_from_cart));
             } else {
-                this.mLaptopFragmentButton.setText("Add to cart");
+                this.mLaptopFragmentButton.setText(this.getResources().getString(R.string.add_to_cart));
             }
         }
 
         if (this.mCurrentUser.equals(ConstantsHelper.ADMIN)) {
             if (this.getArguments().getBoolean(ConstantsHelper.IS_ADD_LIST)) {
-                this.mLaptopFragmentButton.setText("Remove from list");
+                this.mLaptopFragmentButton.setText(this.getResources().getString(R.string.remove_from_list));
             } else if (this.getArguments().getBoolean(ConstantsHelper.IS_REMOVE_LIST)) {
-                this.mLaptopFragmentButton.setText("Remove from list");
+                this.mLaptopFragmentButton.setText(this.getResources().getString(R.string.remove_from_list));
             } else {
-                this.mLaptopFragmentButton.setText("Remove from database");
+                this.mLaptopFragmentButton.setText(this.getResources().getString(R.string.remove_from_db));
             }
         }
 
@@ -205,25 +181,6 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         LaptopSqlite laptop = this.getArguments().getParcelable(ConstantsHelper.LAPTOP_FRAGMENT_PARCELABLE_KEY);
-//        if (this.getArguments().getBoolean("is_cart")) {
-//            //this.mLaptopsDatabaseManager.deleteRecord(laptop, ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
-//            this.mLaptopsDatabaseManager.deleteRecord(laptop.getId(), ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
-//            mRemoveLaptopListener.onRemoved();
-//            //  Toast.makeText(getContext(),"Laptop deleted from cart",Toast.LENGTH_SHORT).show();
-//        } else {
-//            if (this.mCurrentUser.equals("user")) {
-//                this.mLaptopsDatabaseManager.insertLaptopIntoTable(laptop, ConstantsHelper
-//                        .CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
-//                Toast.makeText(this.getContext(), "Laptop added to cart", Toast.LENGTH_SHORT).show();
-//            }
-//            if (this.mCurrentUser.equals("admin")) {
-////                this.mLoadDataService.removeLaptopFromKinvey(laptop);
-////                this.mLoadDataService.transferDataFromKinvey();
-////                this.getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
-//                this.mLaptopsDatabaseManager.insertLaptopIntoTable(laptop, ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
-//                Toast.makeText(this.mContext, "Laptop added to \"REMOVE\" list", Toast.LENGTH_SHORT).show();
-//            }
-//        }
 
         if (this.mCurrentUser.equals(ConstantsHelper.USER)) {
             if (this.getArguments().getBoolean(ConstantsHelper.IS_CARD_LIST)) {
@@ -232,7 +189,7 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
             } else {
                 this.mLaptopsDatabaseManager.insertLaptopIntoTable(laptop, ConstantsHelper
                         .CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
-                Toast.makeText(this.getContext(), "Laptop added to cart", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.getContext(), this.getResources().getString(R.string.laptop_added_to_cart), Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -245,41 +202,8 @@ public class LaptopFragment extends Fragment implements View.OnClickListener {
                 mRemoveLaptopListener.onRemoved();
             } else {
                 this.mLaptopsDatabaseManager.insertLaptopIntoTable(laptop, ConstantsHelper.ADMIN_REMOVED_LAPTOPS_TABLE_NAME);
-                Toast.makeText(this.mContext, "Laptop added to \"REMOVE\" list", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.mContext, this.getResources().getString(R.string.laptop_added_to_remove_list), Toast.LENGTH_SHORT).show();
             }
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        if (this.mIsBinded) {
-            this.mContext.unbindService(this.connection);
-        }
-        super.onDestroy();
-    }
-
-    private ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LoadDataService.LoadDataServiceBinder binder = (LoadDataService.LoadDataServiceBinder) service;
-            LaptopFragment.this.mLoadDataService = binder.getService();
-            LaptopFragment.this.mIsBinded = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            LaptopFragment.this.mIsBinded = false;
-        }
-    };
-
-    private boolean isDataServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) this.mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> services = manager.getRunningServices(Integer.MAX_VALUE);
-        for (ActivityManager.RunningServiceInfo service : services) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 }

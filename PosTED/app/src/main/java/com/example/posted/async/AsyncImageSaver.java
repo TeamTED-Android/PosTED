@@ -38,7 +38,6 @@ public class AsyncImageSaver extends AsyncTask<String, Void, Bitmap> {
         byte[] decodedString = Base64.decode(base64ImgStr, Base64.DEFAULT);
         Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
         if (bitmap != null) {
-//            bitmap = Bitmap.createScaledBitmap(bitmap, 512, 512, false);
             bitmap = this.scaleBitmap(bitmap, screenDensity);
         }
         return bitmap;
@@ -47,7 +46,7 @@ public class AsyncImageSaver extends AsyncTask<String, Void, Bitmap> {
     private Bitmap scaleBitmap(Bitmap bitmap, float screenDensity) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-        // TODO fix image dimentions DONE, V beware of big number, may triggers OutOfMemoryError
+        // beware of big number, may triggers OutOfMemoryError
         int bounding = Math.round((float) 192 * screenDensity);
 
         // Determine how much to scale: the dimension requiring less scaling is
@@ -61,7 +60,6 @@ public class AsyncImageSaver extends AsyncTask<String, Void, Bitmap> {
         matrix.postScale(scale, scale);
 
         // Create a new bitmap and convert it to a format more attune to the ImageView
-        // TODO triggers OutOfMemoryError
         Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
 
         return scaledBitmap;
