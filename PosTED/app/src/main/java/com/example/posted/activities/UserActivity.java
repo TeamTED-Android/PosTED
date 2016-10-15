@@ -230,8 +230,7 @@ public class UserActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onDestroy() {
         if (this.mIsBinded) {
             this.unbindService(connection);
         }
@@ -240,6 +239,7 @@ public class UserActivity extends AppCompatActivity
         }
         this.unregisterReceiver(this.mNetworkStateReceiver);
         this.unregisterReceiver(this.mBroadcastListener);
+        super.onDestroy();
     }
 
 

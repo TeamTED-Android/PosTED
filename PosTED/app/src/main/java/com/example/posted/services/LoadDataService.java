@@ -259,29 +259,32 @@ public class LoadDataService extends IntentService implements AsyncImageEncoder.
     }
 
     public void uploadOrdersToKinvey(com.example.posted.models.User user) {
-        Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
-        this.sendBroadcast(startLoading);
-        this.loginToKinvey();
         ArrayList<Order> ordersToUpload = this.mLaptopsDatabaseManager.getAllOrders(ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
-        for (Order order : ordersToUpload) {
-            order.setUser(user.getUsername());
-            AsyncAppData<Order> laptopsInfo = this.mKinveyClient.appData(ConstantsHelper.KINVEY_ORDERS_TABLE_NAME, Order.class);
-            laptopsInfo.save(order, new KinveyClientCallback<Order>() {
-                @Override
-                public void onSuccess(Order order) {
-                    Toast.makeText(LoadDataService.this, LoadDataService.this.getResources().getString(R.string.order_successfully_sent), Toast.LENGTH_SHORT).show();
-                    LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(order.getId(), ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
-                    Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
-                    LoadDataService.this.sendBroadcast(endLoading);
-                }
+        if (ordersToUpload.size()> 0){
+            Intent startLoading = new Intent(ConstantsHelper.BROADCAST_START_LOADING);
+            this.sendBroadcast(startLoading);
+            this.loginToKinvey();
 
-                @Override
-                public void onFailure(Throwable throwable) {
-                    // Toast.makeText(LoadDataService.this, "Fail to upload order", Toast.LENGTH_SHORT).show();
-                    Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
-                    LoadDataService.this.sendBroadcast(endLoading);
-                }
-            });
+            for (Order order : ordersToUpload) {
+                order.setUser(user.getUsername());
+                AsyncAppData<Order> laptopsInfo = this.mKinveyClient.appData(ConstantsHelper.KINVEY_ORDERS_TABLE_NAME, Order.class);
+                laptopsInfo.save(order, new KinveyClientCallback<Order>() {
+                    @Override
+                    public void onSuccess(Order order) {
+                        Toast.makeText(LoadDataService.this, LoadDataService.this.getResources().getString(R.string.order_successfully_sent), Toast.LENGTH_SHORT).show();
+                        LoadDataService.this.mLaptopsDatabaseManager.deleteRecord(order.getId(), ConstantsHelper.CURRENT_ORDERS_LAPTOPS_TABLE_NAME);
+                        Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
+                        LoadDataService.this.sendBroadcast(endLoading);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        // Toast.makeText(LoadDataService.this, "Fail to upload order", Toast.LENGTH_SHORT).show();
+                        Intent endLoading = new Intent(ConstantsHelper.BROADCAST_END_LOADING);
+                        LoadDataService.this.sendBroadcast(endLoading);
+                    }
+                });
+            }
         }
     }
 

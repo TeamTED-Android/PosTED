@@ -313,8 +313,7 @@ public class AdminActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onDestroy() {
         if (this.mIsBindedSync) {
             this.unbindService(this.connectionSync);
         }
@@ -323,6 +322,7 @@ public class AdminActivity extends AppCompatActivity
         }
         this.unregisterReceiver(this.mNetworkStateReceiver);
         this.unregisterReceiver(this.mBroadcastListener);
+        super.onDestroy();
     }
 
     private boolean checkForInternetConnection() {
@@ -423,6 +423,7 @@ public class AdminActivity extends AppCompatActivity
             AdminActivity.this.mLoadDataService = binder.getService();
             AdminActivity.this.mIsBindedSync = true;
         }
+
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
